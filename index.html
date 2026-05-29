@@ -107,7 +107,7 @@
 
         // Načítanie po štarte stránky
         document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons(); // OPRAVA 4: Statické ikony v HTML sa načítajú okamžite, nečaká sa na API
+            lucide.createIcons(); // Fix: Statické ikony sa vygenerujú okamžite po načítaní stránky
             fetchDashboardData();
             setupThemeToggle();
             
@@ -142,7 +142,7 @@
             } catch (error) {
                 console.error("Detaily zlyhania komunikácie:", error);
                 
-                // OPRAVA 2: Odstránenie nekonečne blikajúcich loaderov, ak API vráti catch error
+                // Fix: Odstránenie blikajúcich loaderov pri chybe komunikácie
                 const grid = document.getElementById('sensors-grid');
                 if (grid) {
                     grid.innerHTML = `
@@ -168,7 +168,7 @@
             if (!grid) return;
             grid.innerHTML = ''; 
 
-            // OPRAVA 1: Kontrola aktuálne nastaveného režimu pred generovaním kariet
+            // Fix: Kontrola aktuálneho režimu pre správne nastylovanie kariet senzorov
             const isLight = document.getElementById('body-layout').classList.contains('bg-boho-cream');
 
             Object.keys(metrics).forEach(key => {
@@ -263,7 +263,7 @@
                     body.classList.remove('bg-boho-darkBg', 'text-slate-100');
                     body.classList.add('bg-boho-cream', 'text-slate-800');
                     
-                    // OPRAVA 1: Zosvetlenie hlavičky, bočného panelu a boxu s hodnotou
+                    // Fix: Kompletné prefarbenie hlavičky, bočného panelu a boxov detailov do svetlej témy
                     if (header) {
                         header.classList.remove('bg-slate-900/50', 'border-slate-800');
                         header.classList.add('bg-white/70', 'border-slate-200');
@@ -281,7 +281,7 @@
                         document.getElementById('detail-value').classList.add('text-slate-900');
                     }
                     
-                    // OPRAVA 3: innerHTML upravené tak, aby v ňom ostal zachovaný korektný text bez zlyhania premennej
+                    // Fix: Oprava štruktúry textu vo vnútri tlačidla pri prepínaní bez straty referencie
                     btn.innerHTML = `<i data-lucide="moon" class="w-4 h-4 text-boho-terracotta"></i> <span>Temný režim</span>`;
                 } else {
                     // PREPNUTIE NA TMAVÝ REŽIM
@@ -308,7 +308,7 @@
                     btn.innerHTML = `<i data-lucide="sun" class="w-4 h-4 text-boho-mustard"></i> <span>Svetlý režim</span>`;
                 }
                 
-                // OPRAVA 1: Okamžité prekreslenie vygenerovaných senzorov pri zmene témy
+                // Fix: Okamžité prekreslenie vygenerovaných kariet senzorov pri zmene témy bez nutnosti čakať 30s na API
                 if (globalData) {
                     renderSensors(globalData);
                 }
