@@ -1,6 +1,7 @@
 # 🌤️ Weather & Sensors Project
 
 Welcome to our GitHub repository! This project is all about tracking weather data and working with different environmental sensors.
+
 Odkaz na stránku: https://matus49.github.io/Meteorological_project/
 ---
 
