@@ -1,12 +1,12 @@
 import os
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
 # Inicializácia aplikácie a logovania
-app = FastAPI(title="GaiaSenzor Core API", version="2.0.0")
+app = FastAPI(title="GaiaSenzor Core API")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=False,  # OPRAVENÉ: Zmenené z True na False, aby FastAPI nepadalo pri hromadnom povolení "*"
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -34,7 +34,6 @@ MOCK_METRICS = {
 }
 
 async def fetch_api_data(source: int, limit: int) -> List[Any]:
-    """Pomocná funkcia na sťahovanie dát z konkrétneho zdroja s limitom."""
     url = f"{API_BASE_URL}?source={source}&sort=timestamp&dir=desc&limit={limit}"
     try:
         async with httpx.AsyncClient(timeout=4.0) as client:
@@ -47,11 +46,9 @@ async def fetch_api_data(source: int, limit: int) -> List[Any]:
 
 @app.get("/api/dashboard")
 async def get_dashboard_data():
-    """Hlavný endpoint posielajúci flat JSON štruktúru priamo pre frontend."""
     current_s0 = await fetch_api_data(source=0, limit=1)
     current_s1 = await fetch_api_data(source=1, limit=1)
 
-    # Ak škola nevráti nič (timeout/chyba), okamžite posielame lokálny fallback
     if not current_s0 and not current_s1:
         logger.warning("Školské API nedostupné. Aktivuje sa lokálny fallback.")
         return MOCK_METRICS
@@ -59,7 +56,6 @@ async def get_dashboard_data():
     c0 = current_s0[0] if current_s0 else {}
     c1 = current_s1[0] if current_s1 else {}
 
-    # Vrátenie čistého slovníka metrík napriamo
     return {
         "temperature": {
             "title": "Teplota vzduchu",
@@ -100,4 +96,6 @@ async def get_dashboard_data():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
+    # Načítanie portu z prostredia (vynútené pre Render) alebo port 8000 pre lokálne testovanie
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("backend:app", host="0.0.0.0", port=port, reload=True)
