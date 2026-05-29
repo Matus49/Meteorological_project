@@ -24,7 +24,7 @@ API_BASE_URL = "https://projekttb.sksnr.sk/data/api.php"
 API_USER = "sks"
 API_PASSWORD = "kolbe"
 
-# Lokálne záložné dáta pre prípad, že školský server vypadne
+# Lokálne záložné dáta pre prípad, že školský server vypadne alebo pošle zlý formát
 MOCK_METRICS = {
     "temperature": {"title": "Teplota vzduchu", "value": 21.5, "unit": "°C", "icon": "🌡️", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}},
     "humidity": {"title": "Vlhkosť vzduchu", "value": 55, "unit": "%", "icon": "💧", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}},
@@ -39,63 +39,72 @@ async def fetch_api_data(source: int, limit: int) -> List[Any]:
         async with httpx.AsyncClient(timeout=4.0) as client:
             response = await client.get(url, auth=(API_USER, API_PASSWORD))
             if response.status_code == 200:
-                return response.json()
+                res_data = response.json()
+                # Poistka: Ak školské API vráti list, pošleme ho ďalej
+                if isinstance(res_data, list):
+                    return res_data
     except Exception as e:
         logger.error(f"Chyba pri sťahovaní source={source}: {e}")
     return []
 
 @app.get("/api/dashboard")
 async def get_dashboard_data():
-    current_s0 = await fetch_api_data(source=0, limit=1)
-    current_s1 = await fetch_api_data(source=1, limit=1)
+    try:
+        current_s0 = await fetch_api_data(source=0, limit=1)
+        current_s1 = await fetch_api_data(source=1, limit=1)
 
-    if not current_s0 and not current_s1:
-        logger.warning("Školské API nedostupné. Aktivuje sa lokálny fallback.")
-        return MOCK_METRICS
+        # Nepriestrelná kontrola: Vytiahni prvok [0] iba ak ide o nezáporný zoznam s dictom vo vnútri
+        c0 = current_s0[0] if (isinstance(current_s0, list) and len(current_s0) > 0 and isinstance(current_s0[0], dict)) else {}
+        c1 = current_s1[0] if (isinstance(current_s1, list) and len(current_s1) > 0 and isinstance(current_s1[0], dict)) else {}
 
-    c0 = current_s0[0] if current_s0 else {}
-    c1 = current_s1[0] if current_s1 else {}
+        # Ak z obidvoch zdrojov neprišlo nič validné, vráť rovno mock dáta
+        if not c0 and not c1:
+            logger.warning("Školské API neposkytlo dáta. Aktivuje sa lokálny fallback.")
+            return MOCK_METRICS
 
-    return {
-        "temperature": {
-            "title": "Teplota vzduchu",
-            "value": c0.get("temp", c0.get("temperature", 21.5)),
-            "unit": "°C",
-            "icon": "🌡️",
-            "trend": {"text": "Meteostanica", "type": "good"}
-        },
-        "humidity": {
-            "title": "Vlhkosť vzduchu",
-            "value": c0.get("humidity", c0.get("hum", 55)),
-            "unit": "%",
-            "icon": "💧",
-            "trend": {"text": "Meteostanica", "type": "good"}
-        },
-        "pressure": {
-            "title": "Atmosférický tlak",
-            "value": c0.get("pressure", c0.get("barometer", 1013)),
-            "unit": "hPa",
-            "icon": "⏱️",
-            "trend": {"text": "Meteostanica", "type": "good"}
-        },
-        "temp_flower": {
-            "title": "Teplota pri Kvete",
-            "value": c1.get("temp", c1.get("temperature", 23.1)),
-            "unit": "°C",
-            "icon": "🌱",
-            "trend": {"text": "Senzor Kvet", "type": "good"}
-        },
-        "hum_flower": {
-            "title": "Vlhkosť pri Kvete",
-            "value": c1.get("humidity", c1.get("hum", 48)),
-            "unit": "%",
-            "icon": "🪴",
-            "trend": {"text": "Senzor Kvet", "type": "good"}
+        return {
+            "temperature": {
+                "title": "Teplota vzduchu",
+                "value": c0.get("temp", c0.get("temperature", 21.5)),
+                "unit": "°C",
+                "icon": "🌡️",
+                "trend": {"text": "Meteostanica", "type": "good"}
+            },
+            "humidity": {
+                "title": "Vlhkosť vzduchu",
+                "value": c0.get("humidity", c0.get("hum", 55)),
+                "unit": "%",
+                "icon": "💧",
+                "trend": {"text": "Meteostanica", "type": "good"}
+            },
+            "pressure": {
+                "title": "Atmosférický tlak",
+                "value": c0.get("pressure", c0.get("barometer", 1013)),
+                "unit": "hPa",
+                "icon": "⏱️",
+                "trend": {"text": "Meteostanica", "type": "good"}
+            },
+            "temp_flower": {
+                "title": "Teplota pri Kvete",
+                "value": c1.get("temp", c1.get("temperature", 23.1)),
+                "unit": "°C",
+                "icon": "🌱",
+                "trend": {"text": "Senzor Kvet", "type": "good"}
+            },
+            "hum_flower": {
+                "title": "Vlhkosť pri Kvete",
+                "value": c1.get("humidity", c1.get("hum", 48)),
+                "unit": "%",
+                "icon": "🪴",
+                "trend": {"text": "Senzor Kvet", "type": "good"}
+            }
         }
-    }
+    except Exception as general_error:
+        # Ak by sa čokoľvek nečakane pokazilo, zachráň to odoslaním MOCK dát namiesto 500-ky
+        logger.error(f"Kritická chyba endpointu: {general_error}")
+        return MOCK_METRICS
 
 if __name__ == "__main__":
     import uvicorn
-    import os
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run("backend:app", host="0.0.0.0", port=port)
