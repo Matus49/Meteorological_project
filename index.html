@@ -195,6 +195,22 @@
                 ]
             });
 
+            // --- TU JE PRIDANÝ KÓD PRE ŽIVÉ NAČÍTANIE DÁT Z RENDERU ---
+            React.useEffect(() => {
+                fetch('https://meteorological-project.onrender.com/api/dashboard')
+                    .then(response => {
+                        if (!response.ok) throw new Error("Chyba pri sťahovaní dát zo servera");
+                        return response.json();
+                    })
+                    .then(realData => {
+                        setData(realData); // Nahradí simulované dáta tými skutočnými z databázy
+                    })
+                    .catch(error => {
+                        console.error("Nepodarilo sa načítať živé dáta, zostávajú pôvodné:", error);
+                    });
+            }, []);
+            // --- KONIEC PRIDANÉHO KÓDU ---
+
             // Synchronizácia dark módu s HTML elementom
             React.useEffect(() => {
                 const rootHtml = document.documentElement;
@@ -227,7 +243,7 @@
                 Object.keys(data.metrics).forEach(key => {
                     const metric = data.metrics[key];
                     metric.history.forEach(h => {
-                        csvContent += `"${metric.title}",font-serif"${h.time}","${h.value}"\n`;
+                        csvContent += `"${metric.title}","${h.time}","${h.value}"\n`;
                     });
                 });
 
@@ -264,13 +280,13 @@
                             <nav class="space-y-1.5">
                                 <button 
                                     onClick={() => setActiveTab('dashboard')} 
-                                    class={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeTab === 'dashboard' ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'}`}
+                                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeTab === 'dashboard' ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'}"
                                 >
                                     📊 Riadiaci panel
                                 </button>
                                 <button 
                                     onClick={() => setActiveTab('rooms')} 
-                                    class={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeTab === 'rooms' ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'}`}
+                                    class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${activeTab === 'rooms' ? 'bg-sky-500 text-white shadow-lg shadow-sky-500/20' : 'text-slate-400 hover:bg-slate-800 hover:text-slate-100'}"
                                 >
                                     🏫 Interiér tried
                                 </button>
@@ -346,7 +362,7 @@
                                             </div>
                                         </div>
 
-                                        {/* Dynamické vykreslenie SVG Grafu podľavybratej karty */}
+                                        {/* Dynamické vykreslenie SVG Grafu podľa vybratej karty */}
                                         <DynamicHistoryChart 
                                             metricName={data.metrics[selectedMetric].title}
                                             historyData={data.metrics[selectedMetric].history}
