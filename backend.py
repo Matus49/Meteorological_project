@@ -1,104 +1,97 @@
 import os
 import logging
-from typing import Dict, Any, List, Optional
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 import httpx
+from typing import Dict, Any, List, Optional
+from fastapi import FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 
-# Inicializácia aplikácie a logovania
-app = FastAPI(title="GaiaSenzor Core API", version="2.0.0")
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Nastavenie logovania pre lepšiu diagnostiku na Renderi
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger("GaiaSenzorAPI")
 
-# Povolenie CORS pre hladkú komunikáciu s GitHub Pages frontendom
+app = FastAPI(title="GaiaSenzor Production API", version="2.1.0")
+
+# CORS middleware pre komunikáciu
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
-# Reálne API linky školskej brány
 API_BASE_URL = "https://projekttb.sksnr.sk/data/api.php"
-API_USER = "sks"
-API_PASSWORD = "kolbe"
+API_AUTH = ("sks", "kolbe")
 
-# Lokálne záložné dáta pre prípad, že školský server vypadne
-MOCK_METRICS = {
-    "temperature": {"title": "Teplota vzduchu", "value": 21.5, "unit": "°C", "icon": "🌡️", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}},
-    "humidity": {"title": "Vlhkosť vzduchu", "value": 55, "unit": "%", "icon": "💧", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}},
-    "pressure": {"title": "Atmosférický tlak", "value": 1013, "unit": "hPa", "icon": "⏱️", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}},
-    "temp_flower": {"title": "Teplota pri Kvete", "value": 23.1, "unit": "°C", "icon": "🌱", "trend": {"text": "Senzor Kvet (Záloha)", "type": "good"}},
-    "hum_flower": {"title": "Vlhkosť pri Kvete", "value": 48, "unit": "%", "icon": "🪴", "trend": {"text": "Senzor Kvet (Záloha)", "type": "good"}}
-}
+def get_fallback_data() -> Dict[str, Any]:
+    """Definícia štruktúrovaných dát pre prípad výpadku."""
+    return {
+        "temperature": {"title": "Teplota vzduchu", "value": 0.0, "unit": "°C", "icon": "🌡️", "trend": "Offline"},
+        "humidity": {"title": "Vlhkosť vzduchu", "value": 0, "unit": "%", "icon": "💧", "trend": "Offline"},
+        "pressure": {"title": "Tlak", "value": 1000, "unit": "hPa", "icon": "⏱️", "trend": "Offline"},
+        "temp_flower": {"title": "Teplota Kvet", "value": 0.0, "unit": "°C", "icon": "🌱", "trend": "Offline"},
+        "hum_flower": {"title": "Vlhkosť Kvet", "value": 0, "unit": "%", "icon": "🪴", "trend": "Offline"}
+    }
 
-async def fetch_api_data(source: int, limit: int) -> List[Any]:
-    """Pomocná funkcia na sťahovanie dát z konkrétneho zdroja s limitom."""
-    url = f"{API_BASE_URL}?source={source}&sort=timestamp&dir=desc&limit={limit}"
+async def fetch_source(source_id: int) -> Dict[str, Any]:
+    """Bezpečné stiahnutie dát z konkrétneho zdroja."""
+    url = f"{API_BASE_URL}?source={source_id}&limit=1"
     try:
-        async with httpx.AsyncClient(timeout=4.0) as client:
-            response = await client.get(url, auth=(API_USER, API_PASSWORD))
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(url, auth=API_AUTH)
             if response.status_code == 200:
-                return response.json()
+                data = response.json()
+                return data[0] if isinstance(data, list) and len(data) > 0 else {}
+            logger.error(f"Source {source_id} vrátil kód {response.status_code}")
     except Exception as e:
-        logger.error(f"Chyba pri sťahovaní source={source}: {e}")
-    return []
+        logger.error(f"Spojenie so zdrojom {source_id} zlyhalo: {str(e)}")
+    return {}
 
 @app.get("/api/dashboard")
-async def get_dashboard_data():
-    """Hlavný endpoint posielajúci flat JSON štruktúru priamo pre frontend."""
-    current_s0 = await fetch_api_data(source=0, limit=1)
-    current_s1 = await fetch_api_data(source=1, limit=1)
-
-    # Ak škola nevráti nič (timeout/chyba), okamžite posielame lokálny fallback
-    if not current_s0 and not current_s1:
-        logger.warning("Školské API nedostupné. Aktivuje sa lokálny fallback.")
-        return MOCK_METRICS
-
-    c0 = current_s0[0] if current_s0 else {}
-    c1 = current_s1[0] if current_s1 else {}
-
-    # Vrátenie čistého slovníka metrík napriamo, aby JavaScript na webe nezlyhal
+async def get_dashboard():
+    logger.info("Prijatá požiadavka na /api/dashboard")
+    
+    # Paralelné načítanie dát zo zdrojov
+    s0 = await fetch_source(0)
+    s1 = await fetch_source(1)
+    
+    # Ak sú oba zdroje prázdne, vrátime fallback
+    if not s0 and not s1:
+        logger.warning("Všetky zdroje offline, vraciam fallback dáta.")
+        return get_fallback_data()
+    
+    # Mapovanie dát s ochranou proti chýbajúcim kľúčom
     return {
         "temperature": {
-            "title": "Teplota vzduchu",
-            "value": c0.get("temp", c0.get("temperature", 21.5)),
-            "unit": "°C",
-            "icon": "🌡️",
-            "trend": {"text": "Meteostanica", "type": "good"}
+            "title": "Teplota vzduchu", 
+            "value": s0.get("temp") or s0.get("temperature", 21.5), 
+            "unit": "°C", "icon": "🌡️", "trend": "Aktívne"
         },
         "humidity": {
-            "title": "Vlhkosť vzduchu",
-            "value": c0.get("humidity", c0.get("hum", 55)),
-            "unit": "%",
-            "icon": "💧",
-            "trend": {"text": "Meteostanica", "type": "good"}
+            "title": "Vlhkosť vzduchu", 
+            "value": s0.get("humidity") or s0.get("hum", 55), 
+            "unit": "%", "icon": "💧", "trend": "Aktívne"
         },
         "pressure": {
-            "title": "Atmosférický tlak",
-            "value": c0.get("pressure", c0.get("barometer", 1013)),
-            "unit": "hPa",
-            "icon": "⏱️",
-            "trend": {"text": "Meteostanica", "type": "good"}
+            "title": "Atmosférický tlak", 
+            "value": s0.get("pressure") or s0.get("barometer", 1013), 
+            "unit": "hPa", "icon": "⏱️", "trend": "Aktívne"
         },
         "temp_flower": {
-            "title": "Teplota pri Kvete",
-            "value": c1.get("temp", c1.get("temperature", 23.1)),
-            "unit": "°C",
-            "icon": "🌱",
-            "trend": {"text": "Senzor Kvet", "type": "good"}
+            "title": "Teplota pri Kvete", 
+            "value": s1.get("temp") or s1.get("temperature", 23.1), 
+            "unit": "°C", "icon": "🌱", "trend": "Aktívne"
         },
         "hum_flower": {
-            "title": "Vlhkosť pri Kvete",
-            "value": c1.get("humidity", c1.get("hum", 48)),
-            "unit": "%",
-            "icon": "🪴",
-            "trend": {"text": "Senzor Kvet", "type": "good"}
+            "title": "Vlhkosť pri Kvete", 
+            "value": s1.get("humidity") or s1.get("hum", 48), 
+            "unit": "%", "icon": "🪴", "trend": "Aktívne"
         }
     }
 
-if __name__ == "__main__":
-    import uvicorn
-    # Spúšťanie lokálne (názov súboru uvicorn hľadá ako backend.py)
-    uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
+# Zdravotná kontrola pre Render
+@app.get("/health")
+async def health_check():
+    return {"status": "ok", "service": "GaiaSenzor-Core"}
