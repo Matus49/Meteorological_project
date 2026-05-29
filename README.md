@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge&logo=github" alt="Status">
-  <img src="https://img.shields.io/badge/Location-Nitra,%20Slovakia-orange?style=for-the-badge&logo=googlemaps" alt="Location">
+  <img src="https://img.shields.io/badge/Location-Nitra,%20Slovakia-yellow?style=for-the-badge&logo=googlemaps" alt="Location">
   <img src="https://img.shields.io/badge/Focus-IoT%20%26%20Climate-blue?style=for-the-badge" alt="Focus">
 </p>
 
