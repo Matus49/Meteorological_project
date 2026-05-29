@@ -2,253 +2,48 @@
 <html lang="sk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GaiaSenzor Core</title>
+    <title>GaiaSenzor Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        // Konfigurácia tvojich vlastných Boho farieb do Tailwindu
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        boho: {
-                            terracotta: '#C96F53',
-                            sage: '#8A9A86',
-                            mustard: '#DCAE62',
-                            cream: '#FAF6F0',
-                            brick: '#A64B44',
-                            darkBg: '#0F172A',
-                            cardBg: '#1E293B'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
 </head>
-<body class="bg-boho-darkBg text-slate-100 min-h-screen font-sans antialiased transition-colors duration-300" id="body-layout">
-
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex justify-between items-center">
-        <div>
-            <div class="flex items-center gap-2">
-                <i data-lucide="zap" class="text-boho-terracotta w-6 h-6 animate-pulse"></i>
-                <h1 class="text-xl font-bold tracking-tight text-white">GaiaSenzor Core</h1>
+<body class="bg-slate-950 text-white p-8">
+    <h1 class="text-4xl font-black text-emerald-500 mb-10 text-center">GaiaSenzor Monitoring</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+        <div class="bg-slate-900 p-6 rounded-2xl border border-sky-900">
+            <h2 class="text-sky-400 font-bold text-xl mb-4">📍 Vonkajšie prostredie</h2>
+            <div id="out-vals" class="space-y-2">
+                <p>Teplota: <span id="out-t" class="font-bold">--</span> °C</p>
+                <p>Vlhkosť: <span id="out-h" class="font-bold">--</span> %</p>
             </div>
-            <p class="text-xs text-boho-sage font-medium tracking-wide uppercase mt-0.5">Meteostanica & Meranie Kveta</p>
         </div>
-        <button id="theme-toggle" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold px-4 py-2 rounded-full border border-slate-700 transition">
-            <i data-lucide="sun" class="w-4 h-4 text-boho-mustard"></i>
-            <span id="theme-text">Svetlý režim</span>
-        </button>
-    </header>
-
-    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <section class="lg:col-span-2 space-y-6">
-            
-            <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-slate-400 uppercase tracking-wider">Aktuálne monitorovaný uzol</p>
-                    <h2 id="connection-status" class="text-lg font-semibold text-amber-500 flex items-center gap-2 mt-1">
-                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                        Pripájanie k API...
-                    </h2>
-                </div>
-                <div class="text-right">
-                    <span id="source-badge" class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded-md font-mono border border-slate-700">CHECKING</span>
-                </div>
+        <div class="bg-slate-900 p-6 rounded-2xl border border-amber-900">
+            <h2 class="text-amber-400 font-bold text-xl mb-4">🏫 IT Učebňa</h2>
+            <div id="in-vals" class="space-y-2">
+                <p>Teplota: <span id="in-t" class="font-bold">--</span> °C</p>
+                <p>Vlhkosť: <span id="in-h" class="font-bold">--</span> %</p>
             </div>
-
-            <div>
-                <h3 class="text-xs font-bold text-boho-sage uppercase tracking-widest mb-4">Aktuálne stavy senzorov</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="sensors-grid">
-                    <div class="animate-pulse bg-boho-cardBg h-32 rounded-2xl border border-slate-800"></div>
-                    <div class="animate-pulse bg-boho-cardBg h-32 rounded-2xl border border-slate-800"></div>
-                    <div class="animate-pulse bg-boho-cardBg h-32 rounded-2xl border border-slate-800"></div>
-                    <div class="animate-pulse bg-boho-cardBg h-32 rounded-2xl border border-slate-800"></div>
-                </div>
-            </div>
-
-        </section>
-
-        <section class="space-y-6">
-            <div class="bg-boho-cardBg border border-slate-800 rounded-3xl p-6 shadow-xl sticky top-6">
-                <h3 class="text-xs font-bold text-boho-sage uppercase tracking-widest mb-4">Detail a história merania</h3>
-                
-                <div class="space-y-5">
-                    <div>
-                        <label class="text-xs text-slate-400 block mb-2 font-medium">Zvolená veličina</label>
-                        <select id="metric-selector" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-boho-terracotta text-white font-medium">
-                        </select>
-                    </div>
-
-                    <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 text-center">
-                        <div id="detail-value" class="text-5xl font-black text-white tracking-tight">--</div>
-                        <div id="detail-title" class="text-xs text-slate-400 mt-2 font-medium">Vyberte veličinu</div>
-                    </div>
-
-                    <div class="p-4 bg-slate-900/30 border border-slate-800/50 rounded-xl flex gap-3 items-start">
-                        <i data-lucide="database" class="w-4 h-4 text-slate-500 mt-0.5 shrink-0"></i>
-                        <p class="text-xs text-slate-400 leading-relaxed">
-                            Pre túto veličinu nie sú v databáze dostupné historické záznamy. Zobrazuje sa reálny čas z meteostanice.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
+        </div>
+    </div>
 
     <script>
-        // Zabezpečená HTTPS URL adresa z tvojho Renderu
-        const API_URL = 'https://meteorological-project.onrender.com/api/dashboard';
-        let globalData = null;
-
-        // Načítanie po štarte stránky
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchDashboardData();
-            setupThemeToggle();
-            
-            // Kontrola nových dát každých 30 sekúnd
-            setInterval(fetchDashboardData, 30000);
-        });
-
-        // Bezpečné načítanie dát z backendu
-        async function fetchDashboardData() {
-            const statusEl = document.getElementById('connection-status');
-            const sourceBadge = document.getElementById('source-badge');
-
+        async function fetchAll() {
             try {
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error('Chyba servera');
+                const res = await fetch('https://meteorological-project.onrender.com/api/dashboard');
+                const data = await res.json();
                 
-                const data = await response.json();
-                if (!data || Object.keys(data).length === 0) throw new Error('Dáta sú prázdne');
+                // Vonkajšok
+                document.getElementById('out-t').innerText = data.outside.current.temp;
+                document.getElementById('out-h').innerText = data.outside.current.humidity;
                 
-                globalData = data;
+                // Učebňa
+                document.getElementById('in-t').innerText = data.classroom.current.temp;
+                document.getElementById('in-h').innerText = data.classroom.current.humidity;
                 
-                // Úspešne pripojené - zelený stav
-                statusEl.className = "text-lg font-semibold text-emerald-500 flex items-center gap-2 mt-1";
-                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Živé školské API`;
-                
-                sourceBadge.className = "text-[10px] bg-emerald-950 text-emerald-400 px-2.5 py-1 rounded-md font-mono border border-emerald-800";
-                sourceBadge.textContent = 'ONLINE';
-
-                renderSensors(data);
-                populateSelector(data);
-
-            } catch (error) {
-                console.error("Detaily zlyhania komunikácie:", error);
-                
-                // Chyba spojenia - červený stav
-                statusEl.className = "text-lg font-semibold text-rose-500 flex items-center gap-2 mt-1";
-                statusEl.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i> Chyba spojenia s backendom`;
-                
-                sourceBadge.className = "text-[10px] bg-rose-950 text-rose-400 px-2.5 py-1 rounded-md font-mono border border-rose-800";
-                sourceBadge.textContent = 'OFFLINE';
-                lucide.createIcons();
-            }
+                console.log("Dáta úspešne načítané");
+            } catch(e) { console.error("Chyba:", e); }
         }
-
-        // Generovanie kartičiek zo získaných metrík
-        function renderSensors(metrics) {
-            const grid = document.getElementById('sensors-grid');
-            if (!grid) return;
-            grid.innerHTML = ''; 
-
-            Object.keys(metrics).forEach(key => {
-                const item = metrics[key];
-                if (item && typeof item === 'object' && item.title) {
-                    const card = document.createElement('div');
-                    card.className = "bg-boho-cardBg border border-slate-800/80 rounded-2xl p-5 hover:border-boho-sage/40 transition-all duration-300 cursor-pointer shadow-sm shadow-black/20";
-                    card.onclick = () => selectMetric(key, item);
-
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <span class="text-xs text-slate-400 font-medium">${item.title || 'Senzor'}</span>
-                            <span class="text-xl">${item.icon || '📊'}</span>
-                        </div>
-                        <div class="mt-4 flex items-baseline gap-1">
-                            <span class="text-3xl font-bold tracking-tight text-white">${item.value !== undefined ? item.value : '--'}</span>
-                            <span class="text-sm text-slate-400 font-medium">${item.unit || ''}</span>
-                        </div>
-                        <div class="text-[11px] text-boho-sage mt-2 flex items-center gap-1 font-medium">
-                            <i data-lucide="info" class="w-3 h-3 text-boho-terracotta"></i>
-                            ${item.trend?.text || 'Senzor aktívny'}
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                }
-            });
-
-            lucide.createIcons();
-        }
-
-        // Naplnenie bočného dropdown zoznamu
-        function populateSelector(metrics) {
-            const selector = document.getElementById('metric-selector');
-            if (!selector) return;
-            
-            const currentSelection = selector.value;
-            selector.innerHTML = '';
-            
-            Object.keys(metrics).forEach(key => {
-                const item = metrics[key];
-                if (item && typeof item === 'object' && item.title) {
-                    const option = document.createElement('option');
-                    option.value = key;
-                    option.textContent = item.title;
-                    selector.appendChild(option);
-                }
-            });
-
-            if (currentSelection && metrics[currentSelection]) {
-                selector.value = currentSelection;
-            } else {
-                const firstKey = Object.keys(metrics)[0];
-                if (firstKey) selectMetric(firstKey, metrics[firstKey]);
-            }
-
-            selector.onchange = (e) => {
-                const key = e.target.value;
-                if (metrics[key]) selectMetric(key, metrics[key]);
-            };
-        }
-
-        // Výber a detail zobrazenia jednej veličiny
-        function selectMetric(key, item) {
-            const selector = document.getElementById('metric-selector');
-            const dValue = document.getElementById('detail-value');
-            const dTitle = document.getElementById('detail-title');
-            
-            if (selector) selector.value = key;
-            if (dValue) dValue.textContent = `${item.value !== undefined ? item.value : '--'} ${item.unit || ''}`;
-            if (dTitle) dTitle.textContent = item.title || '';
-        }
-
-        // Boho prepínač režimov (Svetlý / Tmavý)
-        function setupThemeToggle() {
-            const btn = document.getElementById('theme-toggle');
-            const body = document.getElementById('body-layout');
-            const text = document.getElementById('theme-text');
-            if (!btn || !body || !text) return;
-
-            btn.addEventListener('click', () => {
-                if (body.classList.contains('bg-boho-darkBg')) {
-                    body.classList.remove('bg-boho-darkBg', 'text-slate-100');
-                    body.classList.add('bg-boho-cream', 'text-slate-800');
-                    text.textContent = 'Temný režim';
-                    btn.innerHTML = `<i data-lucide="moon" class="w-4 h-4 text-boho-terracotta"></i> <span>Temný režim</span>`;
-                } else {
-                    body.classList.remove('bg-boho-cream', 'text-slate-800');
-                    body.classList.add('bg-boho-darkBg', 'text-slate-100');
-                    text.textContent = 'Svetlý režim';
-                    btn.innerHTML = `<i data-lucide="sun" class="w-4 h-4 text-boho-mustard"></i> <span>Svetlý režim</span>`;
-                }
-                lucide.createIcons();
-            });
-        }
+        fetchAll();
+        setInterval(fetchAll, 30000);
     </script>
 </body>
 </html>
