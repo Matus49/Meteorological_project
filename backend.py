@@ -18,18 +18,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Tvoje reálne API linky
+# API linky a prístupy
 API_BASE_URL = "https://projekttb.sksnr.sk/data/api.php"
 API_USER = "sks"
 API_PASSWORD = "kolbe"
 
 # Fallback dáta pre prípad výpadku siete školskej brány
 MOCK_METRICS = {
-    "temperature": {"title": "Teplota vzduchu", "value": 21.5, "unit": "°C", "icon": "🌡️", "trend": {"text": "Meteostanica", "type": "good"}, "history": [{"time": "10:00", "value": 19.5}, {"time": "11:00", "value": 20.8}, {"time": "12:00", "value": 21.5}]},
-    "humidity": {"title": "Vlhkosť vzduchu", "value": 55, "unit": "%", "icon": "💧", "trend": {"text": "Meteostanica", "type": "good"}, "history": [{"time": "10:00", "value": 58}, {"time": "11:00", "value": 56}, {"time": "12:00", "value": 55}]},
-    "pressure": {"title": "Atmosférický tlak", "value": 1013, "unit": "hPa", "icon": "⏱️", "trend": {"text": "Meteostanica", "type": "good"}, "history": [{"time": "10:00", "value": 1012}, {"time": "11:00", "value": 1013}, {"time": "12:00", "value": 1013}]},
-    "temp_flower": {"title": "Teplota pri Kvete", "value": 23.1, "unit": "°C", "icon": "🌱", "trend": {"text": "Senzor Kvet", "type": "good"}, "history": [{"time": "10:00", "value": 22.0}, {"time": "11:00", "value": 22.7}, {"time": "12:00", "value": 23.1}]},
-    "hum_flower": {"title": "Vlhkosť pri Kvete", "value": 48, "unit": "%", "icon": "🪴", "trend": {"text": "Senzor Kvet", "type": "good"}, "history": [{"time": "10:00", "value": 50}, {"time": "11:00", "value": 49}, {"time": "12:00", "value": 48}]}
+    "temperature": {"title": "Teplota vzduchu", "value": 21.5, "unit": "°C", "icon": "🌡️", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}, "history": [{"time": "10:00", "value": 19.5}, {"time": "11:00", "value": 20.8}, {"time": "12:00", "value": 21.5}]},
+    "humidity": {"title": "Vlhkosť vzduchu", "value": 55, "unit": "%", "icon": "💧", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}, "history": [{"time": "10:00", "value": 58}, {"time": "11:00", "value": 56}, {"time": "12:00", "value": 55}]},
+    "pressure": {"title": "Atmosférický tlak", "value": 1013, "unit": "hPa", "icon": "⏱️", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}, "history": [{"time": "10:00", "value": 1012}, {"time": "11:00", "value": 1013}, {"time": "12:00", "value": 1013}]},
+    "temp_flower": {"title": "Teplota pri Kvete", "value": 23.1, "unit": "°C", "icon": "🌱", "trend": {"text": "Senzor Kvet (Záloha)", "type": "good"}, "history": [{"time": "10:00", "value": 22.0}, {"time": "11:00", "value": 22.7}, {"time": "12:00", "value": 23.1}]},
+    "hum_flower": {"title": "Vlhkosť pri Kvete", "value": 48, "unit": "%", "icon": "🪴", "trend": {"text": "Senzor Kvet (Záloha)", "type": "good"}, "history": [{"time": "10:00", "value": 50}, {"time": "11:00", "value": 49}, {"time": "12:00", "value": 48}]}
 }
 
 async def fetch_api_data(source: int, limit: int) -> List[Any]:
@@ -45,7 +45,7 @@ async def fetch_api_data(source: int, limit: int) -> List[Any]:
     return []
 
 def format_time(timestamp: Optional[str]) -> str:
-    """Vytiahne iba HH:MM z timestampu pre čisté zobrazenie v grafe."""
+    """Vytiahne iba HH:MM z timestampu pre čisté zobrazenie."""
     if not timestamp or " " not in timestamp:
         return "--:--"
     try:
@@ -55,30 +55,32 @@ def format_time(timestamp: Optional[str]) -> str:
 
 @app.get("/api/dashboard")
 async def get_dashboard_data():
-    """Hlavný endpoint spájajúci Source 0 (Meteo) a Source 1 (Kvet)."""
-    # Paralelné načítanie aktuálnych (limit=1) aj historických (limit=15) dát
+    """Hlavný endpoint upravený priamo pre potreby frontend dizajnu."""
     current_s0 = await fetch_api_data(source=0, limit=1)
     history_s0 = await fetch_api_data(source=0, limit=15)
     current_s1 = await fetch_api_data(source=1, limit=1)
     history_s1 = await fetch_api_data(source=1, limit=15)
 
+    # Ak škola nevráti nič, pošleme von lokálne mock dáta s príznakom backup_api
     if not current_s0 and not current_s1:
         logger.warning("Dáta nedostupné. Aktivuje sa lokálny fallback.")
-        return {"location": "Záložný režim (Offline)", "metrics": MOCK_METRICS}
+        return {
+            "source": "backup_api",
+            "weather": MOCK_METRICS
+        }
 
     # Extrakcia aktuálnych hodnôt
     c0 = current_s0[0] if current_s0 else {}
     c1 = current_s1[0] if current_s1 else {}
 
-    # Obrátenie histórie, aby na grafe išla zľava doprava (od najstaršej po najnovšiu)
     h0_reversed = list(reversed(history_s0))
     h1_reversed = list(reversed(history_s1))
 
-    # Dynamická stavba finálnej štruktúry metrík
+    # Tvorba štruktúry presne podla očakávania index.html
     metrics = {
         "temperature": {
             "title": "Teplota vzduchu",
-            "value": c0.get("temp", c0.get("temperature")),
+            "value": c0.get("temp", c0.get("temperature", 0)),
             "unit": "°C",
             "icon": "🌡️",
             "trend": {"text": "Meteostanica", "type": "good"},
@@ -86,7 +88,7 @@ async def get_dashboard_data():
         },
         "humidity": {
             "title": "Vlhkosť vzduchu",
-            "value": c0.get("humidity", c0.get("hum")),
+            "value": c0.get("humidity", c0.get("hum", 0)),
             "unit": "%",
             "icon": "💧",
             "trend": {"text": "Meteostanica", "type": "good"},
@@ -94,7 +96,7 @@ async def get_dashboard_data():
         },
         "pressure": {
             "title": "Atmosférický tlak",
-            "value": c0.get("pressure", c0.get("barometer")),
+            "value": c0.get("pressure", c0.get("barometer", 0)),
             "unit": "hPa",
             "icon": "⏱️",
             "trend": {"text": "Meteostanica", "type": "good"},
@@ -102,7 +104,7 @@ async def get_dashboard_data():
         },
         "temp_flower": {
             "title": "Teplota pri Kvete",
-            "value": c1.get("temp", c1.get("temperature")),
+            "value": c1.get("temp", c1.get("temperature", 0)),
             "unit": "°C",
             "icon": "🌱",
             "trend": {"text": "Senzor Kvet", "type": "good"},
@@ -110,7 +112,7 @@ async def get_dashboard_data():
         },
         "hum_flower": {
             "title": "Vlhkosť pri Kvete",
-            "value": c1.get("humidity", c1.get("hum")),
+            "value": c1.get("humidity", c1.get("hum", 0)),
             "unit": "%",
             "icon": "🪴",
             "trend": {"text": "Senzor Kvet", "type": "good"},
@@ -119,10 +121,11 @@ async def get_dashboard_data():
     }
 
     return {
-        "location": "Školská Meteostanica & Kvet",
-        "metrics": metrics
+        "source": "live_api",
+        "weather": metrics
     }
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    # Opravené z main:app na backend:app
+    uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
