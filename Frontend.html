@@ -1,0 +1,336 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  CloudSun, Droplets, Wind, DoorOpen, DoorClosed, 
+  AlertTriangle, LayoutDashboard, BarChart3, Sliders, 
+  Volume2, Users, Flame, Sun, CloudRain
+} from 'lucide-react';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+
+// --- BOHO PALETA (Konštanty pre CSS inline štýly ak treba, zvyšok cez Tailwind)
+// Terakota: #C96F53, Jemná šalviová: #8A9A86, Tlmená horčicová: #DCAE62
+// Krémové pozadie: #FAF6F0, Tlmená tehlovo-červená: #A64B44
+
+export default function BohoMeteoApp() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [alerts, setAlerts] = useState([]);
+
+  // Simulácia/Fetch dát z backendu
+  useEffect(() => {
+    // V reálnom nasadení nahraď za: fetch('http://localhost:8000/api/dashboard')
+    const mockFetch = () => {
+      const simulatedPayload = {
+        source: "live_api",
+        weather: {
+          temperature_out: 23.8,
+          humidity_out: 68.5, // Vysoká vlhkosť -> indikuje možnosť dažďa
+          pressure: 1011.4,
+          rain_1h: 1.2,       // > 0 znamená, že prší pre náš efekt!
+          cloudiness: 75,
+          ghi: 180
+        },
+        classrooms: [
+          { id: "A204", name: "Učebňa Informatiky (A204)", co2: 850, temperature: 21.8, humidity: 45, noise: 42, door_open: false, productivity_index: 88 },
+          { id: "B101", name: "Fyzikálne Laboratórium (B101)", co2: 1420, temperature: 24.1, humidity: 55, noise: 68, door_open: true, productivity_index: 45 },
+          { id: "C302", name: "Ateliér Estetiky (C302)", co2: 510, temperature: 20.5, humidity: 42, noise: 28, door_open: false, productivity_index: 96 }
+        ],
+        history: [
+          { time: "08:00", temp: 18.2, co2_avg: 620 },
+          { time: "10:00", temp: 20.5, co2_avg: 890 },
+          { time: "12:00", temp: 22.1, co2_avg: 1150 },
+          { time: "14:00", temp: 23.8, co2_avg: 1300 },
+          { time: "16:00", temp: 22.9, co2_avg: 920 },
+        ]
+      };
+      setData(simulatedPayload);
+      generateSmartAlerts(simulatedPayload);
+      setLoading(false);
+    };
+
+    setTimeout(mockFetch, 800);
+  }, []);
+
+  // Smart engine na generovanie upozornení podľa zadania
+  const generateSmartAlerts = (currentData) => {
+    const generated = [];
+    currentData.classrooms.forEach(room => {
+      if (room.co2 > 1200) {
+        generated.push({
+          id: `co2-${room.id}`,
+          type: 'danger',
+          message: `V triede ${room.name} klesá koncentrácia pozornosti z dôvodu vysokého CO2 (${room.co2} ppm). Vyvetrajte prosím.`
+        });
+      }
+      // Bezpečnostná logika dverí po "fiktívnom" čase 20:00
+      if (room.door_open) {
+        generated.push({
+          id: `door-${room.id}`,
+          type: 'warning',
+          message: `Bezpečnostné upozornenie: Dvere na ${room.name} sú v neskorých hodinách stále otvorené.`
+        });
+      }
+    });
+    setAlerts(generated);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FAF6F0] flex flex-col items-center justify-center font-sans">
+        <div className="w-12 h-12 border-4 border-[#C96F53] border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-[#8A9A86] font-serif italic text-lg">Nalaďujem zemské senzory...</p>
+      </div>
+    );
+  }
+
+  const isRaining = data.weather.rain_1h > 0;
+  const isSunny = data.weather.ghi > 300;
+
+  return (
+    <div className="min-h-screen bg-[#FAF6F0] text-[#4A3F35] font-sans flex flex-col md:flex-row relative overflow-hidden selection:bg-[#C96F53]/20">
+      
+      {/* --- DYNAMICKÉ POZADIE (CSS Efekty) --- */}
+      {isRaining && (
+        <div className="absolute inset-0 pointer-events-none z-0 opacity-40 mix-blend-multiply bg-gradient-to-b from-blue-900/5 to-transparent">
+          <div className="absolute inset-0 animate-pulse bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_0%,rgba(138,154,134,0.2)_100%)]"></div>
+          {/* Padajúci dážď reprezentovaný CSS animovaným maskovaním */}
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 50% 50%, #8A9A86 1px, transparent 1px)',
+            backgroundSize: '20px 150px',
+            animation: 'rain 0.7s linear infinite'
+          }}></div>
+          <style>{`
+            @keyframes rain {
+              0% { background-position: 0px 0px; }
+              100% { background-position: 20px 500px; }
+            }
+          `}</style>
+        </div>
+      )}
+
+      {isSunny && (
+        <div className="absolute inset-0 pointer-events-none z-0 opacity-20 transition-all duration-1000">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-radial from-[#DCAE62]/40 to-transparent rounded-full blur-3xl animate-pulse" style={{ animationDuration: '6s' }}></div>
+        </div>
+      )}
+
+      {/* --- BOČNÝ PANEL (Sidebar) --- */}
+      <aside className="w-full md:w-64 bg-[#F3ECE0] border-b md:border-b-0 md:border-r border-[#E6DCCE] p-6 flex flex-col justify-between z-10">
+        <div>
+          {/* Logo / Branding */}
+          <div className="mb-10 text-center md:text-left">
+            <h1 className="font-serif text-2xl tracking-wide text-[#C96F53] font-bold flex items-center gap-2 justify-center md:justify-start">
+              <CloudSun className="w-7 h-7" /> Gaia<span className="text-[#8A9A86] font-light">Senzor</span>
+            </h1>
+            <p className="text-xs uppercase tracking-widest text-[#9A8D7E] mt-1 font-semibold">Eko-metrika školy</p>
+          </div>
+
+          {/* Navigácia */}
+          <nav className="space-y-2">
+            <button 
+              onClick={() => setActiveTab('dashboard')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium ${activeTab === 'dashboard' ? 'bg-[#C96F53] text-white shadow-md' : 'text-[#6E6053] hover:bg-[#E6DCCE]'}`}
+            >
+              <LayoutDashboard className="w-5 h-5" /> Nástenka
+            </button>
+            <button 
+              onClick={() => setActiveTab('analytics')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium ${activeTab === 'analytics' ? 'bg-[#C96F53] text-white shadow-md' : 'text-[#6E6053] hover:bg-[#E6DCCE]'}`}
+            >
+              <BarChart3 className="w-5 h-5" /> Analytika
+            </button>
+          </nav>
+        </div>
+
+        {/* Spodná estetická doložka */}
+        <div className="mt-8 pt-4 border-t border-[#E6DCCE] text-center md:text-left">
+          <p className="text-xs text-[#9A8D7E] italic font-serif">"V harmónii s prostredím."</p>
+          <div className="inline-block mt-2 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider bg-[#8A9A86]/20 text-[#546251]">
+            {data.source === 'live_api' ? '● Live Školské API' : '▲ Fallback Režim'}
+          </div>
+        </div>
+      </aside>
+
+      {/* --- HLAVNÁ PLOCHA --- */}
+      <main className="flex-1 p-6 md:p-10 z-10 flex flex-col gap-6 max-w-7xl w-full mx-auto">
+        
+        {/* HORNÝ PANEL S ALERTS */}
+        {alerts.length > 0 && (
+          <div className="space-y-2 animate-fadeIn">
+            {alerts.map((alert) => (
+              <div 
+                key={alert.id} 
+                className={`flex items-start gap-3 p-4 rounded-xl border transition-all shadow-sm ${
+                  alert.type === 'danger' 
+                    ? 'bg-[#A64B44]/10 border-[#A64B44]/30 text-[#82332D]' 
+                    : 'bg-[#DCAE62]/10 border-[#DCAE62]/30 text-[#966C2A]'
+                }`}
+              >
+                <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
+                <p className="text-sm font-medium">{alert.message}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeTab === 'dashboard' ? (
+          <>
+            {/* METEOSTANICA HERO SEKCIJA */}
+            <section className="bg-[#EFE8DC] border border-[#E6DCCE] rounded-2xl p-6 md:p-8 relative overflow-hidden shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-center">
+                <div className="md:col-span-2">
+                  <span className="text-xs uppercase tracking-wider font-bold text-[#9A8D7E]">Vonkajšia meteostanica</span>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <h2 className="text-5xl font-serif font-bold text-[#4A3F35]">{data.weather.temperature_out}°C</h2>
+                    <span className="text-[#8A9A86] text-lg font-medium">/ vonku</span>
+                  </div>
+                  <p className="text-sm text-[#7A6C5D] mt-2 flex items-center gap-1.5">
+                    {isRaining ? <CloudRain className="w-4 h-4 text-[#8A9A86]" /> : <Sun className="w-4 h-4 text-[#DCAE62]" />}
+                    Momentálne je {isRaining ? 'daždivo a sviežo' : 'slnečno a jasné nebo'}. Atmosférický tlak: {data.weather.pressure} hPa.
+                  </p>
+                </div>
+                
+                {/* Rýchle widgety meteostanice */}
+                <div className="grid grid-cols-2 gap-4 md:col-span-2 w-full">
+                  <div className="bg-[#FAF6F0]/60 p-3 rounded-xl border border-[#E6DCCE]/60 flex items-center gap-3">
+                    <Droplets className="w-5 h-5 text-[#8A9A86]" />
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider font-bold text-[#9A8D7E]">Vlhkosť</p>
+                      <p className="text-base font-semibold">{data.weather.humidity_out}%</p>
+                    </div>
+                  </div>
+                  <div className="bg-[#FAF6F0]/60 p-3 rounded-xl border border-[#E6DCCE]/60 flex items-center gap-3">
+                    <Wind className="w-5 h-5 text-[#DCAE62]" />
+                    <div>
+                      <p className="text-[11px] uppercase tracking-wider font-bold text-[#9A8D7E]">Solárne GHI</p>
+                      <p className="text-base font-semibold">{data.weather.ghi} W/m²</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* SEKCIA TRIED / ZÓN */}
+            <section>
+              <h3 className="font-serif text-xl mb-4 text-[#6E6053] font-semibold flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#C96F53]" /> Monitorované interiéry školy
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {data.classrooms.map((room) => {
+                  const isCriticalCO2 = room.co2 > 1200;
+                  
+                  return (
+                    <div 
+                      key={room.id}
+                      className={`rounded-2xl p-6 border transition-all duration-500 shadow-sm flex flex-col justify-between ${
+                        isCriticalCO2 
+                          ? 'bg-[#A64B44] text-[#FAF6F0] border-[#8C3D37]' 
+                          : 'bg-[#FAF6F0] border-[#E6DCCE] hover:border-[#C96F53]'
+                      }`}
+                    >
+                      {/* Hlavička karty */}
+                      <div>
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h4 className={`font-serif font-bold text-lg ${isCriticalCO2 ? 'text-white' : 'text-[#4A3F35]'}`}>
+                              {room.name}
+                            </h4>
+                            <span className={`text-[11px] uppercase font-bold tracking-wider ${isCriticalCO2 ? 'text-[#E8C2BF]' : 'text-[#9A8D7E]'}`}>
+                              Zóna ID: {room.id}
+                            </span>
+                          </div>
+                          
+                          {/* Interaktívne dvere s rotáciou/animáciou */}
+                          <div className={`p-2 rounded-xl transition-all duration-300 ${isCriticalCO2 ? 'bg-white/10' : 'bg-[#F3ECE0]'}`}>
+                            {room.door_open ? (
+                              <DoorOpen className={`w-5 h-5 transition-transform duration-500 rotate-6 ${isCriticalCO2 ? 'text-white' : 'text-[#C96F53]'}`} />
+                            ) : (
+                              <DoorClosed className={`w-5 h-5 transition-transform duration-500 scale-95 ${isCriticalCO2 ? 'text-white/70' : 'text-[#6E6053]'}`} />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Metriky miestnosti */}
+                        <div className="space-y-3 my-6">
+                          {/* CO2 Riadok */}
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="font-medium opacity-80">CO2 Koncentrácia</span>
+                            <span className="font-bold flex items-center gap-1">
+                              {room.co2} ppm 
+                              {isCriticalCO2 && <Flame className="w-4 h-4 animate-bounce" />}
+                            </span>
+                          </div>
+
+                          {/* Teplota a Hluk v riadku */}
+                          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-current/10 text-xs">
+                            <div>
+                              <p className="opacity-70">Teplota / Vlhkosť</p>
+                              <p className="font-bold text-sm mt-0.5">{room.temperature}°C / {room.humidity}%</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="opacity-70 flex items-center gap-1 justify-end">
+                                <Volume2 className="w-3 h-3" /> Hluk
+                              </p>
+                              <p className="font-bold text-sm mt-0.5">{room.noise} dB</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Index produktivity na spodku */}
+                      <div className={`mt-4 pt-4 border-t ${isCriticalCO2 ? 'border-white/20' : 'border-[#E6DCCE]'}`}>
+                        <div className="flex justify-between items-center text-xs mb-1">
+                          <span className="uppercase tracking-wider font-bold opacity-80">Index Produktivity</span>
+                          <span className="font-bold">{room.productivity_index}%</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-current/10 rounded-full overflow-hidden">
+                          <div 
+                            className={`h-full rounded-full transition-all duration-1000 ${isCriticalCO2 ? 'bg-white' : 'bg-[#8A9A86]'}`}
+                            style={{ width: `${room.productivity_index}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          </>
+        ) : (
+          /* --- SEKCIA ANALYTIKA (Elegantný Boho Graf) --- */
+          <section className="bg-[#FAF6F0] border border-[#E6DCCE] rounded-2xl p-6 shadow-sm animate-fadeIn">
+            <div className="mb-6">
+              <h3 className="font-serif text-xl font-bold text-[#4A3F35]">Historická retrospektíva</h3>
+              <p className="text-sm text-[#9A8D7E]">Prehľad teplotných cyklov a priemeru CO2 v priebehu vyučovania.</p>
+            </div>
+
+            <div className="w-full h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data.history} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorTemp" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#C96F53" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#C96F53" stopOpacity={0}/>
+                    </linearGradient>
+                    <linearGradient id="colorCO2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#8A9A86" stopOpacity={0.4}/>
+                      <stop offset="95%" stopColor="#8A9A86" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E6DCCE" />
+                  <XAxis dataKey="time" stroke="#9A8D7E" fontSize={12} />
+                  <YAxis stroke="#9A8D7E" fontSize={12} />
+                  <Tooltip contentStyle={{ backgroundColor: '#F3ECE0', borderRadius: '12px', border: '1px solid #E6DCCE' }} />
+                  <Area type="monotone" dataKey="temp" name="Teplota (°C)" stroke="#C96F53" strokeWidth={2} fillOpacity={1} fill="url(#colorTemp)" />
+                  <Area type="monotone" dataKey="co2_avg" name="Priemerné CO2" stroke="#8A9A86" strokeWidth={2} fillOpacity={1} fill="url(#colorCO2)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+        )}
+      </main>
+    </div>
+  );
+}
