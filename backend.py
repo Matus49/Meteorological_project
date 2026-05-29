@@ -96,6 +96,6 @@ async def get_dashboard_data():
 
 if __name__ == "__main__":
     import uvicorn
-    # Načítanie portu z prostredia (vynútené pre Render) alebo port 8000 pre lokálne testovanie
+    import os
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("backend:app", host="0.0.0.0", port=port, reload=True)
+    uvicorn.run("backend:app", host="0.0.0.0", port=port)
