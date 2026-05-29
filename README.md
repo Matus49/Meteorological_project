@@ -22,6 +22,6 @@ This repository is dedicated to everything involving **weather tracking and sens
 3. **The Output:** The weather metrics are processed, structured, and formatted for viewing.
 
 ---
-* **Creators:** Dzejna, Samuelito, Moarari, Noenix
+* **Creators:** Dzejna, Samuelito, Moarari, Neonix
 
 *Thank you for checking out my weather and sensors project!*
