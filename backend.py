@@ -1,13 +1,12 @@
+import os
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
-# Konfigurácia logovania pre prehľadnosť v Render.com
+app = FastAPI(title="GaiaSenzor Core API")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-app = FastAPI(title="GaiaSenzor Core API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -16,66 +15,147 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Konfigurácia pripojenia
 API_BASE_URL = "https://projekttb.sksnr.sk/data/api.php"
-AUTH = ("sks", "kolbe")
+USER = "sks"
+PASS = "kolbe"
 
-# Mapovanie zdrojov podľa požiadaviek
-SOURCES = {
-    "meteo": 0,
-    "trieda": 1,
-    "dvere": 8
-}
-
-async def fetch_api_data(source_id, limit=1):
-    """Univerzálna funkcia na fetchovanie dát z API"""
+async def fetch_data(source, limit):
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            url = f"{API_BASE_URL}?source={source_id}&sort=timestamp&dir=desc&limit={limit}"
-            response = await client.get(url, auth=AUTH)
-            if response.status_code == 200:
-                data = response.json()
-                return data.get('rows', [])
-            return []
+            url = f"{API_BASE_URL}?source={source}&sort=timestamp&dir=desc&limit={limit}"
+            r = await client.get(url, auth=(USER, PASS))
+            
+            if r.status_code != 200:
+                logger.error(f"Zdroj {source} vrátil kód {r.status_code}")
+                return []
+            return r.json()
     except Exception as e:
-        logger.error(f"Chyba pripojenia k zdroju {source_id}: {e}")
+        logger.error(f"Chyba pripojenia k zdroju {source}: {e}")
         return []
 
 @app.get("/api/dashboard")
 async def get_dashboard_data():
-    # Načítanie aktuálnych dát
-    meteo = await fetch_api_data(0, 1) # Meteo stanica
-    trieda = await fetch_api_data(1, 1) # Trieda
-    dvere = await fetch_api_data(8, 1)  # Dvere
-    
-    m = meteo[0] if meteo else {}
-    t = trieda[0] if trieda else {}
-    d = dvere[0] if dvere else {}
+    try:
+        # Paralelné asynchrónne načítanie aktuálnych dát zo všetkých 3 podsystémov
+        current_s0 = await fetch_data(source=0, limit=1) # Meteostanica
+        current_s1 = await fetch_data(source=1, limit=1) # Trieda
+        current_s8 = await fetch_data(source=8, limit=1) # Dvere
 
-    return {
-        "main_sensors": {
-            "temperature": {"val": m.get("temperature"), "unit": "°C", "title": "Teplota"},
-            "feels_like": {"val": m.get("feels_like"), "unit": "°C", "title": "Pocitová teplota"},
-            "pressure": {"val": m.get("pressure"), "unit": "hPa", "title": "Tlak"},
-            "co2": {"val": t.get("co2"), "unit": "ppm", "title": "CO2"}
-        },
-        "secondary_sensors": {
-            "humidity": {"val": m.get("humidity"), "unit": "%", "title": "Vlhkosť"},
-            "cloudiness": {"val": m.get("cloudiness"), "unit": "%", "title": "Oblačnosť"},
-            "wind_speed": {"val": m.get("wind_speed"), "unit": "m/s", "title": "Rýchlosť vetra"},
-            "wind_dir": {"val": m.get("wind_direction"), "unit": "°", "title": "Smer vetra"},
-            "rain_1h": {"val": m.get("rain_1h"), "unit": "mm", "title": "Dážď (1h)"},
-            "snow_1h": {"val": m.get("snow_1h"), "unit": "mm", "title": "Sneh (1h)"},
-            "ghi": {"val": m.get("ghi"), "unit": "W/m²", "title": "GHI"},
-            "clear_sky_ghi": {"val": m.get("clear_sky_ghi"), "unit": "W/m²", "title": "Clear Sky GHI"}
-        },
-        "door_status": {
-            "state": {"val": d.get("state"), "title": "Stav dverí"}
+        # Vytiahnutie prvého riadku z 'rows' poistite proti prázdnym dátam
+        c0 = current_s0.get('rows', [])[0] if isinstance(current_s0, dict) and 'rows' in current_s0 and len(current_s0['rows']) > 0 else {}
+        c1 = current_s1.get('rows', [])[0] if isinstance(current_s1, dict) and 'rows' in current_s1 and len(current_s1['rows']) > 0 else {}
+        c8 = current_s8.get('rows', [])[0] if isinstance(current_s8, dict) and 'rows' in current_s8 and len(current_s8['rows']) > 0 else {}
+
+        # Návrat kompletných dát s pridanými metadátami pre inteligentné vykreslenie a filtrovanie
+        return {
+            # --- HLAVNÉ ÚDAJE (Kľúčové pre vrchný grid) ---
+            "temperature": {
+                "title": "Teplota vzduchu",
+                "value": c0.get("temperature", "--"),
+                "unit": "°C",
+                "icon": "thermometer",
+                "group": "meteo",
+                "importance": "main"
+            },
+            "feels_like": {
+                "title": "Pocitová teplota",
+                "value": c0.get("feels_like", "--"),
+                "unit": "°C",
+                "icon": "cloud-sun",
+                "group": "meteo",
+                "importance": "main"
+            },
+            "pressure": {
+                "title": "Atmosférický tlak",
+                "value": c0.get("pressure", "--"),
+                "unit": "hPa",
+                "icon": "gauge",
+                "group": "meteo",
+                "importance": "main"
+            },
+            "co2": {
+                "title": "Koncentrácia CO2",
+                "value": c1.get("co2", "--"),
+                "unit": "ppm",
+                "icon": "wind",
+                "group": "trieda",
+                "importance": "main"
+            },
+            # --- VEDĽAJŠIE ÚDAJE ---
+            "humidity": {
+                "title": "Vlhkosť vzduchu",
+                "value": c0.get("humidity", "--"),
+                "unit": "%",
+                "icon": "droplet",
+                "group": "meteo",
+                "importance": "secondary"
+            },
+            "cloudiness": {
+                "title": "Oblačnosť",
+                "value": c0.get("cloudiness", "--"),
+                "unit": "%",
+                "icon": "cloud",
+                "group": "meteo",
+                "importance": "secondary"
+            },
+            "wind_speed": {
+                "title": "Rýchlosť vetra",
+                "value": c0.get("wind_speed", "--"),
+                "unit": "m/s",
+                "icon": "info", # Bude nahradené Lucide ikonou vetra vo frontende
+                "group": "meteo",
+                "importance": "secondary"
+            },
+            "wind_direction": {
+                "title": "Smer vetra",
+                "value": c0.get("wind_direction", "--"),
+                "unit": "°",
+                "icon": "compass",
+                "group": "meteo",
+                "importance": "secondary"
+            },
+            "rain_1h": {
+                "title": "Zrážky (1h)",
+                "value": c0.get("rain_1h", "--"),
+                "unit": "mm",
+                "icon": "cloud-rain",
+                "group": "meteo",
+                "importance": "secondary"
+            },
+            "snow_1h": {
+                "title": "Sneženie (1h)",
+                "value": c0.get("snow_1h", "--"),
+                "unit": "mm",
+                "icon": "cloud-snow",
+                "group": "meteo",
+                "importance": "secondary"
+            },
+            "ghi": {
+                "title": "Slnečné žiarenie (GHI)",
+                "value": c0.get("ghi", "--"),
+                "unit": "W/m²",
+                "icon": "sun",
+                "group": "meteo",
+                "importance": "secondary"
+            },
+            "clear_sky_ghi": {
+                "title": "Jasná obloha (GHI)",
+                "value": c0.get("clear_sky_ghi", "--"),
+                "unit": "W/m²",
+                "icon": "sun-dim",
+                "group": "meteo",
+                "importance": "secondary"
+            },
+            # --- MONITOROVANIE VSTUPU ---
+            "door_state": {
+                "title": "Stav dverí",
+                "value": c8.get("state", "--"), # Hodnota (0 alebo 1), frontend si ju transformuje na Otvorené/Zatvorené
+                "unit": "",
+                "icon": "door-closed",
+                "group": "dvere",
+                "importance": "secondary"
+            }
         }
-    }
-
-@app.get("/api/history/{sensor_type}")
-async def get_sensor_history(sensor_type: str):
-    """Endpoint pre získanie histórie 500 záznamov pre grafy"""
-    source_id = SOURCES.get(sensor_type, 0)
-    return await fetch_api_data(source_id, 500)
+    except Exception as e:
+        logger.error(f"Kritická chyba pri spracovaní dát: {e}")
+        return {}
