@@ -1,12 +1,13 @@
-import os
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
-app = FastAPI(title="GaiaSenzor Core API")
+# Konfigurácia logovania pre prehľadnosť v Render.com
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+app = FastAPI(title="GaiaSenzor Core API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -15,55 +16,66 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Konfigurácia pripojenia
 API_BASE_URL = "https://projekttb.sksnr.sk/data/api.php"
-# Tieto údaje sú správne, len ich musíme použiť v správnom formáte
-USER = "sks"
-PASS = "kolbe"
+AUTH = ("sks", "kolbe")
 
-MOCK_METRICS = {
-    "temperature": {"title": "Teplota vzduchu", "value": 21.5, "unit": "°C", "icon": "🌡️", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}},
-    "humidity": {"title": "Vlhkosť vzduchu", "value": 55, "unit": "%", "icon": "💧", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}},
-    "pressure": {"title": "Atmosférický tlak", "value": 1013, "unit": "hPa", "icon": "⏱️", "trend": {"text": "Meteostanica (Záloha)", "type": "good"}},
-    "temp_flower": {"title": "Teplota pri Kvete", "value": 23.1, "unit": "°C", "icon": "🌱", "trend": {"text": "Senzor Kvet (Záloha)", "type": "good"}},
-    "hum_flower": {"title": "Vlhkosť pri Kvete", "value": 48, "unit": "%", "icon": "🪴", "trend": {"text": "Senzor Kvet (Záloha)", "type": "good"}}
+# Mapovanie zdrojov podľa požiadaviek
+SOURCES = {
+    "meteo": 0,
+    "trieda": 1,
+    "dvere": 8
 }
 
-async def fetch_data(source, limit):
+async def fetch_api_data(source_id, limit=1):
+    """Univerzálna funkcia na fetchovanie dát z API"""
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            url = f"{API_BASE_URL}?source={source}&sort=timestamp&dir=desc&limit={limit}"
-            # OPRAVA: Používame tuple priamo tu
-            r = await client.get(url, auth=(USER, PASS))
-            
-            if r.status_code != 200:
-                logger.error(f"Zdroj {source} vrátil kód {r.status_code}")
-                return []
-            return r.json()
+            url = f"{API_BASE_URL}?source={source_id}&sort=timestamp&dir=desc&limit={limit}"
+            response = await client.get(url, auth=AUTH)
+            if response.status_code == 200:
+                data = response.json()
+                return data.get('rows', [])
+            return []
     except Exception as e:
-        logger.error(f"Chyba pripojenia: {e}")
+        logger.error(f"Chyba pripojenia k zdroju {source_id}: {e}")
         return []
-        
+
 @app.get("/api/dashboard")
 async def get_dashboard_data():
-    try:
-        current_s0 = await fetch_data(source=0, limit=1)
-        current_s1 = await fetch_data(source=1, limit=1)
+    # Načítanie aktuálnych dát
+    meteo = await fetch_api_data(0, 1) # Meteo stanica
+    trieda = await fetch_api_data(1, 1) # Trieda
+    dvere = await fetch_api_data(8, 1)  # Dvere
+    
+    m = meteo[0] if meteo else {}
+    t = trieda[0] if trieda else {}
+    d = dvere[0] if dvere else {}
 
-        # Správne vytiahnutie údajov z vnoreného poľa 'rows'
-        # Podľa logov je to: data['rows'][0]
-        c0 = current_s0.get('rows', [])[0] if isinstance(current_s0, dict) and 'rows' in current_s0 and len(current_s0['rows']) > 0 else {}
-        c1 = current_s1.get('rows', [])[0] if isinstance(current_s1, dict) and 'rows' in current_s1 and len(current_s1['rows']) > 0 else {}
-
-        if not c0 and not c1:
-            return MOCK_METRICS
-
-        return {
-            "temperature": {"title": "Teplota vzduchu", "value": c0.get("temperature", 21.5), "unit": "°C", "icon": "🌡️", "trend": {"text": "Meteostanica", "type": "good"}},
-            "humidity": {"title": "Vlhkosť vzduchu", "value": c0.get("humidity", 55), "unit": "%", "icon": "💧", "trend": {"text": "Meteostanica", "type": "good"}},
-            "pressure": {"title": "Atmosférický tlak", "value": c0.get("pressure", 1013), "unit": "hPa", "icon": "⏱️", "trend": {"text": "Meteostanica", "type": "good"}},
-            "temp_flower": {"title": "Teplota pri Kvete", "value": c1.get("temperature", 23.1), "unit": "°C", "icon": "🌱", "trend": {"text": "Senzor Kvet", "type": "good"}},
-            "hum_flower": {"title": "Vlhkosť pri Kvete", "value": c1.get("humidity", 48), "unit": "%", "icon": "🪴", "trend": {"text": "Senzor Kvet", "type": "good"}}
+    return {
+        "main_sensors": {
+            "temperature": {"val": m.get("temperature"), "unit": "°C", "title": "Teplota"},
+            "feels_like": {"val": m.get("feels_like"), "unit": "°C", "title": "Pocitová teplota"},
+            "pressure": {"val": m.get("pressure"), "unit": "hPa", "title": "Tlak"},
+            "co2": {"val": t.get("co2"), "unit": "ppm", "title": "CO2"}
+        },
+        "secondary_sensors": {
+            "humidity": {"val": m.get("humidity"), "unit": "%", "title": "Vlhkosť"},
+            "cloudiness": {"val": m.get("cloudiness"), "unit": "%", "title": "Oblačnosť"},
+            "wind_speed": {"val": m.get("wind_speed"), "unit": "m/s", "title": "Rýchlosť vetra"},
+            "wind_dir": {"val": m.get("wind_direction"), "unit": "°", "title": "Smer vetra"},
+            "rain_1h": {"val": m.get("rain_1h"), "unit": "mm", "title": "Dážď (1h)"},
+            "snow_1h": {"val": m.get("snow_1h"), "unit": "mm", "title": "Sneh (1h)"},
+            "ghi": {"val": m.get("ghi"), "unit": "W/m²", "title": "GHI"},
+            "clear_sky_ghi": {"val": m.get("clear_sky_ghi"), "unit": "W/m²", "title": "Clear Sky GHI"}
+        },
+        "door_status": {
+            "state": {"val": d.get("state"), "title": "Stav dverí"}
         }
-    except Exception as e:
-        logger.error(f"Kritická chyba pri spracovaní: {e}")
-        return MOCK_METRICS
+    }
+
+@app.get("/api/history/{sensor_type}")
+async def get_sensor_history(sensor_type: str):
+    """Endpoint pre získanie histórie 500 záznamov pre grafy"""
+    source_id = SOURCES.get(sensor_type, 0)
+    return await fetch_api_data(source_id, 500)
