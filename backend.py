@@ -42,31 +42,28 @@ async def fetch_data(source, limit):
     except Exception as e:
         logger.error(f"Chyba pripojenia: {e}")
         return []
+        
 @app.get("/api/dashboard")
 async def get_dashboard_data():
     try:
         current_s0 = await fetch_data(source=0, limit=1)
         current_s1 = await fetch_data(source=1, limit=1)
-        
-        # LOGOVANIE: Toto nám ukáže v Render Logs, čo presne chodí
-        logger.info(f"DATA_S0: {current_s0}")
-        logger.info(f"DATA_S1: {current_s1}")
 
-        c0 = current_s0[0] if (isinstance(current_s0, list) and len(current_s0) > 0) else {}
-        c1 = current_s1[0] if (isinstance(current_s1, list) and len(current_s1) > 0) else {}
+        # Správne vytiahnutie údajov z vnoreného poľa 'rows'
+        # Podľa logov je to: data['rows'][0]
+        c0 = current_s0.get('rows', [])[0] if isinstance(current_s0, dict) and 'rows' in current_s0 and len(current_s0['rows']) > 0 else {}
+        c1 = current_s1.get('rows', [])[0] if isinstance(current_s1, dict) and 'rows' in current_s1 and len(current_s1['rows']) > 0 else {}
 
-        # Ak sú c0 aj c1 prázdne, vrátime mock, inak reálne dáta
         if not c0 and not c1:
             return MOCK_METRICS
 
-        # Upravil som kľúče - ak API posiela iné, tu to hneď uvidíme v logoch
         return {
-            "temperature": {"title": "Teplota vzduchu", "value": c0.get("temp", c0.get("temperature", 21.5)), "unit": "°C", "icon": "🌡️", "trend": {"text": "Meteostanica", "type": "good"}},
+            "temperature": {"title": "Teplota vzduchu", "value": c0.get("temperature", 21.5), "unit": "°C", "icon": "🌡️", "trend": {"text": "Meteostanica", "type": "good"}},
             "humidity": {"title": "Vlhkosť vzduchu", "value": c0.get("humidity", 55), "unit": "%", "icon": "💧", "trend": {"text": "Meteostanica", "type": "good"}},
             "pressure": {"title": "Atmosférický tlak", "value": c0.get("pressure", 1013), "unit": "hPa", "icon": "⏱️", "trend": {"text": "Meteostanica", "type": "good"}},
-            "temp_flower": {"title": "Teplota pri Kvete", "value": c1.get("temp", c1.get("temperature", 23.1)), "unit": "°C", "icon": "🌱", "trend": {"text": "Senzor Kvet", "type": "good"}},
+            "temp_flower": {"title": "Teplota pri Kvete", "value": c1.get("temperature", 23.1), "unit": "°C", "icon": "🌱", "trend": {"text": "Senzor Kvet", "type": "good"}},
             "hum_flower": {"title": "Vlhkosť pri Kvete", "value": c1.get("humidity", 48), "unit": "%", "icon": "🪴", "trend": {"text": "Senzor Kvet", "type": "good"}}
         }
     except Exception as e:
-        logger.error(f"Kritická chyba: {e}")
+        logger.error(f"Kritická chyba pri spracovaní: {e}")
         return MOCK_METRICS
