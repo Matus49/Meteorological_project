@@ -33,19 +33,22 @@ MOCK_METRICS = {
     "hum_flower": {"title": "Vlhkosť pri Kvete", "value": 48, "unit": "%", "icon": "🪴", "trend": {"text": "Senzor Kvet (Záloha)", "type": "good"}}
 }
 
-async def fetch_api_data(source: int, limit: int) -> List[Any]:
-    url = f"{API_BASE_URL}?source={source}&sort=timestamp&dir=desc&limit={limit}"
+async def fetch_data(source, limit):
     try:
-        async with httpx.AsyncClient(timeout=4.0) as client:
-            response = await client.get(url, auth=(API_USER, API_PASSWORD))
-            if response.status_code == 200:
-                res_data = response.json()
-                # Poistka: Ak školské API vráti list, pošleme ho ďalej
-                if isinstance(res_data, list):
-                    return res_data
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            url = f"{API_BASE_URL}?source={source}&sort=timestamp&dir=desc&limit={limit}"
+            r = await client.get(url, auth=AUTH)
+            
+            # TOTO JE KĽÚČOVÁ ČASŤ PRE DIAGNOSTIKU:
+            if r.status_code != 200:
+                print(f"CHYBA: Zdroj {source} vrátil kód {r.status_code}")
+                print(f"Text odpovede servera: {r.text}")
+                return []
+                
+            return r.json()
     except Exception as e:
-        logger.error(f"Chyba pri sťahovaní source={source}: {e}")
-    return []
+        print(f"KRITICKÁ CHYBA pri source {source}: {e}")
+        return []
 
 @app.get("/api/dashboard")
 async def get_dashboard_data():
