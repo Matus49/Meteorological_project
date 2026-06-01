@@ -3,318 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GaiaSenzor Core</title>
+    <title>GaiaSenzor | Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-        // Konfigurácia tvojich vlastných Boho farieb do Tailwindu
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        boho: {
-                            terracotta: '#C96F53',
-                            sage: '#8A9A86',
-                            mustard: '#DCAE62',
-                            cream: '#FAF6F0',
-                            brick: '#A64B44',
-                            darkBg: '#0F172A',
-                            cardBg: '#1E293B'
-                        }
-                    }
-                }
-            }
-        }
-    </script>
+    <style>
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+        .transition-all { transition: all 0.3s ease; }
+    </style>
 </head>
-<body class="bg-boho-darkBg text-slate-100 min-h-screen font-sans antialiased transition-colors duration-300" id="body-layout">
+<body class="bg-[#0b1221] text-white min-h-screen font-sans">
 
-    <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur px-6 py-4 flex justify-between items-center">
-        <div>
-            <div class="flex items-center gap-2">
-                <i data-lucide="zap" class="text-boho-terracotta w-6 h-6 animate-pulse"></i>
-                <h1 class="text-xl font-bold tracking-tight text-white">GaiaSenzor Core</h1>
-            </div>
-            <p class="text-xs text-boho-sage font-medium tracking-wide uppercase mt-0.5">Meteostanica & Meranie Kveta</p>
-        </div>
-        <button id="theme-toggle" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold px-4 py-2 rounded-full border border-slate-700 transition">
-            <i data-lucide="sun" class="w-4 h-4 text-boho-mustard"></i>
-            <span id="theme-text">Svetlý režim</span>
-        </button>
+    <header class="p-6 flex justify-between items-center border-b border-slate-800">
+        <h1 class="text-2xl font-bold tracking-tighter">GaiaSenzor <span class="text-blue-500">Core</span></h1>
+        <input type="text" placeholder="Filtrovať senzory..." class="glass rounded-full px-4 py-2 text-sm w-64 focus:outline-none focus:ring-2 ring-blue-500">
     </header>
 
-    <main class="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        <section class="lg:col-span-2 space-y-6">
-            
-            <div class="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-slate-400 uppercase tracking-wider">Aktuálne monitorovaný uzol</p>
-                    <h2 id="connection-status" class="text-lg font-semibold text-amber-500 flex items-center gap-2 mt-1">
-                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
-                        Pripájanie k API...
-                    </h2>
-                </div>
-                <div class="text-right">
-                    <span id="source-badge" class="text-[10px] bg-slate-800 text-slate-400 px-2.5 py-1 rounded-md font-mono border border-slate-700">CHECKING</span>
-                </div>
+    <main class="max-w-7xl mx-auto p-6 grid grid-cols-12 gap-6">
+        <aside class="col-span-3 space-y-4">
+            <div class="glass p-4 rounded-2xl">
+                <h2 class="text-xs uppercase text-slate-400 mb-3">Kamera 1</h2>
+                <img id="cam0" src="https://projekttb.sksnr.sk/data/camera.php?cam=0" class="rounded-xl w-full">
             </div>
-
-            <div>
-                <h3 class="text-xs font-bold text-boho-sage uppercase tracking-widest mb-4">Aktuálne stavy senzorov</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="sensors-grid">
-                    <div class="animate-pulse bg-boho-cardBg h-32 rounded-2xl border border-slate-800"></div>
-                    <div class="animate-pulse bg-boho-cardBg h-32 rounded-2xl border border-slate-800"></div>
-                    <div class="animate-pulse bg-boho-cardBg h-32 rounded-2xl border border-slate-800"></div>
-                    <div class="animate-pulse bg-boho-cardBg h-32 rounded-2xl border border-slate-800"></div>
-                </div>
+            <div class="glass p-4 rounded-2xl">
+                <h2 class="text-xs uppercase text-slate-400 mb-3">Kamera 2</h2>
+                <img id="cam1" src="https://projekttb.sksnr.sk/data/camera.php?cam=1" class="rounded-xl w-full">
             </div>
+        </aside>
 
+        <section class="col-span-9 space-y-6">
+            <div id="main-sensors" class="grid grid-cols-4 gap-4"></div>
+
+            <div id="secondary-sensors" class="grid grid-cols-4 gap-4"></div>
         </section>
-
-        <section class="space-y-6">
-            <div class="bg-boho-cardBg border border-slate-800 rounded-3xl p-6 shadow-xl sticky top-6">
-                <h3 class="text-xs font-bold text-boho-sage uppercase tracking-widest mb-4">Detail a história merania</h3>
-                
-                <div class="space-y-5">
-                    <div>
-                        <label class="text-xs text-slate-400 block mb-2 font-medium">Zvolená veličina</label>
-                        <select id="metric-selector" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-boho-terracotta text-white font-medium">
-                        </select>
-                    </div>
-
-                    <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 text-center">
-                        <div id="detail-value" class="text-5xl font-black text-white tracking-tight">--</div>
-                        <div id="detail-title" class="text-xs text-slate-400 mt-2 font-medium">Vyberte veličinu</div>
-                    </div>
-
-                    <div class="p-4 bg-slate-900/30 border border-slate-800/50 rounded-xl flex gap-3 items-start">
-                        <i data-lucide="database" class="w-4 h-4 text-slate-500 mt-0.5 shrink-0"></i>
-                        <p class="text-xs text-slate-400 leading-relaxed">
-                            Pre túto veličinu nie sú v databáze dostupné historické záznamy. Zobrazuje sa reálny čas z meteostanice.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
     </main>
 
     <script>
-        // Zabezpečená HTTPS URL adresa z tvojho Renderu
-        const API_URL = 'https://meteorological-project.onrender.com/api/dashboard';
-        let globalData = null;
+        const API_URL = 'http://localhost:8000/api/dashboard'; // Zmeň na svoju URL
 
-        // Načítanie po štarte stránky
-        document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons(); // Fix: Statické ikony sa vygenerujú okamžite po načítaní stránky
-            fetchDashboardData();
-            setupThemeToggle();
-            
-            // Kontrola nových dát každých 30 sekúnd
-            setInterval(fetchDashboardData, 30000);
-        });
-
-        // Bezpečné načítanie dát z backendu
-        async function fetchDashboardData() {
-            const statusEl = document.getElementById('connection-status');
-            const sourceBadge = document.getElementById('source-badge');
-
+        async function updateDashboard() {
             try {
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error('Chyba servera');
+                const res = await fetch(API_URL);
+                const data = await res.json();
                 
-                const data = await response.json();
-                if (!data || Object.keys(data).length === 0) throw new Error('Dáta sú prázdne');
-                
-                globalData = data;
-                
-                // Úspešne pripojené - zelený stav
-                statusEl.className = "text-lg font-semibold text-emerald-500 flex items-center gap-2 mt-1";
-                statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Živé školské API`;
-                
-                sourceBadge.className = "text-[10px] bg-emerald-950 text-emerald-400 px-2.5 py-1 rounded-md font-mono border border-emerald-800";
-                sourceBadge.textContent = 'ONLINE';
-
-                renderSensors(data);
-                populateSelector(data);
-
-            } catch (error) {
-                console.error("Detaily zlyhania komunikácie:", error);
-                
-                // Fix: Odstránenie blikajúcich loaderov pri chybe komunikácie
-                const grid = document.getElementById('sensors-grid');
-                if (grid) {
-                    grid.innerHTML = `
-                        <div class="col-span-full p-6 text-center text-rose-400 bg-rose-950/20 border border-rose-900/50 rounded-2xl">
-                            <p class="text-sm font-medium">Dáta sa nepodarilo načítať. Skontrolujte spojenie.</p>
-                        </div>
-                    `;
-                }
-                
-                // Chyba spojenia - červený stav
-                statusEl.className = "text-lg font-semibold text-rose-500 flex items-center gap-2 mt-1";
-                statusEl.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i> Chyba spojenia s backendom`;
-                
-                sourceBadge.className = "text-[10px] bg-rose-950 text-rose-400 px-2.5 py-1 rounded-md font-mono border border-rose-800";
-                sourceBadge.textContent = 'OFFLINE';
-                lucide.createIcons();
-            }
+                renderCards('main-sensors', data.main_sensors, true);
+                renderCards('secondary-sensors', data.secondary_sensors, false);
+            } catch (e) { console.error("Chyba API:", e); }
         }
 
-        // Generovanie kartičiek zo získaných metrík
-        function renderSensors(metrics) {
-            const grid = document.getElementById('sensors-grid');
-            if (!grid) return;
-            grid.innerHTML = ''; 
-
-            // Fix: Kontrola aktuálneho režimu pre správne nastylovanie kariet senzorov
-            const isLight = document.getElementById('body-layout').classList.contains('bg-boho-cream');
-
-            Object.keys(metrics).forEach(key => {
-                const item = metrics[key];
-                if (item && typeof item === 'object' && item.title) {
-                    const card = document.createElement('div');
-                    
-                    if (isLight) {
-                        card.className = "bg-white border border-slate-200 rounded-2xl p-5 hover:border-boho-sage/40 transition-all duration-300 cursor-pointer shadow-sm shadow-black/5";
-                    } else {
-                        card.className = "bg-boho-cardBg border border-slate-800/80 rounded-2xl p-5 hover:border-boho-sage/40 transition-all duration-300 cursor-pointer shadow-sm shadow-black/20";
-                    }
-                    
-                    card.onclick = () => selectMetric(key, item);
-
-                    card.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <span class="text-xs ${isLight ? 'text-slate-500' : 'text-slate-400'} font-medium">${item.title || 'Senzor'}</span>
-                            <span class="text-xl">${item.icon || '📊'}</span>
-                        </div>
-                        <div class="mt-4 flex items-baseline gap-1">
-                            <span class="text-3xl font-bold tracking-tight ${isLight ? 'text-slate-900' : 'text-white'}">${item.value !== undefined ? item.value : '--'}</span>
-                            <span class="text-sm ${isLight ? 'text-slate-500' : 'text-slate-400'} font-medium">${item.unit || ''}</span>
-                        </div>
-                        <div class="text-[11px] text-boho-sage mt-2 flex items-center gap-1 font-medium">
-                            <i data-lucide="info" class="w-3 h-3 text-boho-terracotta"></i>
-                            ${item.trend?.text || 'Senzor aktívny'}
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                }
-            });
-
-            lucide.createIcons();
+        function renderCards(containerId, data, isMain) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = Object.entries(data).map(([key, val]) => `
+                <div class="glass p-5 rounded-2xl ${isMain ? 'h-32' : 'h-24'} hover:border-blue-500 transition-all cursor-pointer">
+                    <p class="text-[10px] text-slate-400 uppercase">${val.title}</p>
+                    <p class="text-2xl font-bold mt-1">${val.val} <span class="text-sm font-normal opacity-50">${val.unit || ''}</span></p>
+                </div>
+            `).join('');
         }
 
-        // Naplnenie bočného dropdown zoznamu
-        function populateSelector(metrics) {
-            const selector = document.getElementById('metric-selector');
-            if (!selector) return;
-            
-            const currentSelection = selector.value;
-            selector.innerHTML = '';
-            
-            Object.keys(metrics).forEach(key => {
-                const item = metrics[key];
-                if (item && typeof item === 'object' && item.title) {
-                    const option = document.createElement('option');
-                    option.value = key;
-                    option.textContent = item.title;
-                    selector.appendChild(option);
-                }
-            });
+        // Auto-refresh kamier (každých 5 sekúnd)
+        setInterval(() => {
+            const time = new Date().getTime();
+            document.getElementById('cam0').src = `https://projekttb.sksnr.sk/data/camera.php?cam=0&t=${time}`;
+            document.getElementById('cam1').src = `https://projekttb.sksnr.sk/data/camera.php?cam=1&t=${time}`;
+        }, 5000);
 
-            if (currentSelection && metrics[currentSelection]) {
-                selector.value = currentSelection;
-            } else {
-                const firstKey = Object.keys(metrics)[0];
-                if (firstKey) selectMetric(firstKey, metrics[firstKey]);
-            }
-
-            selector.onchange = (e) => {
-                const key = e.target.value;
-                if (metrics[key]) selectMetric(key, metrics[key]);
-            };
-        }
-
-        // Výber a detail zobrazenia jednej veličiny
-        function selectMetric(key, item) {
-            const selector = document.getElementById('metric-selector');
-            const dValue = document.getElementById('detail-value');
-            const dTitle = document.getElementById('detail-title');
-            
-            if (selector) selector.value = key;
-            if (dValue) dValue.textContent = `${item.value !== undefined ? item.value : '--'} ${item.unit || ''}`;
-            if (dTitle) dTitle.textContent = item.title || '';
-        }
-
-        // Boho prepínač režimov (Svetlý / Tmavý)
-        function setupThemeToggle() {
-            const btn = document.getElementById('theme-toggle');
-            const body = document.getElementById('body-layout');
-            const header = document.querySelector('header');
-            const detailCard = document.querySelector('section .sticky');
-            const detailValueBg = document.getElementById('detail-value')?.parentElement;
-            
-            if (!btn || !body) return;
-
-            btn.addEventListener('click', () => {
-                if (body.classList.contains('bg-boho-darkBg')) {
-                    // PREPNUTIE NA SVETLÝ REŽIM
-                    body.classList.remove('bg-boho-darkBg', 'text-slate-100');
-                    body.classList.add('bg-boho-cream', 'text-slate-800');
-                    
-                    // Fix: Kompletné prefarbenie hlavičky, bočného panelu a boxov detailov do svetlej témy
-                    if (header) {
-                        header.classList.remove('bg-slate-900/50', 'border-slate-800');
-                        header.classList.add('bg-white/70', 'border-slate-200');
-                        header.querySelector('h1').classList.remove('text-white');
-                        header.querySelector('h1').classList.add('text-slate-900');
-                    }
-                    if (detailCard) {
-                        detailCard.classList.remove('bg-boho-cardBg', 'border-slate-800');
-                        detailCard.classList.add('bg-white', 'border-slate-200');
-                    }
-                    if (detailValueBg) {
-                        detailValueBg.classList.remove('bg-slate-900/60', 'border-slate-800/80');
-                        detailValueBg.classList.add('bg-slate-100', 'border-slate-200');
-                        document.getElementById('detail-value').classList.remove('text-white');
-                        document.getElementById('detail-value').classList.add('text-slate-900');
-                    }
-                    
-                    // Fix: Oprava štruktúry textu vo vnútri tlačidla pri prepínaní bez straty referencie
-                    btn.innerHTML = `<i data-lucide="moon" class="w-4 h-4 text-boho-terracotta"></i> <span>Temný režim</span>`;
-                } else {
-                    // PREPNUTIE NA TMAVÝ REŽIM
-                    body.classList.remove('bg-boho-cream', 'text-slate-800');
-                    body.classList.add('bg-boho-darkBg', 'text-slate-100');
-                    
-                    if (header) {
-                        header.classList.remove('bg-white/70', 'border-slate-200');
-                        header.classList.add('bg-slate-900/50', 'border-slate-800');
-                        header.querySelector('h1').classList.remove('text-slate-900');
-                        header.querySelector('h1').classList.add('text-white');
-                    }
-                    if (detailCard) {
-                        detailCard.classList.remove('bg-white', 'border-slate-200');
-                        detailCard.classList.add('bg-boho-cardBg', 'border-slate-800');
-                    }
-                    if (detailValueBg) {
-                        detailValueBg.classList.remove('bg-slate-100', 'border-slate-200');
-                        detailValueBg.classList.add('bg-slate-900/60', 'border-slate-800/80');
-                        document.getElementById('detail-value').classList.remove('text-slate-900');
-                        document.getElementById('detail-value').classList.add('text-white');
-                    }
-                    
-                    btn.innerHTML = `<i data-lucide="sun" class="w-4 h-4 text-boho-mustard"></i> <span>Svetlý režim</span>`;
-                }
-                
-                // Fix: Okamžité prekreslenie vygenerovaných kariet senzorov pri zmene témy bez nutnosti čakať 30s na API
-                if (globalData) {
-                    renderSensors(globalData);
-                }
-                lucide.createIcons();
-            });
-        }
+        setInterval(updateDashboard, 30000);
+        updateDashboard();
+        lucide.createIcons();
     </script>
 </body>
 </html>
