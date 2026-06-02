@@ -18,6 +18,7 @@
   </a>
 </p>
 
+https://betterstack.com/users/join/7GaYdiqRnXnw2c5wAeWhVoWX
 ---
 
 ## 📋 O projekte
