@@ -1,1619 +1,702 @@
 <!DOCTYPE html>
 <html lang="sk">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OmniSense Core | Dashboard</title>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Playfair+Display:wght@400;600&display=swap"
-      rel="stylesheet"
-    >
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GaiaSenzor Core | Dashboard</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --accent:       #60a5fa;
+    --accent-dim:   rgba(96,165,250,0.18);
+    --accent-glow:  rgba(96,165,250,0.35);
+    --glass-bg:     rgba(8,15,30,0.52);
+    --glass-border: rgba(255,255,255,0.10);
+    --glass-shadow: 0 8px 40px rgba(0,0,0,0.45);
+    --glass-blur:   16px;
+    --text-primary:   #f0f4ff;
+    --text-secondary: #94a3b8;
+    --text-muted:     #5a6a80;
+    --header-bg:    rgba(5,10,22,0.72);
+    --overlay-bg:   rgba(0,0,0,0.38);
+    --radius-card:  20px;
+    --radius-pill:  999px;
+    --font-body:    "DM Sans", sans-serif;
+    --font-display: "Playfair Display", serif;
+    --transition-slow: 0.6s cubic-bezier(0.4,0,0.2,1);
+    --transition-mid:  0.3s ease;
+    --transition-fast: 0.15s ease;
+  }
+  body.light {
+    --glass-bg:     rgba(240,248,255,0.55);
+    --glass-border: rgba(255,255,255,0.55);
+    --glass-shadow: 0 8px 40px rgba(30,60,120,0.12);
+    --text-primary:   #0d1b2a;
+    --text-secondary: #3a5068;
+    --text-muted:     #7a92aa;
+    --header-bg:    rgba(240,248,255,0.72);
+    --overlay-bg:   rgba(10,20,40,0.22);
+  }
+  #bg-slideshow { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+  .bg-layer {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    opacity: 0; transition: opacity 2s ease-in-out;
+    animation: subtle-zoom 18s ease-in-out infinite alternate;
+  }
+  .bg-layer.active { opacity: 1; }
+  @keyframes subtle-zoom {
+    from { transform: scale(1.04) translate(0%,0%); }
+    to   { transform: scale(1) translate(-0.8%,-0.3%); }
+  }
+  .bg-layer:nth-child(1)  { background-image: url("https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=85"); }
+  .bg-layer:nth-child(2)  { background-image: url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1920&q=85"); }
+  .bg-layer:nth-child(3)  { background-image: url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=85"); }
+  .bg-layer:nth-child(4)  { background-image: url("https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=1920&q=85"); }
+  .bg-layer:nth-child(5)  { background-image: url("https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=1920&q=85"); }
+  .bg-layer:nth-child(6)  { background-image: url("https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=1920&q=85"); }
+  .bg-layer:nth-child(7)  { background-image: url("https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=1920&q=85"); }
+  .bg-layer:nth-child(8)  { background-image: url("https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1920&q=85"); }
+  .bg-layer:nth-child(9)  { background-image: url("https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=1920&q=85"); }
+  .bg-layer:nth-child(10) { background-image: url("https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1920&q=85"); }
+  #bg-overlay {
+    position: fixed; inset: 0; z-index: 1;
+    background: radial-gradient(ellipse at 50% 40%, var(--overlay-bg) 0%, rgba(0,0,0,0.55) 100%);
+    transition: background var(--transition-slow);
+  }
+  body.light #bg-overlay {
+    background: radial-gradient(ellipse at 50% 40%, rgba(200,220,240,0.3) 0%, rgba(10,30,60,0.38) 100%);
+  }
+  body { font-family: var(--font-body); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; transition: color var(--transition-mid); }
+  #app-shell { position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+  .glass-card {
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow); backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur)); border-radius: var(--radius-card);
+    transition: transform var(--transition-mid), border-color var(--transition-mid), box-shadow var(--transition-mid);
+  }
+  .glass-card:hover { transform: translateY(-3px); border-color: var(--accent-glow); box-shadow: var(--glass-shadow), 0 0 0 1px var(--accent-glow); }
+  header {
+    position: sticky; top: 0; z-index: 40; background: var(--header-bg);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--glass-border); padding: 14px 28px;
+    display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;
+    transition: background var(--transition-slow);
+  }
+  .header-brand { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+  .brand-icon-wrap { background: var(--accent-dim); padding: 9px; border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border); }
+  .brand-icon-wrap svg { color: var(--accent); width: 22px; height: 22px; animation: pulse-glow 3s ease-in-out infinite; }
+  @keyframes pulse-glow { 0%,100% { opacity:1; filter: drop-shadow(0 0 4px var(--accent)); } 50% { opacity:.65; filter: drop-shadow(0 0 10px var(--accent)); } }
+  .brand-title { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; line-height: 1.2; }
+  .brand-title .accent { color: var(--accent); }
+  #api-status { font-size: 0.68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; margin-top: 2px; display: block; }
+  .nav-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .nav-tab {
+    display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.07);
+    border: 1px solid var(--glass-border); border-radius: var(--radius-pill); padding: 8px 18px;
+    font-size: 0.82rem; font-weight: 600; font-family: var(--font-body);
+    color: var(--text-secondary); cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  }
+  .nav-tab svg { width: 15px; height: 15px; }
+  .nav-tab:hover { background: rgba(255,255,255,0.13); color: var(--text-primary); }
+  .nav-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .search-wrap { position: relative; }
+  .search-wrap svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--text-muted); pointer-events: none; }
+  #searchInput {
+    background: rgba(255,255,255,0.07); border: 1px solid var(--glass-border);
+    border-radius: var(--radius-pill); padding: 8px 16px 8px 38px;
+    font-size: 0.875rem; font-family: var(--font-body); color: var(--text-primary);
+    outline: none; width: 240px; transition: border-color var(--transition-fast), background var(--transition-fast);
+  }
+  #searchInput::placeholder { color: var(--text-muted); }
+  #searchInput:focus { border-color: var(--accent); background: rgba(255,255,255,0.11); }
+  #theme-toggle {
+    display: flex; align-items: center; gap: 7px; background: rgba(255,255,255,0.07);
+    border: 1px solid var(--glass-border); border-radius: var(--radius-pill); padding: 8px 16px;
+    font-size: 0.8rem; font-weight: 600; font-family: var(--font-body); color: var(--text-primary);
+    cursor: pointer; transition: background var(--transition-fast), border-color var(--transition-fast); flex-shrink: 0;
+  }
+  #theme-toggle:hover { background: rgba(255,255,255,0.13); border-color: var(--accent); }
+  #theme-toggle svg { width: 16px; height: 16px; }
+  main { flex: 1; max-width: 1400px; width: 100%; margin: 0 auto; padding: 28px 24px 48px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .uvod-grid { display: grid; grid-template-columns: 280px 1fr; gap: 28px; }
+  @media (max-width: 900px) { .uvod-grid { grid-template-columns: 1fr; } }
+  .cameras-col { display: flex; flex-direction: column; gap: 16px; }
+  .section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); display: flex; align-items: center; gap: 7px; margin-bottom: 10px; }
+  .section-label svg { width: 14px; height: 14px; }
+  .camera-card { padding: 8px; position: relative; overflow: hidden; cursor: default; }
+  .cam-badge { position: absolute; top: 18px; left: 18px; background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); padding: 4px 9px; border-radius: 6px; font-size: 0.65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #fff; z-index: 2; display: flex; align-items: center; gap: 5px; }
+  .rec-dot { width: 6px; height: 6px; border-radius: 50%; background: #f87171; animation: blink 1.2s step-start infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .camera-card img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 14px; display: block; transition: transform .7s ease; }
+  .camera-card:hover img { transform: scale(1.04); }
+  .meteo-col { display: flex; flex-direction: column; gap: 20px; }
+  .block-header { border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 14px; }
+  .block-title { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; display: flex; align-items: center; gap: 9px; }
+  .block-title svg { width: 18px; height: 18px; color: var(--accent); }
+  .block-desc { font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px; }
+  .sensor-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 900px) { .sensor-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 500px)  { .sensor-grid { grid-template-columns: 1fr; } }
+  .sensor-card { padding: 16px; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between; min-height: 105px; position: relative; overflow: hidden; animation: card-in .4s ease both; }
+  .sensor-card::before { content: ""; position: absolute; top: -30px; right: -30px; width: 90px; height: 90px; background: var(--accent-glow); border-radius: 50%; filter: blur(28px); opacity: 0; transition: opacity var(--transition-mid); pointer-events: none; }
+  .sensor-card:hover::before { opacity: 1; }
+  .sensor-card.main { grid-column: span 2; padding: 22px; min-height: 125px; }
+  @keyframes card-in { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .card-label { font-size: 0.67rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); }
+  .card-icon-wrap { background: var(--accent-dim); border: 1px solid var(--glass-border); border-radius: 10px; padding: 7px; display: flex; align-items: center; justify-content: center; }
+  .card-icon-wrap svg { width: 17px; height: 17px; color: var(--accent); }
+  .card-value-row { display: flex; align-items: baseline; gap: 4px; }
+  .card-value { font-weight: 700; line-height: 1; color: var(--text-primary); }
+  .sensor-card.main .card-value { font-size: 2.6rem; }
+  .sensor-card:not(.main) .card-value { font-size: 1.65rem; }
+  .card-unit { font-size: 0.82rem; font-weight: 500; color: var(--text-secondary); }
+  .val-open   { color: #f87171; }
+  .val-closed { color: #34d399; }
+  .skola-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+  .avg-badge { display: flex; align-items: center; gap: 10px; background: var(--glass-bg); border: 1px solid var(--accent); border-radius: var(--radius-pill); padding: 10px 22px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .avg-badge svg { width: 18px; height: 18px; color: var(--accent); }
+  .avg-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: .1em; color: var(--text-muted); }
+  .avg-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .avg-unit  { font-size: 0.85rem; color: var(--text-secondary); }
+  .th-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  @media (max-width: 1100px) { .th-grid { grid-template-columns: repeat(4,1fr); } }
+  @media (max-width: 800px)  { .th-grid { grid-template-columns: repeat(3,1fr); } }
+  @media (max-width: 550px)  { .th-grid { grid-template-columns: repeat(2,1fr); } }
+  .th-card { padding: 16px; cursor: pointer; position: relative; overflow: hidden; animation: card-in .4s ease both; }
+  .th-card-num { font-size: 0.65rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; }
+  .th-temp { font-size: 2rem; font-weight: 700; color: var(--text-primary); line-height: 1; }
+  .th-temp span { font-size: 0.9rem; color: var(--text-secondary); }
+  .th-hum  { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+  .th-time { font-size: 0.65rem; color: var(--text-muted); margin-top: 6px; }
+  .temp-cold { color: #93c5fd; }
+  .temp-cool { color: #67e8f9; }
+  .temp-ok   { color: #34d399; }
+  .temp-warm { color: #fbbf24; }
+  .temp-hot  { color: #f87171; }
+  .trieda-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  @media (max-width: 800px) { .trieda-grid { grid-template-columns: 1fr; } }
+  .trieda-block { display: flex; flex-direction: column; gap: 12px; }
+  .trieda-block-title { font-family: var(--font-display); font-size: 1rem; font-weight: 600; color: var(--text-primary); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; margin-bottom: 4px; }
+  .trieda-block-title svg { width: 16px; height: 16px; color: var(--accent); }
+  .mini-sensor-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+  .it-card { padding: 14px; cursor: pointer; position: relative; overflow: hidden; animation: card-in .4s ease both; }
+  .it-card .card-value { font-size: 1.5rem; }
+  .door-history-list { display: flex; flex-direction: column; gap: 6px; max-height: 200px; overflow-y: auto; padding-right: 4px; }
+  .door-event { display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 8px 12px; font-size: 0.8rem; }
+  .door-event-icon svg { width: 14px; height: 14px; }
+  .door-event.open .door-event-icon svg { color: #f87171; }
+  .door-event.closed .door-event-icon svg { color: #34d399; }
+  .door-event-time { color: var(--text-muted); font-size: 0.72rem; margin-left: auto; }
+  #chart-modal { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 20px; opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+  #chart-modal.open { opacity: 1; pointer-events: all; }
+  #chart-modal-content { width: 100%; max-width: 860px; padding: 36px; position: relative; transform: scale(0.95); transition: transform .3s ease; background: var(--glass-bg); border: 1px solid var(--glass-border); box-shadow: var(--glass-shadow); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-radius: 28px; }
+  #chart-modal.open #chart-modal-content { transform: scale(1); }
+  .modal-close { position: absolute; top: 20px; right: 20px; background: rgba(255,255,255,0.08); border: 1px solid var(--glass-border); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-secondary); transition: background var(--transition-fast), color var(--transition-fast); }
+  .modal-close:hover { background: rgba(255,255,255,0.14); color: var(--text-primary); }
+  .modal-close svg { width: 18px; height: 18px; }
+  #modal-title { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; }
+  .modal-subtitle { font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 28px; }
+  #chart-loader { display: flex; justify-content: center; align-items: center; height: 300px; }
+  #chart-loader svg { width: 36px; height: 36px; color: var(--accent); animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #chart-container { position: relative; height: 300px; width: 100%; }
+  #chart-container.hidden { display: none; }
+  .status-live  { color: #34d399; }
+  .status-error { color: #f87171; }
+  @media (max-width: 700px) { header { padding: 12px 14px; } main { padding: 16px 12px 40px; } .sensor-card.main { grid-column: span 1; } #searchInput { width: 160px; } #chart-modal-content { padding: 22px 16px; } }
+  </style>
+</head>
+<body class="dark" id="body-layout">
 
-    <style>
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<div id="bg-slideshow" aria-hidden="true">
+  <div class="bg-layer active"></div><div class="bg-layer"></div><div class="bg-layer"></div>
+  <div class="bg-layer"></div><div class="bg-layer"></div><div class="bg-layer"></div>
+  <div class="bg-layer"></div><div class="bg-layer"></div><div class="bg-layer"></div>
+  <div class="bg-layer"></div>
+</div>
+<div id="bg-overlay" aria-hidden="true"></div>
 
-    :root {
-      --accent: #60a5fa;
-      --accent-dim: rgba(96, 165, 250, 0.18);
-      --accent-glow: rgba(96, 165, 250, 0.35);
-      --glass-bg: rgba(8, 15, 30, 0.52);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
-      --glass-blur: 16px;
-      --text-primary: #f0f4ff;
-      --text-secondary: #94a3b8;
-      --text-muted: #5a6a80;
-      --header-bg: rgba(5, 10, 22, 0.72);
-      --overlay-bg: rgba(0, 0, 0, 0.38);
-      --radius-card: 20px;
-      --radius-pill: 999px;
-      --font-body: "DM Sans", sans-serif;
-      --font-display: "Playfair Display", serif;
-      --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      --transition-mid: 0.3s ease;
-      --transition-fast: 0.15s ease;
-    }
-    body.light {
-      --glass-bg: rgba(240, 248, 255, 0.55);
-      --glass-border: rgba(255, 255, 255, 0.55);
-      --glass-shadow: 0 8px 40px rgba(30, 60, 120, 0.12);
-      --text-primary: #0d1b2a;
-      --text-secondary: #3a5068;
-      --text-muted: #7a92aa;
-      --header-bg: rgba(240, 248, 255, 0.72);
-      --overlay-bg: rgba(10, 20, 40, 0.22);
-    }
-
-    #bg-slideshow {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      overflow: hidden;
-    }
-    .bg-layer {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center;
-      opacity: 0;
-      transition: opacity 2s ease-in-out;
-      animation: subtle-zoom 18s ease-in-out infinite alternate;
-    }
-    .bg-layer.active {
-      opacity: 1;
-    }
-    @keyframes subtle-zoom {
-      from {
-        transform: scale(1.04) translate(0%, 0%);
-      }
-      to {
-        transform: scale(1) translate(-0.8%, -0.3%);
-      }
-    }
-    .bg-layer:nth-child(1) {
-      background-image: url("https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=85");
-    }
-    .bg-layer:nth-child(2) {
-      background-image: url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1920&q=85");
-    }
-    .bg-layer:nth-child(3) {
-      background-image: url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=85");
-    }
-    .bg-layer:nth-child(4) {
-      background-image: url("https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=1920&q=85");
-    }
-    .bg-layer:nth-child(5) {
-      background-image: url("https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=1920&q=85");
-    }
-    .bg-layer:nth-child(6) {
-      background-image: url("https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=1920&q=85");
-    }
-    .bg-layer:nth-child(7) {
-      background-image: url("https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=1920&q=85");
-    }
-    .bg-layer:nth-child(8) {
-      background-image: url("https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1920&q=85");
-    }
-    .bg-layer:nth-child(9) {
-      background-image: url("https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=1920&q=85");
-    }
-    .bg-layer:nth-child(10) {
-      background-image: url("https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1920&q=85");
-    }
-
-    #bg-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      background: radial-gradient(
-        ellipse at 50% 40%,
-        var(--overlay-bg) 0%,
-        rgba(0, 0, 0, 0.55) 100%
-      );
-      transition: background var(--transition-slow);
-    }
-    body.light #bg-overlay {
-      background: radial-gradient(
-        ellipse at 50% 40%,
-        rgba(200, 220, 240, 0.3) 0%,
-        rgba(10, 30, 60, 0.38) 100%
-      );
-    }
-
-    body {
-      font-family: var(--font-body);
-      color: var(--text-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-      transition: color var(--transition-mid);
-    }
-    #app-shell {
-      position: relative;
-      z-index: 2;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--accent);
-      border-radius: 10px;
-    }
-
-    .glass-card {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      backdrop-filter: blur(var(--glass-blur));
-      -webkit-backdrop-filter: blur(var(--glass-blur));
-      border-radius: var(--radius-card);
-      transition:
-        transform var(--transition-mid),
-        border-color var(--transition-mid),
-        box-shadow var(--transition-mid);
-    }
-    .glass-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--accent-glow);
-      box-shadow:
-        var(--glass-shadow),
-        0 0 0 1px var(--accent-glow);
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      background: var(--header-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--glass-border);
-      padding: 14px 28px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      transition: background var(--transition-slow);
-    }
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-    .brand-icon-wrap {
-      background: var(--accent-dim);
-      padding: 9px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--glass-border);
-    }
-    .brand-icon-wrap svg {
-      color: var(--accent);
-      width: 22px;
-      height: 22px;
-      animation: pulse-glow 3s ease-in-out infinite;
-    }
-    @keyframes pulse-glow {
-      0%,
-      100% {
-        opacity: 1;
-        filter: drop-shadow(0 0 4px var(--accent));
-      }
-      50% {
-        opacity: 0.65;
-        filter: drop-shadow(0 0 10px var(--accent));
-      }
-    }
-    .brand-title {
-      font-family: var(--font-display);
-      font-size: 1.25rem;
-      font-weight: 600;
-      line-height: 1.2;
-    }
-    .brand-title .accent {
-      color: var(--accent);
-    }
-    #api-status {
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-top: 2px;
-      display: block;
-    }
-
-    .nav-tabs {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-    .nav-tab {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-pill);
-      padding: 8px 18px;
-      font-size: 0.82rem;
-      font-weight: 600;
-      font-family: var(--font-body);
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition:
-        background var(--transition-fast),
-        border-color var(--transition-fast),
-        color var(--transition-fast);
-    }
-    .nav-tab svg {
-      width: 15px;
-      height: 15px;
-    }
-    .nav-tab:hover {
-      background: rgba(255, 255, 255, 0.13);
-      color: var(--text-primary);
-    }
-    .nav-tab.active {
-      background: var(--accent-dim);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .search-wrap {
-      position: relative;
-    }
-    .search-wrap svg {
-      position: absolute;
-      left: 13px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 15px;
-      height: 15px;
-      color: var(--text-muted);
-      pointer-events: none;
-    }
-    #searchInput {
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-pill);
-      padding: 8px 16px 8px 38px;
-      font-size: 0.875rem;
-      font-family: var(--font-body);
-      color: var(--text-primary);
-      outline: none;
-      width: 240px;
-      transition:
-        border-color var(--transition-fast),
-        background var(--transition-fast);
-    }
-    #searchInput::placeholder {
-      color: var(--text-muted);
-    }
-    #searchInput:focus {
-      border-color: var(--accent);
-      background: rgba(255, 255, 255, 0.11);
-    }
-    #theme-toggle {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-pill);
-      padding: 8px 16px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      font-family: var(--font-body);
-      color: var(--text-primary);
-      cursor: pointer;
-      transition:
-        background var(--transition-fast),
-        border-color var(--transition-fast);
-      flex-shrink: 0;
-    }
-    #theme-toggle:hover {
-      background: rgba(255, 255, 255, 0.13);
-      border-color: var(--accent);
-    }
-    #theme-toggle svg {
-      width: 16px;
-      height: 16px;
-    }
-
-    main {
-      flex: 1;
-      max-width: 1400px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 28px 24px 48px;
-    }
-
-    .screen {
-      display: none;
-    }
-    .screen.active {
-      display: block;
-    }
-
-    /* UVOD */
-    .uvod-grid {
-      display: grid;
-      grid-template-columns: 280px 1fr;
-      gap: 28px;
-    }
-    @media (max-width: 900px) {
-      .uvod-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .cameras-col {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .section-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      margin-bottom: 10px;
-    }
-    .section-label svg {
-      width: 14px;
-      height: 14px;
-    }
-    .camera-card {
-      padding: 8px;
-      position: relative;
-      overflow: hidden;
-      cursor: default;
-    }
-    .cam-badge {
-      position: absolute;
-      top: 18px;
-      left: 18px;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(6px);
-      padding: 4px 9px;
-      border-radius: 6px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #fff;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .rec-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #f87171;
-      animation: blink 1.2s step-start infinite;
-    }
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
-    .camera-card img {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      border-radius: 14px;
-      display: block;
-      transition: transform 0.7s ease;
-    }
-    .camera-card:hover img {
-      transform: scale(1.04);
-    }
-
-    .meteo-col {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .block-header {
-      border-bottom: 1px solid var(--glass-border);
-      padding-bottom: 10px;
-      margin-bottom: 14px;
-    }
-    .block-title {
-      font-family: var(--font-display);
-      font-size: 1.15rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-    .block-title svg {
-      width: 18px;
-      height: 18px;
-      color: var(--accent);
-    }
-    .block-desc {
-      font-size: 0.8rem;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
-
-    .sensor-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
-    @media (max-width: 900px) {
-      .sensor-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    @media (max-width: 500px) {
-      .sensor-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .sensor-card {
-      padding: 16px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 105px;
-      position: relative;
-      overflow: hidden;
-      animation: card-in 0.4s ease both;
-    }
-    .sensor-card::before {
-      content: "";
-      position: absolute;
-      top: -30px;
-      right: -30px;
-      width: 90px;
-      height: 90px;
-      background: var(--accent-glow);
-      border-radius: 50%;
-      filter: blur(28px);
-      opacity: 0;
-      transition: opacity var(--transition-mid);
-      pointer-events: none;
-    }
-    .sensor-card:hover::before {
-      opacity: 1;
-    }
-    .sensor-card.main {
-      grid-column: span 2;
-      padding: 22px;
-      min-height: 125px;
-    }
-    @keyframes card-in {
-      from {
-        opacity: 0;
-        transform: translateY(18px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 12px;
-    }
-    .card-label {
-      font-size: 0.67rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-    .card-icon-wrap {
-      background: var(--accent-dim);
-      border: 1px solid var(--glass-border);
-      border-radius: 10px;
-      padding: 7px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .card-icon-wrap svg {
-      width: 17px;
-      height: 17px;
-      color: var(--accent);
-    }
-    .card-value-row {
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-    }
-    .card-value {
-      font-weight: 700;
-      line-height: 1;
-      color: var(--text-primary);
-    }
-    .sensor-card.main .card-value {
-      font-size: 2.6rem;
-    }
-    .sensor-card:not(.main) .card-value {
-      font-size: 1.65rem;
-    }
-    .card-unit {
-      font-size: 0.82rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
-    .val-open {
-      color: #f87171;
-    }
-    .val-closed {
-      color: #34d399;
-    }
-
-    /* SKOLA */
-    .skola-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .avg-badge {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--glass-bg);
-      border: 1px solid var(--accent);
-      border-radius: var(--radius-pill);
-      padding: 10px 22px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-    }
-    .avg-badge svg {
-      width: 18px;
-      height: 18px;
-      color: var(--accent);
-    }
-    .avg-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-muted);
-    }
-    .avg-value {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--accent);
-    }
-    .avg-unit {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-    }
-
-    .th-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-    }
-    @media (max-width: 1100px) {
-      .th-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-    @media (max-width: 800px) {
-      .th-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-    @media (max-width: 550px) {
-      .th-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-
-    .th-card {
-      padding: 16px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      animation: card-in 0.4s ease both;
-    }
-    .th-card-num {
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-    }
-    .th-temp {
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      line-height: 1;
-    }
-    .th-temp span {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-    }
-    .th-hum {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin-top: 4px;
-    }
-    .th-time {
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      margin-top: 6px;
-    }
-
-    .temp-cold {
-      color: #93c5fd;
-    }
-    .temp-cool {
-      color: #67e8f9;
-    }
-    .temp-ok {
-      color: #34d399;
-    }
-    .temp-warm {
-      color: #fbbf24;
-    }
-    .temp-hot {
-      color: #f87171;
-    }
-
-    /* TRIEDA */
-    .trieda-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-    @media (max-width: 800px) {
-      .trieda-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    .trieda-block {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .trieda-block-title {
-      font-family: var(--font-display);
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      border-bottom: 1px solid var(--glass-border);
-      padding-bottom: 10px;
-      margin-bottom: 4px;
-    }
-    .trieda-block-title svg {
-      width: 16px;
-      height: 16px;
-      color: var(--accent);
-    }
-
-    .mini-sensor-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .it-card {
-      padding: 14px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      animation: card-in 0.4s ease both;
-    }
-    .it-card .card-value {
-      font-size: 1.5rem;
-    }
-
-    .door-history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      max-height: 200px;
-      overflow-y: auto;
-      padding-right: 4px;
-    }
-    .door-event {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.04);
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 0.8rem;
-    }
-    .door-event-icon svg {
-      width: 14px;
-      height: 14px;
-    }
-    .door-event.open .door-event-icon svg {
-      color: #f87171;
-    }
-    .door-event.closed .door-event-icon svg {
-      color: #34d399;
-    }
-    .door-event-time {
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      margin-left: auto;
-    }
-
-    /* MODAL */
-    #chart-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 20px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    #chart-modal.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-    #chart-modal-content {
-      width: 100%;
-      max-width: 860px;
-      padding: 36px;
-      position: relative;
-      transform: scale(0.95);
-      transition: transform 0.3s ease;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-radius: 28px;
-    }
-    #chart-modal.open #chart-modal-content {
-      transform: scale(1);
-    }
-    .modal-close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--glass-border);
-      border-radius: 50%;
-      width: 38px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--text-secondary);
-      transition:
-        background var(--transition-fast),
-        color var(--transition-fast);
-    }
-    .modal-close:hover {
-      background: rgba(255, 255, 255, 0.14);
-      color: var(--text-primary);
-    }
-    .modal-close svg {
-      width: 18px;
-      height: 18px;
-    }
-    #modal-title {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 4px;
-    }
-    .modal-subtitle {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      margin-bottom: 28px;
-    }
-    #chart-loader {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 300px;
-    }
-    #chart-loader svg {
-      width: 36px;
-      height: 36px;
-      color: var(--accent);
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-    #chart-container {
-      position: relative;
-      height: 300px;
-      width: 100%;
-    }
-    #chart-container.hidden {
-      display: none;
-    }
-
-    .status-live {
-      color: #34d399;
-    }
-    .status-error {
-      color: #f87171;
-    }
-
-    @media (max-width: 700px) {
-      header {
-        padding: 12px 14px;
-      }
-      main {
-        padding: 16px 12px 40px;
-      }
-      .sensor-card.main {
-        grid-column: span 1;
-      }
-      #searchInput {
-        width: 160px;
-      }
-      #chart-modal-content {
-        padding: 22px 16px;
-      }
-    }
-    </style>
-  </head>
-
-  <body class="dark" id="body-layout">
-    <div id="bg-slideshow" aria-hidden="true">
-      <div class="bg-layer active"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
+<div id="app-shell">
+  <header>
+    <div class="header-brand">
+      <div class="brand-icon-wrap"><i data-lucide="activity"></i></div>
+      <div>
+        <div class="brand-title">GaiaSenzor <span class="accent">Core</span></div>
+        <span id="api-status">Pripajanie...</span>
+      </div>
     </div>
-    <div id="bg-overlay" aria-hidden="true"></div>
-
-    <div id="app-shell">
-      <header>
-        <div class="header-brand">
-          <div class="brand-icon-wrap"><i data-lucide="activity"></i></div>
-          <div>
-            <div class="brand-title">
-              GaiaSenzor <span class="accent">Core</span>
-            </div>
-            <span id="api-status">Pripajanie...</span>
-          </div>
-        </div>
-
-        <nav class="nav-tabs">
-          <button
-            class="nav-tab active"
-            data-screen="uvod"
-            onclick="switchScreen('uvod')"
-          >
-            <i data-lucide="home"></i>
-            Uvod
-          </button>
-          <button
-            class="nav-tab"
-            data-screen="skola"
-            onclick="switchScreen('skola')"
-          >
-            <i data-lucide="school"></i>
-            Skola
-          </button>
-          <button
-            class="nav-tab"
-            data-screen="trieda"
-            onclick="switchScreen('trieda')"
-          >
-            <i data-lucide="monitor"></i>
-            I.IT
-          </button>
-        </nav>
-
-        <div class="header-right">
-          <div class="search-wrap">
-            <i data-lucide="search"></i>
-            <input type="text" id="searchInput" placeholder="Filtrovat...">
-          </div>
-          <button id="theme-toggle">
-            <i data-lucide="sun" style="color:#FBBF24;"></i>
-            <span id="theme-text">Svetly</span>
-          </button>
-        </div>
-      </header>
-
-      <main>
-        <!-- UVOD -->
-        <div id="screen-uvod" class="screen active">
-          <div class="uvod-grid">
-            <div class="cameras-col">
-              <div class="section-label">
-                <i data-lucide="camera"></i>
-                Skolske Kamery
-              </div>
-              <div class="glass-card camera-card">
-                <div class="cam-badge">
-                  <span class="rec-dot"></span>
-                  REC 01
-                </div>
-                <img
-                  id="cam0"
-                  src="https://projekttb.sksnr.sk/data/camera.php?cam=0"
-                  alt="Kamera 1"
-                >
-              </div>
-              <div class="glass-card camera-card">
-                <div class="cam-badge">
-                  <span class="rec-dot"></span>
-                  REC 02
-                </div>
-                <img
-                  id="cam1"
-                  src="https://projekttb.sksnr.sk/data/camera.php?cam=1"
-                  alt="Kamera 2"
-                >
-              </div>
-            </div>
-
-            <div class="meteo-col">
-              <div class="block-header">
-                <div class="block-title">
-                  <i data-lucide="cloud-sun"></i>
-                  Meteostanica Hrad - aktualne pocasie v Nitre
-                </div>
-                <p class="block-desc">
-                  Vonkajsie klimaticke podmienky v okoli skoly · aktualizacia
-                  kazdych 30 s
-                </p>
-              </div>
-              <div class="sensor-grid" id="grid-uvod-meteo"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- SKOLA -->
-        <div id="screen-skola" class="screen">
-          <div class="skola-header">
-            <div
-              class="block-title"
-              style="font-family:var(--font-display);font-size:1.3rem;"
-            >
-              <i
-                data-lucide="thermometer"
-                style="color:var(--accent);width:22px;height:22px;"
-              ></i>
-              TH senzory 1 - 20
-            </div>
-            <div class="avg-badge">
-              <i data-lucide="bar-chart-2" style="color:var(--accent);"></i>
-              <div>
-                <div class="avg-label">Priemerna teplota</div>
-                <div style="display:flex;align-items:baseline;gap:4px;">
-                  <span class="avg-value" id="avg-temp">--</span>
-                  <span class="avg-unit">°C</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="th-grid" id="grid-th"></div>
-        </div>
-
-        <!-- TRIEDA IT -->
-        <div id="screen-trieda" class="screen">
-          <div class="block-header" style="margin-bottom:24px;">
-            <div class="block-title">
-              <i data-lucide="monitor"></i>
-              Trieda I.IT - monitorovanie prostredia
-            </div>
-            <p class="block-desc">
-              Ambient senzor · Power Meter 3D tlaciarne · Lux senzor · Door
-              sensor 05
-            </p>
-          </div>
-
-          <div class="trieda-grid">
-            <div class="trieda-block">
-              <div class="trieda-block-title">
-                <i data-lucide="wind"></i>
-                Ambient sensor 01
-              </div>
-              <div class="mini-sensor-grid" id="grid-ambient"></div>
-            </div>
-
-            <div class="trieda-block">
-              <div class="trieda-block-title">
-                <i data-lucide="zap"></i>
-                Power Meter - 3D tlaciaren
-              </div>
-              <div class="mini-sensor-grid" id="grid-power"></div>
-            </div>
-
-            <div class="trieda-block">
-              <div class="trieda-block-title">
-                <i data-lucide="sun"></i>
-                Lux sensor 01
-              </div>
-              <div class="mini-sensor-grid" id="grid-lux"></div>
-            </div>
-
-            <div class="trieda-block">
-              <div class="trieda-block-title">
-                <i data-lucide="door-open"></i>
-                Door sensor 05
-              </div>
-              <div id="grid-door"></div>
-              <div style="margin-top:12px;">
-                <div class="section-label" style="margin-bottom:8px;">
-                  <i data-lucide="history"></i>
-                  Historia otvoreni
-                </div>
-                <div class="door-history-list" id="door-history-list">
-                  <div
-                    style="color:var(--text-muted);font-size:0.82rem;padding:8px;"
-                  >
-                    Nacitavam historiu...
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-screen="uvod" onclick="switchScreen('uvod')"><i data-lucide="home"></i> Uvod</button>
+      <button class="nav-tab" data-screen="skola" onclick="switchScreen('skola')"><i data-lucide="school"></i> Skola</button>
+      <button class="nav-tab" data-screen="trieda" onclick="switchScreen('trieda')"><i data-lucide="monitor"></i> I.IT</button>
+    </nav>
+    <div class="header-right">
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input type="text" id="searchInput" placeholder="Filtrovat...">
+      </div>
+      <button id="theme-toggle">
+        <i data-lucide="sun" style="color:#FBBF24;"></i>
+        <span id="theme-text">Svetly</span>
+      </button>
     </div>
+  </header>
 
-    <!-- MODAL -->
-    <div
-      id="chart-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      <div id="chart-modal-content">
-        <button class="modal-close" onclick="closeModal()" aria-label="Zavriet">
-          <i data-lucide="x"></i>
-        </button>
-        <h3 id="modal-title">Nazov Veliciny</h3>
-        <p class="modal-subtitle" id="modal-subtitle">
-          Historia poslednych 500 merani
-        </p>
-        <div id="chart-loader"><i data-lucide="loader-2"></i></div>
-        <div id="chart-container" class="hidden">
-          <canvas id="historyChart"></canvas>
+  <main>
+    <!-- UVOD -->
+    <div id="screen-uvod" class="screen active">
+      <div class="uvod-grid">
+        <div class="cameras-col">
+          <div class="section-label"><i data-lucide="camera"></i> Skolske Kamery</div>
+          <div class="glass-card camera-card">
+            <div class="cam-badge"><span class="rec-dot"></span> REC 01</div>
+            <img id="cam0" src="https://projekttb.sksnr.sk/data/camera.php?cam=0" alt="Kamera 1">
+          </div>
+          <div class="glass-card camera-card">
+            <div class="cam-badge"><span class="rec-dot"></span> REC 02</div>
+            <img id="cam1" src="https://projekttb.sksnr.sk/data/camera.php?cam=1" alt="Kamera 2">
+          </div>
+        </div>
+        <div class="meteo-col">
+          <div class="block-header">
+            <div class="block-title"><i data-lucide="cloud-sun"></i> Meteostanica Hrad - aktualne pocasie v Nitre</div>
+            <p class="block-desc">Vonkajsie klimaticke podmienky v okoli skoly · aktualizacia kazdych 30 s</p>
+          </div>
+          <div class="sensor-grid" id="grid-uvod-meteo"></div>
         </div>
       </div>
     </div>
 
-    <script>
-    const API = "https://meteorological-project.onrender.com/api";
-    let chartInstance = null;
-    let currentScreen = "uvod";
+    <!-- SKOLA -->
+    <div id="screen-skola" class="screen">
+      <div class="skola-header">
+        <div class="block-title" style="font-family:var(--font-display);font-size:1.3rem;">
+          <i data-lucide="thermometer" style="color:var(--accent);width:22px;height:22px;"></i>
+          TH senzory 1 - 20
+        </div>
+        <div class="avg-badge">
+          <i data-lucide="bar-chart-2"></i>
+          <div>
+            <div class="avg-label">Priemerna teplota</div>
+            <div style="display:flex;align-items:baseline;gap:4px;">
+              <span class="avg-value" id="avg-temp">--</span>
+              <span class="avg-unit">°C</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="th-grid" id="grid-th"></div>
+    </div>
 
-    // Slideshow
-    (function () {
-      const layers = document.querySelectorAll(".bg-layer");
-      let cur = 0;
-      setInterval(() => {
-        layers[cur].classList.remove("active");
-        cur = (cur + 1) % layers.length;
-        layers[cur].classList.add("active");
-      }, 7000);
-    })();
+    <!-- TRIEDA IT -->
+    <div id="screen-trieda" class="screen">
+      <div class="block-header" style="margin-bottom:24px;">
+        <div class="block-title"><i data-lucide="monitor"></i> Trieda I.IT - monitorovanie prostredia</div>
+        <p class="block-desc">Ambient senzor · Power Meter 3D tlaciarne · Lux senzor · Door sensor 05</p>
+      </div>
+      <div class="trieda-grid">
+        <div class="trieda-block">
+          <div class="trieda-block-title"><i data-lucide="wind"></i> Ambient sensor 01</div>
+          <div class="mini-sensor-grid" id="grid-ambient"></div>
+        </div>
+        <div class="trieda-block">
+          <div class="trieda-block-title"><i data-lucide="zap"></i> Power Meter - 3D tlaciaren</div>
+          <div class="mini-sensor-grid" id="grid-power"></div>
+        </div>
+        <div class="trieda-block">
+          <div class="trieda-block-title"><i data-lucide="sun"></i> Lux sensor 01</div>
+          <div class="mini-sensor-grid" id="grid-lux"></div>
+        </div>
+        <div class="trieda-block">
+          <div class="trieda-block-title"><i data-lucide="door-open"></i> Door sensor 05</div>
+          <div id="grid-door"></div>
+          <div style="margin-top:12px;">
+            <div class="section-label" style="margin-bottom:8px;"><i data-lucide="history"></i> Historia otvoreni</div>
+            <div class="door-history-list" id="door-history-list">
+              <div style="color:var(--text-muted);font-size:0.82rem;padding:8px;">Nacitavam historiu...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
 
-    document.addEventListener("DOMContentLoaded", () => {
-      lucide.createIcons();
-      setupThemeToggle();
-      setupSearch();
-      loadScreen("uvod");
-      setInterval(() => loadScreen(currentScreen), 30000);
-      setInterval(() => {
-        const t = Date.now();
-        const c0 = document.getElementById("cam0");
-        const c1 = document.getElementById("cam1");
-        if (c0)
-          c0.src = `https://projekttb.sksnr.sk/data/camera.php?cam=0&t=${t}`;
-        if (c1)
-          c1.src = `https://projekttb.sksnr.sk/data/camera.php?cam=1&t=${t}`;
-      }, 5000);
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeModal();
-      });
+<!-- MODAL -->
+<div id="chart-modal" role="dialog" aria-modal="true">
+  <div id="chart-modal-content">
+    <button class="modal-close" onclick="closeModal()"><i data-lucide="x"></i></button>
+    <h3 id="modal-title">Graf</h3>
+    <p class="modal-subtitle" id="modal-subtitle">Historia poslednych 500 merani</p>
+    <div id="chart-loader"><i data-lucide="loader-2"></i></div>
+    <div id="chart-container" class="hidden"><canvas id="historyChart"></canvas></div>
+  </div>
+</div>
+
+<script>
+const API = "https://meteorological-project.onrender.com/api";
+let chartInstance = null;
+let currentScreen = "uvod";
+
+(function() {
+  const layers = document.querySelectorAll(".bg-layer");
+  let cur = 0;
+  setInterval(() => {
+    layers[cur].classList.remove("active");
+    cur = (cur + 1) % layers.length;
+    layers[cur].classList.add("active");
+  }, 7000);
+})();
+
+document.addEventListener("DOMContentLoaded", () => {
+  lucide.createIcons();
+  setupThemeToggle();
+  setupSearch();
+  loadScreen("uvod");
+  setInterval(() => loadScreen(currentScreen), 30000);
+  setInterval(() => {
+    const t = Date.now();
+    const c0 = document.getElementById("cam0");
+    const c1 = document.getElementById("cam1");
+    if (c0) c0.src = `https://projekttb.sksnr.sk/data/camera.php?cam=0&t=${t}`;
+    if (c1) c1.src = `https://projekttb.sksnr.sk/data/camera.php?cam=1&t=${t}`;
+  }, 5000);
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+});
+
+function switchScreen(name) {
+  currentScreen = name;
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById("screen-" + name).classList.add("active");
+  document.querySelectorAll(".nav-tab").forEach(t => t.classList.toggle("active", t.dataset.screen === name));
+  loadScreen(name);
+}
+
+function loadScreen(name) {
+  if (name === "uvod")   fetchUvod();
+  if (name === "skola")  fetchSkola();
+  if (name === "trieda") fetchTrieda();
+}
+
+function setStatus(ok) {
+  const el = document.getElementById("api-status");
+  el.innerHTML = ok
+    ? '<span class="status-live">●</span> Zive data'
+    : '<span class="status-error">●</span> Offline / Zaloha';
+}
+
+// ── UVOD ──
+async function fetchUvod() {
+  try {
+    const res = await fetch(`${API}/uvod`);
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+    setStatus(true);
+    renderUvod(d);
+  } catch { setStatus(false); }
+}
+
+function renderUvod(d) {
+  const grid = document.getElementById("grid-uvod-meteo");
+  grid.innerHTML = "";
+  const items = [
+    { key: "temperature",    main: true  },
+    { key: "feels_like",     main: true  },
+    { key: "pressure",       main: false },
+    { key: "humidity",       main: false },
+    { key: "wind_speed",     main: false },
+    { key: "wind_direction", main: false },
+    { key: "cloudiness",     main: false },
+    { key: "rain_1h",        main: false },
+    { key: "snow_1h",        main: false },
+    { key: "ghi",            main: false },
+    { key: "clear_sky_ghi",  main: false },
+  ];
+  items.forEach(({ key, main }) => {
+    const item = d[key];
+    if (!item) return;
+    grid.innerHTML += sensorCardHTML(key, item.title, item.value, item.unit, item.icon, main ? "main" : "", 0, key);
+  });
+  lucide.createIcons();
+  applySearch();
+}
+
+// ── SKOLA ──
+async function fetchSkola() {
+  try {
+    const res = await fetch(`${API}/skola`);
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+    setStatus(true);
+    renderSkola(d);
+  } catch { setStatus(false); }
+}
+
+function renderSkola(d) {
+  document.getElementById("avg-temp").textContent = d.avg_temp !== "--" ? d.avg_temp : "--";
+  const grid = document.getElementById("grid-th");
+  grid.innerHTML = "";
+  d.sensors.forEach((s, i) => {
+    const temp = s.temp !== "--" ? parseFloat(s.temp) : null;
+    const tempClass = tempColor(temp);
+    const timeStr = s.timestamp !== "--" ? s.timestamp.slice(11, 16) : "--";
+    grid.innerHTML += `
+      <div class="glass-card th-card"
+           onclick="openModal('TempC_SHT','${s.label} - Teplota','th','°C',${s.source})"
+           data-title="${s.label.toLowerCase()}"
+           style="animation-delay:${i * 0.04}s">
+        <div class="th-card-num">${s.label}</div>
+        <div class="th-temp ${tempClass}">${s.temp !== "--" ? s.temp : "--"}<span> °C</span></div>
+        <div class="th-hum"><i data-lucide="droplet" style="width:11px;height:11px;display:inline;"></i> ${s.hum} %</div>
+        <div class="th-time">${timeStr}</div>
+      </div>`;
+  });
+  lucide.createIcons();
+  applySearch();
+}
+
+function tempColor(t) {
+  if (t === null) return "";
+  if (t < 10)  return "temp-cold";
+  if (t < 17)  return "temp-cool";
+  if (t < 24)  return "temp-ok";
+  if (t < 28)  return "temp-warm";
+  return "temp-hot";
+}
+
+// ── TRIEDA ──
+async function fetchTrieda() {
+  try {
+    const res = await fetch(`${API}/trieda`);
+    if (!res.ok) throw new Error();
+    const d = await res.json();
+    setStatus(true);
+    renderTrieda(d);
+    fetchDoorHistory();
+  } catch { setStatus(false); }
+}
+
+function renderTrieda(d) {
+  const ambGrid = document.getElementById("grid-ambient");
+  ambGrid.innerHTML = "";
+  Object.entries(d.ambient).forEach(([k, item]) => {
+    ambGrid.innerHTML += sensorCardHTML(k, item.title, item.value, item.unit, item.icon, "it-card", item.source, item.key);
+  });
+
+  const pwrGrid = document.getElementById("grid-power");
+  pwrGrid.innerHTML = "";
+  Object.entries(d.power).forEach(([k, item]) => {
+    pwrGrid.innerHTML += sensorCardHTML(k, item.title, item.value, item.unit, item.icon, "it-card", item.source, item.key);
+  });
+
+  const luxGrid = document.getElementById("grid-lux");
+  luxGrid.innerHTML = "";
+  Object.entries(d.lux).forEach(([k, item]) => {
+    luxGrid.innerHTML += sensorCardHTML(k, item.title, item.value, item.unit, item.icon, "it-card", item.source, item.key);
+  });
+
+  const doorGrid = document.getElementById("grid-door");
+  const doorItem = d.door.state;
+  const dv      = doorItem.value;
+  const dvClass = dv === "Otvorene" ? "val-open" : dv === "Zatvorene" ? "val-closed" : "";
+  const dvIcon  = dv === "Otvorene" ? "door-open" : "door-closed";
+  doorGrid.innerHTML = `
+    <div class="glass-card it-card" onclick="openModal('Exti_status','Door sensor 05 - historia','dvere','',8)">
+      <div class="card-top">
+        <span class="card-label">${doorItem.title}</span>
+        <div class="card-icon-wrap"><i data-lucide="${dvIcon}"></i></div>
+      </div>
+      <div class="card-value-row">
+        <span class="card-value ${dvClass}">${dv !== "--" ? dv : "--"}</span>
+      </div>
+      <div class="th-time" style="margin-top:8px;">${d.door.timestamp !== "--" ? d.door.timestamp.slice(11,16) : ""}</div>
+    </div>`;
+
+  lucide.createIcons();
+  applySearch();
+}
+
+async function fetchDoorHistory() {
+  const list = document.getElementById("door-history-list");
+  list.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;padding:8px;">Nacitavam...</div>`;
+  try {
+    const res = await fetch(`${API}/history/8?limit=100`);
+    const d = await res.json();
+    const rows = (d.rows || []).reverse();
+    if (!rows.length) {
+      list.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;padding:8px;">Ziadne zaznamy.</div>`;
+      return;
+    }
+    let prev = null;
+    const events = [];
+    rows.forEach(r => {
+      const state = r.Exti_status !== undefined ? r.Exti_status : r.exti_status;
+      if (state !== prev) { events.push({ state, timestamp: r.timestamp }); prev = state; }
     });
-
-    function switchScreen(name) {
-      currentScreen = name;
-      document
-        .querySelectorAll(".screen")
-        .forEach((s) => s.classList.remove("active"));
-      document.getElementById("screen-" + name).classList.add("active");
-      document.querySelectorAll(".nav-tab").forEach((t) => {
-        t.classList.toggle("active", t.dataset.screen === name);
-      });
-      loadScreen(name);
-    }
-
-    function loadScreen(name) {
-      if (name === "uvod") fetchUvod();
-      if (name === "skola") fetchSkola();
-      if (name === "trieda") fetchTrieda();
-    }
-
-    function setStatus(ok) {
-      const el = document.getElementById("api-status");
-      el.innerHTML = ok
-        ? '<span class="status-live">●</span> Zive data'
-        : '<span class="status-error">●</span> Offline / Zaloha';
-    }
-
-    // ── UVOD ──
-    async function fetchUvod() {
-      try {
-        const res = await fetch(`${API}/uvod`);
-        if (!res.ok) throw new Error();
-        const d = await res.json();
-        setStatus(true);
-        renderUvod(d);
-      } catch {
-        setStatus(false);
-      }
-    }
-
-    function renderUvod(d) {
-      const grid = document.getElementById("grid-uvod-meteo");
-      grid.innerHTML = "";
-      const items = [
-        { key: "temperature", main: true },
-        { key: "feels_like", main: true },
-        { key: "pressure", main: false },
-        { key: "humidity", main: false },
-        { key: "wind_speed", main: false },
-        { key: "wind_direction", main: false },
-        { key: "cloudiness", main: false },
-        { key: "rain_1h", main: false },
-        { key: "snow_1h", main: false },
-        { key: "ghi", main: false },
-        { key: "clear_sky_ghi", main: false },
-      ];
-      items.forEach(({ key, main }) => {
-        const item = d[key];
-        if (!item) return;
-        const mainClass = main ? "main" : "";
-        grid.innerHTML += sensorCardHTML(
-          key,
-          item.title,
-          item.value,
-          item.unit,
-          item.icon,
-          mainClass,
-          0,
-          key,
-        );
-      });
-      lucide.createIcons();
-      applySearch();
-    }
-
-    // ── SKOLA ──
-    async function fetchSkola() {
-      try {
-        const res = await fetch(`${API}/skola`);
-        if (!res.ok) throw new Error();
-        const d = await res.json();
-        setStatus(true);
-        renderSkola(d);
-      } catch {
-        setStatus(false);
-      }
-    }
-
-    function renderSkola(d) {
-      document.getElementById("avg-temp").textContent =
-        d.avg_temp !== "--" ? d.avg_temp : "--";
-      const grid = document.getElementById("grid-th");
-      grid.innerHTML = "";
-      d.sensors.forEach((s, i) => {
-        const temp = s.temp !== "--" ? parseFloat(s.temp) : null;
-        const tempClass = tempColor(temp);
-        const timeStr = s.timestamp !== "--" ? s.timestamp.slice(11, 16) : "--";
-        grid.innerHTML += `
-        <div class="glass-card th-card"
-             onclick="openModal('TEMPC_SHT','${s.label} - Teplota','th','°C',${s.source})"
-             data-title="${s.label.toLowerCase()}"
-             style="animation-delay:${i * 0.04}s">
-          <div class="th-card-num">${s.label}</div>
-          <div class="th-temp ${tempClass}">${s.temp !== "--" ? s.temp : "--"}<span> °C</span></div>
-          <div class="th-hum"><i data-lucide="droplet" style="width:11px;height:11px;display:inline;"></i> ${s.hum} %</div>
-          <div class="th-time">${timeStr}</div>
-        </div>`;
-      });
-      lucide.createIcons();
-      applySearch();
-    }
-
-    function tempColor(t) {
-      if (t === null) return "";
-      if (t < 10) return "temp-cold";
-      if (t < 17) return "temp-cool";
-      if (t < 24) return "temp-ok";
-      if (t < 28) return "temp-warm";
-      return "temp-hot";
-    }
-
-    // ── TRIEDA ──
-    async function fetchTrieda() {
-      try {
-        const res = await fetch(`${API}/trieda`);
-        if (!res.ok) throw new Error();
-        const d = await res.json();
-        setStatus(true);
-        renderTrieda(d);
-        fetchDoorHistory();
-      } catch {
-        setStatus(false);
-      }
-    }
-
-    function renderTrieda(d) {
-      // Ambient
-      const ambGrid = document.getElementById("grid-ambient");
-      ambGrid.innerHTML = "";
-      Object.entries(d.ambient).forEach(([k, item]) => {
-        ambGrid.innerHTML += sensorCardHTML(
-          k,
-          item.title,
-          item.value,
-          item.unit,
-          item.icon,
-          "it-card",
-          item.source,
-          item.key,
-        );
-      });
-
-      // Power Meter
-      const pwrGrid = document.getElementById("grid-power");
-      pwrGrid.innerHTML = "";
-      Object.entries(d.power).forEach(([k, item]) => {
-        pwrGrid.innerHTML += sensorCardHTML(
-          k,
-          item.title,
-          item.value,
-          item.unit,
-          item.icon,
-          "it-card",
-          item.source,
-          item.key,
-        );
-      });
-
-      // Lux
-      const luxGrid = document.getElementById("grid-lux");
-      luxGrid.innerHTML = "";
-      Object.entries(d.lux).forEach(([k, item]) => {
-        luxGrid.innerHTML += sensorCardHTML(
-          k,
-          item.title,
-          item.value,
-          item.unit,
-          item.icon,
-          "it-card",
-          item.source,
-          item.key,
-        );
-      });
-
-      // Door
-      const doorGrid = document.getElementById("grid-door");
-      const doorItem = d.door.state;
-      const dv = doorItem.value;
-      const dvClass =
-        dv === "Otvorene" ? "val-open" : dv === "Zatvorene" ? "val-closed" : "";
-      const dvIcon = dv === "Otvorene" ? "door-open" : "door-closed";
-      doorGrid.innerHTML = `
-      <div class="glass-card it-card" onclick="openModal('Exti_status','Door sensor 05 - historia','dvere','',8)">
-        <div class="card-top">
-          <span class="card-label">${doorItem.title}</span>
-          <div class="card-icon-wrap"><i data-lucide="${dvIcon}"></i></div>
-        </div>
-        <div class="card-value-row">
-          <span class="card-value ${dvClass}">${dv !== "--" ? dv : "--"}</span>
-        </div>
-        <div class="th-time" style="margin-top:8px;">${d.door.timestamp !== "--" ? d.door.timestamp.slice(11, 16) : ""}</div>
-      </div>`;
-
-      lucide.createIcons();
-      applySearch();
-    }
-
-    async function fetchDoorHistory() {
-      const list = document.getElementById("door-history-list");
-      list.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;padding:8px;">Nacitavam...</div>`;
-      try {
-        const res = await fetch(`${API}/history/8?limit=100`);
-        const d = await res.json();
-        const rows = (d.rows || []).reverse();
-        if (!rows.length) {
-          list.innerHTML = `<div style="color:var(--text-muted);font-size:0.82rem;padding:8px;">Ziadne zaznamy.</div>`;
-          return;
-        }
-        let prev = null;
-        const events = [];
-        rows.forEach((r) => {
-          const state =
-            r.Exti_status !== undefined ? r.Exti_status : r.exti_status;
-          if (state !== prev) {
-            events.push({ state, timestamp: r.timestamp });
-            prev = state;
-          }
-        });
-        list.innerHTML = events
-          .slice(0, 30)
-          .map((ev) => {
-            const isOpen = ev.state === "True";
-            const label = isOpen ? "Otvorene" : "Zatvorene";
-            const cls = isOpen ? "open" : "closed";
-            const icon = isOpen ? "door-open" : "door-closed";
-            const time = ev.timestamp ? ev.timestamp.slice(11, 16) : "--";
-            const date = ev.timestamp ? ev.timestamp.slice(0, 10) : "";
-            return `
-          <div class="door-event ${cls}">
-            <div class="door-event-icon"><i data-lucide="${icon}"></i></div>
-            <span>${label}</span>
-            <span class="door-event-time">${date} ${time}</span>
-          </div>`;
-          })
-          .join("");
-        lucide.createIcons();
-      } catch {
-        list.innerHTML = `<div style="color:#f87171;font-size:0.82rem;padding:8px;">Chyba nacitania historie.</div>`;
-      }
-    }
-
-    function sensorCardHTML(
-      key,
-      title,
-      value,
-      unit,
-      icon,
-      extraClass,
-      source,
-      dataKey,
-    ) {
-      const isIt = extraClass === "it-card";
-      const baseClass = isIt
-        ? "glass-card it-card"
-        : `glass-card sensor-card ${extraClass}`;
-      const onclick =
-        source !== null && source !== undefined && dataKey
-          ? `openModal('${dataKey}','${title}','src${source}','${unit}',${source})`
-          : "";
+    list.innerHTML = events.slice(0, 30).map(ev => {
+      const isOpen = ev.state === "True";
+      const label  = isOpen ? "Otvorene" : "Zatvorene";
+      const cls    = isOpen ? "open" : "closed";
+      const icon   = isOpen ? "door-open" : "door-closed";
+      const time   = ev.timestamp ? ev.timestamp.slice(11, 16) : "--";
+      const date   = ev.timestamp ? ev.timestamp.slice(0, 10) : "";
       return `
-      <div class="${baseClass}"
-           ${onclick ? `onclick="${onclick}"` : ""}
-           data-title="${(title || "").toLowerCase()}"
-           title="Kliknite pre historiu">
-        <div class="card-top">
-          <span class="card-label">${title}</span>
-          <div class="card-icon-wrap"><i data-lucide="${icon || "activity"}"></i></div>
-        </div>
-        <div class="card-value-row">
-          <span class="card-value">${value !== null && value !== undefined ? value : "--"}</span>
-          <span class="card-unit">${unit}</span>
-        </div>
-      </div>`;
-    }
+        <div class="door-event ${cls}">
+          <div class="door-event-icon"><i data-lucide="${icon}"></i></div>
+          <span>${label}</span>
+          <span class="door-event-time">${date} ${time}</span>
+        </div>`;
+    }).join("");
+    lucide.createIcons();
+  } catch {
+    list.innerHTML = `<div style="color:#f87171;font-size:0.82rem;padding:8px;">Chyba nacitania historie.</div>`;
+  }
+}
 
-    // ── VYHLADAVANIE ──
-    function setupSearch() {
-      document
-        .getElementById("searchInput")
-        .addEventListener("input", applySearch);
-    }
-    function applySearch() {
-      const term = document.getElementById("searchInput").value.toLowerCase();
-      document.querySelectorAll("[data-title]").forEach((el) => {
-        el.style.display = el.dataset.title.includes(term) ? "" : "none";
-      });
-    }
+function sensorCardHTML(key, title, value, unit, icon, extraClass, source, dataKey) {
+  const isIt = extraClass === "it-card";
+  const baseClass = isIt ? "glass-card it-card" : `glass-card sensor-card ${extraClass}`;
+  const onclick = (source !== null && source !== undefined && dataKey)
+    ? `openModal('${dataKey}','${title}','src${source}','${unit}',${source})`
+    : "";
+  return `
+    <div class="${baseClass}"
+         ${onclick ? `onclick="${onclick}"` : ""}
+         data-title="${(title || "").toLowerCase()}"
+         title="Kliknite pre historiu">
+      <div class="card-top">
+        <span class="card-label">${title}</span>
+        <div class="card-icon-wrap"><i data-lucide="${icon || "activity"}"></i></div>
+      </div>
+      <div class="card-value-row">
+        <span class="card-value">${value !== null && value !== undefined ? value : "--"}</span>
+        <span class="card-unit">${unit}</span>
+      </div>
+    </div>`;
+}
 
-    // ── MODAL ──
-    async function openModal(key, title, group, unit, source) {
-      const modal = document.getElementById("chart-modal");
-      const loader = document.getElementById("chart-loader");
-      const container = document.getElementById("chart-container");
+function setupSearch() {
+  document.getElementById("searchInput").addEventListener("input", applySearch);
+}
+function applySearch() {
+  const term = document.getElementById("searchInput").value.toLowerCase();
+  document.querySelectorAll("[data-title]").forEach(el => {
+    el.style.display = el.dataset.title.includes(term) ? "" : "none";
+  });
+}
 
-      document.getElementById("modal-title").textContent = title;
-      document.getElementById("modal-subtitle").textContent =
-        `Historia poslednych 500 merani · source=${source}`;
-      container.classList.add("hidden");
-      loader.style.display = "flex";
-      loader.innerHTML = '<i data-lucide="loader-2"></i>';
-      lucide.createIcons();
-      modal.classList.add("open");
+async function openModal(key, title, group, unit, source) {
+  const modal     = document.getElementById("chart-modal");
+  const loader    = document.getElementById("chart-loader");
+  const container = document.getElementById("chart-container");
+  document.getElementById("modal-title").textContent = title;
+  document.getElementById("modal-subtitle").textContent = `Historia poslednych 500 merani · source=${source}`;
+  container.classList.add("hidden");
+  loader.style.display = "flex";
+  loader.innerHTML = '<i data-lucide="loader-2"></i>';
+  lucide.createIcons();
+  modal.classList.add("open");
+  try {
+    const res  = await fetch(`${API}/history/${source}?limit=500`);
+    const data = await res.json();
+    const rows = data.rows || [];
+    const labels  = rows.map(r => {
+      const dt = new Date(r.timestamp);
+      return `${String(dt.getHours()).padStart(2,"0")}:${String(dt.getMinutes()).padStart(2,"0")}`;
+    });
+    const dataset = rows.map(r => r[key] !== undefined ? r[key] : null);
+    const isDoor  = (key === "Exti_status" || key === "state");
+    drawChart(labels, dataset, title, unit, isDoor ? "bar" : "line");
+  } catch {
+    loader.innerHTML = '<span style="color:#F87171;">Historicke data nie su dostupne.</span>';
+  }
+}
 
-      try {
-        const res = await fetch(`${API}/history/${source}?limit=500`);
-        const data = await res.json();
-        const rows = data.rows || [];
-        const labels = rows.map((r) => {
-          const dt = new Date(r.timestamp);
-          return `${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")}`;
-        });
-        const dataset = rows.map((r) => (r[key] !== undefined ? r[key] : null));
-        const isDoor = key === "Exti_status" || key === "state";
-        drawChart(labels, dataset, title, unit, isDoor ? "bar" : "line");
-      } catch {
-        loader.innerHTML =
-          '<span style="color:#F87171;">Historicke data nie su dostupne.</span>';
-      }
-    }
+function closeModal() {
+  document.getElementById("chart-modal").classList.remove("open");
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+}
 
-    function closeModal() {
-      document.getElementById("chart-modal").classList.remove("open");
-      if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-      }
-    }
-
-    function drawChart(labels, data, labelName, unit, type = "line") {
-      document.getElementById("chart-loader").style.display = "none";
-      const container = document.getElementById("chart-container");
-      container.classList.remove("hidden");
-      const ctx = document.getElementById("historyChart").getContext("2d");
-      const isDark = !document.body.classList.contains("light");
-      const grid = isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.09)";
-      const tick = isDark ? "#94A3B8" : "#3A5068";
-      if (chartInstance) chartInstance.destroy();
-
-      const grad = ctx.createLinearGradient(0, 0, 0, 300);
-      grad.addColorStop(0, "rgba(96,165,250,0.45)");
-      grad.addColorStop(1, "rgba(96,165,250,0.00)");
-
-      chartInstance = new Chart(ctx, {
-        type,
-        data: {
-          labels,
-          datasets: [
-            {
-              label: `${labelName}${unit ? " (" + unit + ")" : ""}`,
-              data,
-              borderColor: "#60A5FA",
-              backgroundColor: type === "bar" ? "rgba(96,165,250,0.55)" : grad,
-              borderWidth: type === "bar" ? 0 : 2,
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              pointHoverBackgroundColor: "#60A5FA",
-              fill: true,
-              tension: 0.4,
-            },
-          ],
+function drawChart(labels, data, labelName, unit, type = "line") {
+  document.getElementById("chart-loader").style.display = "none";
+  const container = document.getElementById("chart-container");
+  container.classList.remove("hidden");
+  const ctx    = document.getElementById("historyChart").getContext("2d");
+  const isDark = !document.body.classList.contains("light");
+  const gridC  = isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.09)";
+  const tick   = isDark ? "#94A3B8" : "#3A5068";
+  if (chartInstance) chartInstance.destroy();
+  const grad = ctx.createLinearGradient(0, 0, 0, 300);
+  grad.addColorStop(0, "rgba(96,165,250,0.45)");
+  grad.addColorStop(1, "rgba(96,165,250,0.00)");
+  chartInstance = new Chart(ctx, {
+    type,
+    data: {
+      labels,
+      datasets: [{
+        label: `${labelName}${unit ? " (" + unit + ")" : ""}`,
+        data,
+        borderColor: "#60A5FA",
+        backgroundColor: type === "bar" ? "rgba(96,165,250,0.55)" : grad,
+        borderWidth: type === "bar" ? 0 : 2,
+        pointRadius: 0, pointHoverRadius: 5,
+        pointHoverBackgroundColor: "#60A5FA",
+        fill: true, tension: 0.4,
+      }],
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          mode: "index", intersect: false,
+          backgroundColor: isDark ? "rgba(8,15,30,0.92)" : "rgba(240,248,255,0.95)",
+          titleColor: isDark ? "#F0F4FF" : "#0D1B2A",
+          bodyColor:  isDark ? "#94A3B8" : "#3A5068",
+          borderColor: "rgba(96,165,250,0.4)", borderWidth: 1,
+          padding: 10, cornerRadius: 10,
         },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              mode: "index",
-              intersect: false,
-              backgroundColor: isDark
-                ? "rgba(8,15,30,0.92)"
-                : "rgba(240,248,255,0.95)",
-              titleColor: isDark ? "#F0F4FF" : "#0D1B2A",
-              bodyColor: isDark ? "#94A3B8" : "#3A5068",
-              borderColor: "rgba(96,165,250,0.4)",
-              borderWidth: 1,
-              padding: 10,
-              cornerRadius: 10,
-            },
-          },
-          scales: {
-            x: {
-              grid: { display: false },
-              ticks: {
-                maxTicksLimit: 10,
-                color: tick,
-                font: { family: "'DM Sans',sans-serif", size: 11 },
-              },
-            },
-            y: {
-              grid: { color: grid, borderDash: [5, 5] },
-              ticks: {
-                color: tick,
-                font: { family: "'DM Sans',sans-serif", size: 11 },
-              },
-            },
-          },
-        },
-      });
-    }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 10, color: tick, font: { family: "'DM Sans',sans-serif", size: 11 } } },
+        y: { grid: { color: gridC, borderDash: [5,5] }, ticks: { color: tick, font: { family: "'DM Sans',sans-serif", size: 11 } } },
+      },
+    },
+  });
+}
 
-    // ── TEMA ──
-    function setupThemeToggle() {
-      document.getElementById("theme-toggle").addEventListener("click", () => {
-        const body = document.getElementById("body-layout");
-        const goLight = body.classList.contains("dark");
-        body.classList.replace(
-          goLight ? "dark" : "light",
-          goLight ? "light" : "dark",
-        );
-        document.getElementById("theme-toggle").innerHTML = goLight
-          ? `<i data-lucide="moon" style="color:var(--accent);"></i><span id="theme-text">Tmavy</span>`
-          : `<i data-lucide="sun" style="color:#FBBF24;"></i><span id="theme-text">Svetly</span>`;
-        lucide.createIcons();
-        if (chartInstance) {
-          const d = body.classList.contains("dark");
-          chartInstance.options.scales.x.ticks.color = d
-            ? "#94A3B8"
-            : "#3A5068";
-          chartInstance.options.scales.y.ticks.color = d
-            ? "#94A3B8"
-            : "#3A5068";
-          chartInstance.options.scales.y.grid.color = d
-            ? "rgba(255,255,255,0.09)"
-            : "rgba(0,0,0,0.09)";
-          chartInstance.update();
-        }
-      });
+function setupThemeToggle() {
+  document.getElementById("theme-toggle").addEventListener("click", () => {
+    const body    = document.getElementById("body-layout");
+    const goLight = body.classList.contains("dark");
+    body.classList.replace(goLight ? "dark" : "light", goLight ? "light" : "dark");
+    document.getElementById("theme-toggle").innerHTML = goLight
+      ? `<i data-lucide="moon" style="color:var(--accent);"></i><span id="theme-text">Tmavy</span>`
+      : `<i data-lucide="sun" style="color:#FBBF24;"></i><span id="theme-text">Svetly</span>`;
+    lucide.createIcons();
+    if (chartInstance) {
+      const d = body.classList.contains("dark");
+      chartInstance.options.scales.x.ticks.color = d ? "#94A3B8" : "#3A5068";
+      chartInstance.options.scales.y.ticks.color = d ? "#94A3B8" : "#3A5068";
+      chartInstance.options.scales.y.grid.color  = d ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.09)";
+      chartInstance.update();
     }
-    </script>
-  </body>
+  });
+}
+</script>
+</body>
 </html>
