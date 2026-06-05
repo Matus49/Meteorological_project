@@ -172,10 +172,10 @@ const API_URL = 'http://127.0.0.1:8000/api/dashboard';
 
         // --- INICIALIZÁCIA ---
         document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+        lucide.createIcons();
             setupThemeToggle();
-            setupSearch();
-            fetchDashboardData();
+                                    setupSearch();
+             fetchDashboardData();
             
             // Auto-refresh dát každých 30 sekúnd
             setInterval(fetchDashboardData, 30000);
