@@ -4,363 +4,1067 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GaiaSenzor Core | Premium Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Externé knižnice: Lucide ikony, Chart.js -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            darkBg: '#080C16', // Hlboká tmavomodrá
-                            lightBg: '#F0F4F8', // Čistá svetlomodrá/sivá
-                            accent: '#3B82F6', // Profi modrá
-                            glassDark: 'rgba(30, 41, 59, 0.4)',
-                            glassLight: 'rgba(255, 255, 255, 0.6)',
-                        }
-                    },
-                    backdropBlur: {
-                        md: '12px',
-                    }
-                }
-            }
-        }
-    </script>
+
+    <!-- Prémiové fonty -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+
     <style>
-        /* Sklenený efekt (Glassmorphism) */
-        .glass-card {
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: all 0.3s ease;
-        }
-        
-        .dark .glass-card {
-            background: rgba(30, 41, 59, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-        }
-        
-        .light .glass-card {
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        /* ============================================================
+           CSS PREMENNÉ & RESET
+        ============================================================ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        .glass-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(59, 130, 246, 0.5); /* Modrý accent na hover */
+        :root {
+            --accent:       #60A5FA;
+            --accent-dim:   rgba(96, 165, 250, 0.18);
+            --accent-glow:  rgba(96, 165, 250, 0.35);
+
+            /* Glass – tmavý režim (predvolený) */
+            --glass-bg:     rgba(8, 15, 30, 0.52);
+            --glass-border: rgba(255, 255, 255, 0.10);
+            --glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
+            --glass-blur:   16px;
+
+            --text-primary:   #F0F4FF;
+            --text-secondary: #94A3B8;
+            --text-muted:     #5A6A80;
+
+            --header-bg:    rgba(5, 10, 22, 0.70);
+            --overlay-bg:   rgba(0, 0, 0, 0.38);
+
+            --radius-card:  20px;
+            --radius-pill:  999px;
+
+            --font-body:    'DM Sans', sans-serif;
+            --font-display: 'Playfair Display', serif;
+
+            --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-mid:  0.3s ease;
+            --transition-fast: 0.15s ease;
         }
 
-        /* Dynamické pozadia počasia */
-        .weather-rain { background: linear-gradient(to bottom, #1e293b, #0f172a); position: relative; }
-        .weather-rain::after { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: url('data:image/svg+xml;utf8,<svg ... raindrops ...></svg>'); opacity: 0.2; pointer-events: none; }
-        .weather-storm { background: linear-gradient(to bottom, #334155, #0f172a); }
-        .weather-day { background: #F0F4F8 !important; }
-        .weather-night { background: #080C16 !important; }
+        /* ── Svetlý režim ── */
+        body.light {
+            --glass-bg:     rgba(240, 248, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.55);
+            --glass-shadow: 0 8px 40px rgba(30, 60, 120, 0.12);
+
+            --text-primary:   #0D1B2A;
+            --text-secondary: #3A5068;
+            --text-muted:     #7A92AA;
+
+            --header-bg:    rgba(240, 248, 255, 0.72);
+            --overlay-bg:   rgba(10, 20, 40, 0.22);
+        }
+
+        /* ============================================================
+           POZADIE – CROSSFADE SLIDESHOW
+        ============================================================ */
+
+        /* Kontajner vrstiev pozadí */
+        #bg-slideshow {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        /* Každá vrstva = jeden obrázok z Unsplash */
+        .bg-layer {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            transform: scale(1.04); /* Jemný Ken-Burns efekt */
+            animation: subtle-zoom 18s ease-in-out infinite alternate;
+        }
+
+        /* Aktívna vrstva je viditeľná */
+        .bg-layer.active {
+            opacity: 1;
+        }
+
+        /* Jemný Ken Burns pohyb */
+        @keyframes subtle-zoom {
+            from { transform: scale(1.04) translate(0%, 0%); }
+            to   { transform: scale(1.00) translate(-0.8%, -0.3%); }
+        }
+
+        /* Sada prírodných fotografií s rôznymi poveternostnými podmienkami */
+        .bg-layer:nth-child(1)  { background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=85'); } /* les po daždi */
+        .bg-layer:nth-child(2)  { background-image: url('https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=1920&q=85'); } /* hmlistý les */
+        .bg-layer:nth-child(3)  { background-image: url('https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1920&q=85'); } /* pohľad z hory */
+        .bg-layer:nth-child(4)  { background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=85'); } /* horské štíty */
+        .bg-layer:nth-child(5)  { background-image: url('https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=1920&q=85'); } /* oblaky nad krajinou */
+        .bg-layer:nth-child(6)  { background-image: url('https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=1920&q=85'); } /* dramatická obloha */
+        .bg-layer:nth-child(7)  { background-image: url('https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=1920&q=85'); } /* ranná hmla v údolí */
+        .bg-layer:nth-child(8)  { background-image: url('https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=1920&q=85'); } /* západ slnka v horách */
+        .bg-layer:nth-child(9)  { background-image: url('https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=1920&q=85'); } /* les po búrke */
+        .bg-layer:nth-child(10) { background-image: url('https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1920&q=85'); } /* horské údolie */
+        .bg-layer:nth-child(11) { background-image: url('https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=1920&q=85'); } /* krajina s búrkovými mrakmi */
+        .bg-layer:nth-child(12) { background-image: url('https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1920&q=85'); } /* mlha nad lúkami */
+
+        /* Tmavý polopriehľadný overlay pre čitateľnosť */
+        #bg-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            background: var(--overlay-bg);
+            transition: background var(--transition-slow);
+            /* Jemný gradientový vinyting – okraje tmavšie */
+            background: radial-gradient(
+                ellipse at 50% 40%,
+                var(--overlay-bg) 0%,
+                rgba(0, 0, 0, 0.55) 100%
+            );
+        }
+
+        body.light #bg-overlay {
+            background: radial-gradient(
+                ellipse at 50% 40%,
+                rgba(200, 220, 240, 0.30) 0%,
+                rgba(10, 30, 60, 0.38) 100%
+            );
+        }
+
+        /* ============================================================
+           LAYOUT – HLAVNÉ VRSTVY
+        ============================================================ */
+
+        body {
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            transition: color var(--transition-mid);
+        }
+
+        /* Všetok obsah nad pozadím */
+        #app-shell {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
         /* Vlastný scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #3B82F6; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; opacity: 0.7; }
+
+        /* ============================================================
+           SKLENENÝ EFEKT – GLASSMORPHISM POMOCNÁ TRIEDA
+        ============================================================ */
+
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-radius: var(--radius-card);
+            transition:
+                transform       var(--transition-mid),
+                border-color    var(--transition-mid),
+                box-shadow      var(--transition-mid);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-glow);
+            box-shadow: var(--glass-shadow), 0 0 0 1px var(--accent-glow);
+        }
+
+        /* ============================================================
+           HLAVIČKA (HEADER)
+        ============================================================ */
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            transition: background var(--transition-slow);
+        }
+
+        /* Logo & Názov */
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .brand-icon-wrap {
+            background: var(--accent-dim);
+            padding: 9px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--glass-border);
+        }
+
+        .brand-icon-wrap svg {
+            color: var(--accent);
+            width: 22px; height: 22px;
+        }
+
+        /* Pulzujúca animácia ikony aktivity */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px var(--accent)); }
+            50%       { opacity: 0.65; filter: drop-shadow(0 0 10px var(--accent)); }
+        }
+        .brand-icon-wrap svg { animation: pulse-glow 3s ease-in-out infinite; }
+
+        .brand-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+        .brand-title .accent { color: var(--accent); }
+
+        #api-status {
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 2px;
+            display: block;
+        }
+
+        /* Vyhľadávací vstup */
+        .search-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            flex: 1 1 280px;
+        }
+        .search-wrap svg {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px; height: 15px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        #searchInput {
+            width: 100%;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            padding: 9px 16px 9px 38px;
+            font-size: 0.875rem;
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            outline: none;
+            transition:
+                border-color var(--transition-fast),
+                background   var(--transition-fast);
+        }
+        #searchInput::placeholder { color: var(--text-muted); }
+        #searchInput:focus {
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.11);
+        }
+
+        /* Tlačidlo prepínania témy */
+        #theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition:
+                background   var(--transition-fast),
+                border-color var(--transition-fast),
+                color        var(--transition-fast);
+            flex-shrink: 0;
+        }
+        #theme-toggle:hover {
+            background: rgba(255,255,255,0.13);
+            border-color: var(--accent);
+        }
+        #theme-toggle svg { width: 16px; height: 16px; }
+
+        /* ============================================================
+           HLAVNÝ GRID OBSAHU
+        ============================================================ */
+
+        main {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 32px;
+        }
+
+        @media (max-width: 1024px) {
+            main { grid-template-columns: 1fr; }
+        }
+
+        /* ============================================================
+           ĽAVÝ STĹPEC – KAMERY
+        ============================================================ */
+
+        aside {
+            grid-column: 1;
+        }
+
+        .aside-sticky {
+            position: sticky;
+            top: 90px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .section-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 12px;
+        }
+        .section-label svg { width: 14px; height: 14px; }
+
+        /* Karta kamery */
+        .camera-card {
+            padding: 8px;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+        .camera-card:hover { transform: translateY(-2px); }
+
+        .cam-badge {
+            position: absolute;
+            top: 18px; left: 18px;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            padding: 4px 9px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #fff;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .rec-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #F87171;
+            animation: blink 1.2s step-start infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .camera-card img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border-radius: 14px;
+            display: block;
+            transition: transform 0.7s ease;
+        }
+        .camera-card:hover img { transform: scale(1.04); }
+
+        /* ============================================================
+           PRAVÝ STĹPEC – SENZORY
+        ============================================================ */
+
+        section.sensor-section { grid-column: 2; display: flex; flex-direction: column; gap: 40px; }
+
+        @media (max-width: 1024px) {
+            aside, section.sensor-section { grid-column: 1; }
+        }
+
+        /* Nadpis bloku */
+        .block-header {
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .block-title {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--text-primary);
+        }
+        .block-title svg { width: 18px; height: 18px; color: var(--accent); }
+        .block-desc {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        /* Grid senzorov */
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+
+        @media (max-width: 900px)  { .sensor-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 500px)  { .sensor-grid { grid-template-columns: 1fr; } }
+
+        /* Karta senzoru */
+        .sensor-card {
+            padding: 18px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 110px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Jemný svietivý kruh v pozadí karty */
+        .sensor-card::before {
+            content: '';
+            position: absolute;
+            top: -30px; right: -30px;
+            width: 90px; height: 90px;
+            background: var(--accent-glow);
+            border-radius: 50%;
+            filter: blur(28px);
+            opacity: 0;
+            transition: opacity var(--transition-mid);
+            pointer-events: none;
+        }
+        .sensor-card:hover::before { opacity: 1; }
+
+        /* Rozšírená karta (importance: main) */
+        .sensor-card.main {
+            grid-column: span 2;
+            padding: 24px;
+            min-height: 130px;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        .card-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .card-icon-wrap {
+            background: var(--accent-dim);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .card-icon-wrap svg { width: 18px; height: 18px; color: var(--accent); }
+
+        .card-value-row {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .card-value {
+            font-weight: 700;
+            line-height: 1;
+            color: var(--text-primary);
+        }
+        .sensor-card.main .card-value { font-size: 2.8rem; }
+        .sensor-card:not(.main) .card-value { font-size: 1.75rem; }
+
+        .card-unit {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        /* Farby pre dvere */
+        .val-open    { color: #F87171; }
+        .val-closed  { color: #34D399; }
+
+        /* ============================================================
+           MODÁLNE OKNO S GRAFOM
+        ============================================================ */
+
+        #chart-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.60);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #chart-modal.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #chart-modal-content {
+            width: 100%;
+            max-width: 860px;
+            padding: 36px;
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 28px;
+        }
+        #chart-modal.open #chart-modal-content { transform: scale(1); }
+
+        /* Zatvárací gombík */
+        .modal-close {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            width: 38px; height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: background var(--transition-fast), color var(--transition-fast);
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.14); color: var(--text-primary); }
+        .modal-close svg { width: 18px; height: 18px; }
+
+        #modal-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+        .modal-subtitle {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+        }
+
+        /* Loader spinner */
+        #chart-loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+        }
+        #chart-loader svg {
+            width: 36px; height: 36px;
+            color: var(--accent);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        #chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        #chart-container.hidden { display: none; }
+
+        /* ============================================================
+           STAVOVÉ INDIKÁTORY V HLAVIČKE
+        ============================================================ */
+
+        .status-live   { color: #34D399; }
+        .status-error  { color: #F87171; }
+
+        /* ============================================================
+           ANIMÁCIA PRÍCHODU KARIET
+        ============================================================ */
+
+        @keyframes card-in {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .sensor-card { animation: card-in 0.4s ease both; }
+
+        /* Kaskáda pre rôzne oneskorenie */
+        .sensor-card:nth-child(1)  { animation-delay: 0.05s; }
+        .sensor-card:nth-child(2)  { animation-delay: 0.10s; }
+        .sensor-card:nth-child(3)  { animation-delay: 0.15s; }
+        .sensor-card:nth-child(4)  { animation-delay: 0.20s; }
+        .sensor-card:nth-child(5)  { animation-delay: 0.25s; }
+        .sensor-card:nth-child(6)  { animation-delay: 0.30s; }
+        .sensor-card:nth-child(7)  { animation-delay: 0.35s; }
+        .sensor-card:nth-child(8)  { animation-delay: 0.40s; }
+
+        /* ============================================================
+           RESPONZÍVNOSŤ
+        ============================================================ */
+
+        @media (max-width: 700px) {
+            header { padding: 14px 16px; }
+            main   { padding: 20px 14px 40px; }
+            .sensor-card.main { grid-column: span 1; } /* Na mobile nema main 2-stĺpcové rozloženie */
+            #chart-modal-content { padding: 24px 18px; }
+        }
     </style>
 </head>
-<body class="dark bg-brand-darkBg text-slate-100 min-h-screen font-sans antialiased transition-colors duration-500" id="body-layout">
 
-    <header class="sticky top-0 z-40 glass-card border-b-0 rounded-none px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-3">
-            <div class="bg-brand-accent/20 p-2 rounded-lg">
-                <i data-lucide="activity" class="text-brand-accent w-6 h-6 animate-pulse"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-bold tracking-tight">GaiaSenzor <span class="text-brand-accent">Core</span></h1>
-                <p class="text-[10px] text-slate-400 font-medium tracking-widest uppercase mt-0.5" id="api-status">Pripájanie...</p>
-            </div>
-        </div>
+<!-- body: predvolene tmavý režim, trieda "dark" pre JS logiku -->
+<body class="dark" id="body-layout">
 
-        <div class="relative w-full md:w-96">
-            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-            <input type="text" id="searchInput" placeholder="Filtrovať veličiny (napr. teplota, tlak)..." 
-                   class="w-full bg-slate-800/50 dark:bg-slate-800/50 light:bg-white border border-slate-700 dark:border-slate-700 light:border-slate-300 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-brand-accent transition-colors">
-        </div>
+    <!-- ====================================================
+         VRSTVENÉ POZADIE – Crossfade slideshow (12 obrázkov)
+    ==================================================== -->
+    <div id="bg-slideshow" aria-hidden="true">
+        <!-- Každá .bg-layer = jeden prírodný záber, CSS definuje obrázky -->
+        <div class="bg-layer active"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+    </div>
 
-        <button id="theme-toggle" class="flex items-center gap-2 glass-card hover:bg-slate-800 text-xs font-semibold px-4 py-2 rounded-full transition">
-            <i data-lucide="sun" class="w-4 h-4 text-amber-400"></i>
-            <span id="theme-text">Svetlý režim</span>
-        </button>
-    </header>
+    <!-- Polopriehľadný overlay pre lepšiu čitateľnosť textu -->
+    <div id="bg-overlay" aria-hidden="true"></div>
 
-    <main class="max-w-[1400px] mx-auto p-6 grid grid-cols-1 lg:grid-cols-4 gap-8">
-        
-        <aside class="col-span-1 space-y-6">
-            <div class="sticky top-28 space-y-6">
+    <!-- ====================================================
+         OBSAH APLIKÁCIE (nad pozadím)
+    ==================================================== -->
+    <div id="app-shell">
+
+        <!-- ── HLAVIČKA ── -->
+        <header>
+            <!-- Logo + Názov -->
+            <div class="header-brand">
+                <div class="brand-icon-wrap">
+                    <i data-lucide="activity"></i>
+                </div>
                 <div>
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
-                        <i data-lucide="camera" class="w-4 h-4"></i> Školské Kamery
-                    </h3>
-                    <div class="space-y-4">
-                        <div class="glass-card p-2 rounded-2xl relative group overflow-hidden">
-                            <div class="absolute top-4 left-4 bg-black/60 backdrop-blur px-2 py-1 rounded text-[9px] uppercase tracking-wider z-10 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> REC 01</div>
-                            <img id="cam0" src="https://projekttb.sksnr.sk/data/camera.php?cam=0" alt="Kamera 1" class="w-full h-auto rounded-xl object-cover aspect-video transition-transform duration-700 group-hover:scale-105">
+                    <div class="brand-title">GaiaSenzor <span class="accent">Core</span></div>
+                    <span id="api-status">Pripájanie...</span>
+                </div>
+            </div>
+
+            <!-- Vyhľadávanie / Filter -->
+            <div class="search-wrap">
+                <i data-lucide="search"></i>
+                <input type="text" id="searchInput"
+                       placeholder="Filtrovať veličiny (napr. teplota, tlak)...">
+            </div>
+
+            <!-- Prepínač témy -->
+            <button id="theme-toggle">
+                <i data-lucide="sun" style="color:#FBBF24;"></i>
+                <span id="theme-text">Svetlý režim</span>
+            </button>
+        </header>
+
+        <!-- ── HLAVNÝ OBSAH ── -->
+        <main>
+
+            <!-- ── ĽAVÝ STĹPEC: Kamery ── -->
+            <aside class="col-span-1">
+                <div class="aside-sticky">
+                    <div>
+                        <div class="section-label">
+                            <i data-lucide="camera"></i>
+                            Školské Kamery
                         </div>
-                        <div class="glass-card p-2 rounded-2xl relative group overflow-hidden">
-                            <div class="absolute top-4 left-4 bg-black/60 backdrop-blur px-2 py-1 rounded text-[9px] uppercase tracking-wider z-10 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> REC 02</div>
-                            <img id="cam1" src="https://projekttb.sksnr.sk/data/camera.php?cam=1" alt="Kamera 2" class="w-full h-auto rounded-xl object-cover aspect-video transition-transform duration-700 group-hover:scale-105">
+                        <div style="display:flex;flex-direction:column;gap:14px;">
+
+                            <!-- Kamera 1 -->
+                            <div class="glass-card camera-card">
+                                <div class="cam-badge">
+                                    <span class="rec-dot"></span> REC 01
+                                </div>
+                                <img id="cam0"
+                                     src="https://projekttb.sksnr.sk/data/camera.php?cam=0"
+                                     alt="Kamera 1">
+                            </div>
+
+                            <!-- Kamera 2 -->
+                            <div class="glass-card camera-card">
+                                <div class="cam-badge">
+                                    <span class="rec-dot"></span> REC 02
+                                </div>
+                                <img id="cam1"
+                                     src="https://projekttb.sksnr.sk/data/camera.php?cam=1"
+                                     alt="Kamera 2">
+                            </div>
+
                         </div>
                     </div>
                 </div>
-            </div>
-        </aside>
+            </aside>
 
-        <section class="col-span-1 lg:col-span-3 space-y-10">
-            
-            <div id="block-meteo" class="space-y-4">
-                <div class="border-b border-slate-700/50 pb-2 mb-4">
-                    <h2 class="text-xl font-bold flex items-center gap-2"><i data-lucide="cloud-sun" class="w-5 h-5 text-brand-accent"></i> Meteo stanica</h2>
-                    <p class="text-sm text-slate-400 mt-1">Monitoruje vonkajšie klimatické podmienky v okolí školy.</p>
+            <!-- ── PRAVÝ STĹPEC: Senzory ── -->
+            <section class="sensor-section">
+
+                <!-- Meteo stanica -->
+                <div id="block-meteo">
+                    <div class="block-header">
+                        <div class="block-title">
+                            <i data-lucide="cloud-sun"></i>
+                            Meteo stanica
+                        </div>
+                        <p class="block-desc">Monitoruje vonkajšie klimatické podmienky v okolí školy.</p>
+                    </div>
+                    <div class="sensor-grid" id="grid-meteo"></div>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="grid-meteo"></div>
-            </div>
 
-            <div id="block-trieda" class="space-y-4">
-                <div class="border-b border-slate-700/50 pb-2 mb-4">
-                    <h2 class="text-xl font-bold flex items-center gap-2"><i data-lucide="users" class="w-5 h-5 text-brand-accent"></i> Trieda</h2>
-                    <p class="text-sm text-slate-400 mt-1">Sleduje kvalitu vnútorného prostredia a mikroklímu v školskej učebni.</p>
+                <!-- Trieda -->
+                <div id="block-trieda">
+                    <div class="block-header">
+                        <div class="block-title">
+                            <i data-lucide="users"></i>
+                            Trieda
+                        </div>
+                        <p class="block-desc">Sleduje kvalitu vnútorného prostredia a mikroklímu v školskej učebni.</p>
+                    </div>
+                    <div class="sensor-grid" id="grid-trieda"></div>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="grid-trieda"></div>
-            </div>
 
-            <div id="block-dvere" class="space-y-4">
-                <div class="border-b border-slate-700/50 pb-2 mb-4">
-                    <h2 class="text-xl font-bold flex items-center gap-2"><i data-lucide="door-open" class="w-5 h-5 text-brand-accent"></i> Dvere</h2>
-                    <p class="text-sm text-slate-400 mt-1">Zabezpečuje bezpečnosť a prehľad o stave vstupu.</p>
+                <!-- Dvere -->
+                <div id="block-dvere">
+                    <div class="block-header">
+                        <div class="block-title">
+                            <i data-lucide="door-open"></i>
+                            Dvere
+                        </div>
+                        <p class="block-desc">Zabezpečuje bezpečnosť a prehľad o stave vstupu.</p>
+                    </div>
+                    <div class="sensor-grid" id="grid-dvere"></div>
                 </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="grid-dvere"></div>
-            </div>
 
-        </section>
-    </main>
+            </section>
+        </main>
+    </div><!-- /app-shell -->
 
-    <div id="chart-modal" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300 bg-black/60 backdrop-blur-sm p-4">
-        <div class="glass-card w-full max-w-4xl rounded-3xl p-6 md:p-8 relative transform scale-95 transition-transform duration-300" id="chart-modal-content">
-            <button onclick="closeModal()" class="absolute top-6 right-6 text-slate-400 hover:text-white bg-slate-800/50 p-2 rounded-full transition">
-                <i data-lucide="x" class="w-5 h-5"></i>
+    <!-- ====================================================
+         MODÁLNE OKNO – Historický graf senzoru
+    ==================================================== -->
+    <div id="chart-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div id="chart-modal-content">
+
+            <!-- Zatvárací gombík -->
+            <button class="modal-close" onclick="closeModal()" aria-label="Zavrieť">
+                <i data-lucide="x"></i>
             </button>
-            
-            <div class="mb-6">
-                <h3 id="modal-title" class="text-2xl font-bold flex items-center gap-3">Názov Veličiny</h3>
-                <p class="text-sm text-slate-400 mt-1">História posledných 500 meraní</p>
+
+            <!-- Hlavička modálu -->
+            <h3 id="modal-title">Názov Veličiny</h3>
+            <p class="modal-subtitle">História posledných 500 meraní</p>
+
+            <!-- Načítavací spinner -->
+            <div id="chart-loader">
+                <i data-lucide="loader-2"></i>
             </div>
-            
-            <div id="chart-loader" class="flex justify-center items-center h-[300px]">
-                <i data-lucide="loader-2" class="w-8 h-8 text-brand-accent animate-spin"></i>
-            </div>
-            
-            <div class="relative h-[300px] w-full hidden" id="chart-container">
+
+            <!-- Kontajner plátna grafu (skrytý počas načítavania) -->
+            <div id="chart-container" class="hidden">
                 <canvas id="historyChart"></canvas>
             </div>
+
         </div>
     </div>
 
+    <!-- ====================================================
+         JAVASCRIPT – Celá pôvodná logika zachovaná
+    ==================================================== -->
     <script>
-        // URL TVOJHO BACKENDU (Uprav ak beží na inej adrese)
-        const API_URL="http://127.0.0.1:8000/api/dashboard"
-          let globalData=null
- let chartInstance = null;
+        // ── CROSSFADE SLIDESHOW ──────────────────────────────────────
+        // Automatické striedanie vrstiev pozadia s plynulým fade efektom
+        ;(function() {
+            const layers  = document.querySelectorAll('.bg-layer');
+            let current   = 0;
+            const INTERVAL = 7000; // 7 sekúnd na každý obrázok
 
-        // --- INICIALIZÁCIA ---
+            function nextSlide() {
+                layers[current].classList.remove('active');
+                current = (current + 1) % layers.length;
+                layers[current].classList.add('active');
+            }
+
+            setInterval(nextSlide, INTERVAL);
+        })();
+
+        // ── KONFIGURÁCIA API ─────────────────────────────────────────
+        const API_URL = 'http://127.0.0.1:8000/api/dashboard';
+        let globalData    = null;
+        let chartInstance = null;
+
+        // ── INICIALIZÁCIA PO NAČÍTANÍ DOM ────────────────────────────
         document.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             setupThemeToggle();
             setupSearch();
             fetchDashboardData();
-            
+
             // Auto-refresh dát každých 30 sekúnd
             setInterval(fetchDashboardData, 30000);
-            
-            // Auto-refresh kamier každých 5 sekúnd proti cache
+
+            // Auto-refresh kamier každých 5 sekúnd (cache-bust)
             setInterval(() => {
-                const timestamp = new Date().getTime();
-                document.getElementById('cam0').src = `https://projekttb.sksnr.sk/data/camera.php?cam=0&t=${timestamp}`;
-                document.getElementById('cam1').src = `https://projekttb.sksnr.sk/data/camera.php?cam=1&t=${timestamp}`;
+                const t = Date.now();
+                document.getElementById('cam0').src =
+                    `https://projekttb.sksnr.sk/data/camera.php?cam=0&t=${t}`;
+                document.getElementById('cam1').src =
+                    `https://projekttb.sksnr.sk/data/camera.php?cam=1&t=${t}`;
             }, 5000);
+
+            // Zatvoriť modál klávesou Escape
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') closeModal();
+            });
         });
 
-        // --- FETCH DÁT ---
+        // ── FETCH DÁT ZO SENZOROVÉHO API ─────────────────────────────
         async function fetchDashboardData() {
             const statusEl = document.getElementById('api-status');
             try {
                 const response = await fetch(API_URL);
                 if (!response.ok) throw new Error('Chyba servera');
                 const data = await response.json();
-                
+
                 globalData = data;
-                
-                statusEl.innerHTML = `<span class="text-emerald-500">●</span> Živé dáta`;
+                statusEl.innerHTML = `<span class="status-live">●</span> Živé dáta`;
                 renderAllSensors(data);
-                
+
             } catch (error) {
-                console.error("Chyba:", error);
-                statusEl.innerHTML = `<span class="text-rose-500">●</span> Režim zálohy / Offline`;
+                console.error('Chyba:', error);
+                statusEl.innerHTML = `<span class="status-error">●</span> Režim zálohy / Offline`;
             }
         }
 
-        // --- RENDER KARIET ---
+        // ── VYKRESLENIE VŠETKÝCH KARIET SENZOROV ─────────────────────
         function renderAllSensors(data) {
-            const meteoGrid = document.getElementById('grid-meteo');
+            const meteoGrid  = document.getElementById('grid-meteo');
             const triedaGrid = document.getElementById('grid-trieda');
-            const dvereGrid = document.getElementById('grid-dvere');
-            
-            meteoGrid.innerHTML = ''; triedaGrid.innerHTML = ''; dvereGrid.innerHTML = '';
+            const dvereGrid  = document.getElementById('grid-dvere');
+
+            meteoGrid.innerHTML  = '';
+            triedaGrid.innerHTML = '';
+            dvereGrid.innerHTML  = '';
 
             Object.keys(data).forEach(key => {
                 const item = data[key];
-                if(typeof item !== 'object' || !item.group) return;
+                if (typeof item !== 'object' || !item.group) return;
 
-                // Určenie dizajnu podľa dôležitosti
-                const isMain = item.importance === 'main';
-                const colSpanClass = isMain ? 'col-span-2' : 'col-span-1';
-                const valueSizeClass = isMain ? 'text-4xl md:text-5xl' : 'text-2xl';
-                const paddingClass = isMain ? 'p-6' : 'p-4';
+                // Hlavné veličiny zaberajú 2 stĺpce
+                const isMain     = item.importance === 'main';
+                const mainClass  = isMain ? 'main' : '';
 
-                // Špeciálne formátovanie pre Dvere
-                let displayValue = item.value;
-                let valueColorClass = 'text-white dark:text-white light:text-slate-900';
-                
+                // Špeciálne formátovanie stavu dverí
+                let displayValue   = item.value;
+                let valueExtraClass = '';
+
                 if (item.group === 'dvere') {
-                    displayValue = item.value == 1 ? 'Otvorené' : (item.value == 0 ? 'Zatvorené' : '--');
-                    valueColorClass = item.value == 1 ? 'text-rose-500' : 'text-emerald-500';
+                    if      (item.value == 1) { displayValue = 'Otvorené';  valueExtraClass = 'val-open';   }
+                    else if (item.value == 0) { displayValue = 'Zatvorené'; valueExtraClass = 'val-closed'; }
+                    else                      { displayValue = '--'; }
                 }
 
+                // HTML karty senzoru
                 const cardHTML = `
-                    <div class="glass-card rounded-2xl ${paddingClass} ${colSpanClass} cursor-pointer flex flex-col justify-between" 
-                         onclick="openModal('${key}', '${item.title}', '${item.group}', '${item.unit}')" data-title="${item.title.toLowerCase()}">
-                        <div class="flex justify-between items-start mb-4">
-                            <span class="text-xs font-semibold text-slate-400 light:text-slate-500 uppercase tracking-wider">${item.title}</span>
-                            <div class="p-2 bg-brand-accent/10 rounded-lg text-brand-accent">
-                                <i data-lucide="${item.icon || 'activity'}" class="w-5 h-5"></i>
+                    <div class="glass-card sensor-card ${mainClass}"
+                         onclick="openModal('${key}', '${item.title}', '${item.group}', '${item.unit}')"
+                         data-title="${item.title.toLowerCase()}"
+                         title="Kliknite pre zobrazenie histórie">
+                        <div class="card-top">
+                            <span class="card-label">${item.title}</span>
+                            <div class="card-icon-wrap">
+                                <i data-lucide="${item.icon || 'activity'}"></i>
                             </div>
                         </div>
-                        <div class="flex items-baseline gap-1">
-                            <span class="font-bold tracking-tight ${valueSizeClass} ${valueColorClass}">${displayValue}</span>
-                            <span class="text-sm font-medium text-slate-500">${item.unit}</span>
+                        <div class="card-value-row">
+                            <span class="card-value ${valueExtraClass}">${displayValue}</span>
+                            <span class="card-unit">${item.unit}</span>
                         </div>
                     </div>
                 `;
 
-                if (item.group === 'meteo') meteoGrid.innerHTML += cardHTML;
+                if      (item.group === 'meteo')  meteoGrid.innerHTML  += cardHTML;
                 else if (item.group === 'trieda') triedaGrid.innerHTML += cardHTML;
-                else if (item.group === 'dvere') dvereGrid.innerHTML += cardHTML;
+                else if (item.group === 'dvere')  dvereGrid.innerHTML  += cardHTML;
             });
 
+            // Znovu inicializovať Lucide ikony po vložení HTML
             lucide.createIcons();
-            
-            // Re-aplikuj filter ak je niečo napísané
+
+            // Re-aplikovať aktuálny filter vyhľadávania
             document.getElementById('searchInput').dispatchEvent(new Event('input'));
         }
 
-        // --- VYHĽADÁVANIE / FILTER ---
+        // ── VYHĽADÁVANIE / FILTER KARIET ─────────────────────────────
         function setupSearch() {
-            document.getElementById('searchInput').addEventListener('input', (e) => {
+            document.getElementById('searchInput').addEventListener('input', e => {
                 const term = e.target.value.toLowerCase();
-                document.querySelectorAll('.glass-card[data-title]').forEach(card => {
-                    if (card.dataset.title.includes(term)) {
-                        card.style.display = 'flex';
-                    } else {
-                        card.style.display = 'none';
-                    }
+                document.querySelectorAll('.sensor-card[data-title]').forEach(card => {
+                    card.style.display = card.dataset.title.includes(term) ? 'flex' : 'none';
                 });
             });
         }
 
-        // --- GRAFY A MODÁLNE OKNO ---
+        // ── OTVORENIE MODÁLNEHO OKNA S GRAFOM ────────────────────────
         async function openModal(key, title, group, unit) {
-            const modal = document.getElementById('chart-modal');
-            const content = document.getElementById('chart-modal-content');
-            
-            document.getElementById('modal-title').textContent = title;
-            document.getElementById('chart-container').classList.add('hidden');
-            document.getElementById('chart-loader').classList.remove('hidden');
-            
-            // Animácia otvorenia
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            content.classList.remove('scale-95');
-            content.classList.add('scale-100');
+            const modal   = document.getElementById('chart-modal');
+            const loader  = document.getElementById('chart-loader');
+            const container = document.getElementById('chart-container');
 
-            // Namapovanie group na Source ID pre API
-            const sourceMap = { 'meteo': 0, 'trieda': 1, 'dvere': 8 };
-            const sourceId = sourceMap[group] !== undefined ? sourceMap[group] : 0;
+            // Nastaviť nadpis a zobraziť loader
+            document.getElementById('modal-title').textContent = title;
+            container.classList.add('hidden');
+            loader.classList.remove('hidden');
+            loader.innerHTML = '<i data-lucide="loader-2"></i>';
+            lucide.createIcons();
+
+            // Animácia otvorenia
+            modal.classList.add('open');
+
+            // Mapovanie skupiny na ID zdroja pre API
+            const sourceMap = { meteo: 0, trieda: 1, dvere: 8 };
+            const sourceId  = sourceMap[group] !== undefined ? sourceMap[group] : 0;
 
             try {
-                // Fetch histórie (LIMIT 500)
-                const res = await fetch(`https://projekttb.sksnr.sk/data/api.php?source=${sourceId}&sort=timestamp&dir=desc&limit=500`, {
-                    headers: { 'Authorization': 'Basic ' + btoa('sks:kolbe') }
-                });
-                
-                const data = await res.json();
-                const rows = data.rows || [];
-                
-                // Reverz poľa pre graf
-                rows.reverse();
+                // Načítanie histórie (posledných 500 záznamov)
+                const res = await fetch(
+                    `https://projekttb.sksnr.sk/data/api.php?source=${sourceId}&sort=timestamp&dir=desc&limit=500`,
+                    { headers: { 'Authorization': 'Basic ' + btoa('sks:kolbe') } }
+                );
 
+                const data = await res.json();
+                const rows = (data.rows || []).reverse(); // Chronologicky vzostupne
+
+                // Labely časovej osi (HH:MM)
                 const labels = rows.map(r => {
                     const d = new Date(r.timestamp);
-                    return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+                    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
                 });
-                
-                let apiKey = key;
-                if(key === 'door_state') apiKey = 'state';
 
+                // Mapovanie kľúča (door_state → state)
+                const apiKey  = key === 'door_state' ? 'state' : key;
                 const dataset = rows.map(r => r[apiKey] !== undefined ? r[apiKey] : null);
 
                 drawChart(labels, dataset, title, unit);
 
-            } catch(e) {
-                console.error("Chyba načítania histórie:", e);
-                document.getElementById('chart-loader').innerHTML = '<span class="text-rose-500">Historické dáta nie sú dostupné.</span>';
+            } catch (e) {
+                console.error('Chyba načítania histórie:', e);
+                loader.innerHTML = '<span style="color:#F87171;">Historické dáta nie sú dostupné.</span>';
             }
         }
 
+        // ── ZATVORENIE MODÁLNEHO OKNA ─────────────────────────────────
         function closeModal() {
             const modal = document.getElementById('chart-modal');
-            const content = document.getElementById('chart-modal-content');
-            
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            content.classList.remove('scale-100');
-            content.classList.add('scale-95');
-            
-            if(chartInstance) chartInstance.destroy();
+            modal.classList.remove('open');
+            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
         }
 
+        // ── VYKRESLENIE GRAFU ─────────────────────────────────────────
         function drawChart(labels, data, labelName, unit) {
             document.getElementById('chart-loader').classList.add('hidden');
-            document.getElementById('chart-container').classList.remove('hidden');
+            const container = document.getElementById('chart-container');
+            container.classList.remove('hidden');
 
-            const ctx = document.getElementById('historyChart').getContext('2d');
-            const isDark = document.body.classList.contains('dark');
-            const gridColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
-            const textColor = isDark ? '#94a3b8' : '#475569';
+            const ctx     = document.getElementById('historyChart').getContext('2d');
+            const isDark  = !document.body.classList.contains('light');
+            const grid    = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.09)';
+            const tick    = isDark ? '#94A3B8' : '#3A5068';
 
-            if(chartInstance) chartInstance.destroy();
+            if (chartInstance) chartInstance.destroy();
 
-            const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
-            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+            // Gradientová výplň pod čiarou
+            const grad = ctx.createLinearGradient(0, 0, 0, 300);
+            grad.addColorStop(0, 'rgba(96,165,250,0.45)');
+            grad.addColorStop(1, 'rgba(96,165,250,0.00)');
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels,
                     datasets: [{
                         label: `${labelName} (${unit})`,
-                        data: data,
-                        borderColor: '#3B82F6',
-                        backgroundColor: gradient,
+                        data,
+                        borderColor: '#60A5FA',
+                        backgroundColor: grad,
                         borderWidth: 2,
                         pointRadius: 0,
-                        pointHoverRadius: 4,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: '#60A5FA',
                         fill: true,
                         tension: 0.4
                     }]
@@ -373,48 +1077,55 @@
                         tooltip: {
                             mode: 'index',
                             intersect: false,
-                            backgroundColor: isDark ? 'rgba(15, 23, 42, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-                            titleColor: isDark ? '#fff' : '#000',
-                            bodyColor: isDark ? '#fff' : '#000',
-                            borderColor: 'rgba(59, 130, 246, 0.5)',
-                            borderWidth: 1
+                            backgroundColor: isDark ? 'rgba(8,15,30,0.92)' : 'rgba(240,248,255,0.95)',
+                            titleColor:  isDark ? '#F0F4FF' : '#0D1B2A',
+                            bodyColor:   isDark ? '#94A3B8' : '#3A5068',
+                            borderColor: 'rgba(96,165,250,0.4)',
+                            borderWidth: 1,
+                            padding: 10,
+                            cornerRadius: 10
                         }
                     },
                     scales: {
-                        x: { 
-                            grid: { display: false }, 
-                            ticks: { maxTicksLimit: 10, color: textColor } 
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxTicksLimit: 10, color: tick, font: { family: "'DM Sans', sans-serif", size: 11 } }
                         },
-                        y: { 
-                            grid: { color: gridColor, borderDash: [5, 5] }, 
-                            ticks: { color: textColor } 
+                        y: {
+                            grid: { color: grid, borderDash: [5, 5] },
+                            ticks: { color: tick, font: { family: "'DM Sans', sans-serif", size: 11 } }
                         }
                     }
                 }
             });
         }
 
-        // --- TÉMY (LIGHT / DARK) ---
+        // ── PREPÍNANIE SVETLÉHO / TMAVÉHO REŽIMU ──────────────────────
         function setupThemeToggle() {
-            const btn = document.getElementById('theme-toggle');
+            const btn  = document.getElementById('theme-toggle');
             const body = document.getElementById('body-layout');
-            
+
             btn.addEventListener('click', () => {
-                if (body.classList.contains('dark')) {
-                    body.classList.remove('dark', 'bg-brand-darkBg');
-                    body.classList.add('light', 'bg-brand-lightBg');
-                    btn.innerHTML = `<i data-lucide="moon" class="w-4 h-4 text-brand-accent"></i> <span>Temný režim</span>`;
+                const goLight = body.classList.contains('dark');
+
+                if (goLight) {
+                    body.classList.replace('dark', 'light');
+                    btn.innerHTML = `<i data-lucide="moon" style="color:var(--accent);"></i> <span>Temný režim</span>`;
                 } else {
-                    body.classList.remove('light', 'bg-brand-lightBg');
-                    body.classList.add('dark', 'bg-brand-darkBg');
-                    btn.innerHTML = `<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i> <span>Svetlý režim</span>`;
+                    body.classList.replace('light', 'dark');
+                    btn.innerHTML = `<i data-lucide="sun" style="color:#FBBF24;"></i> <span>Svetlý režim</span>`;
                 }
+
                 lucide.createIcons();
-                if(chartInstance) {
-                    const isDark = body.classList.contains('dark');
-                    chartInstance.options.scales.x.ticks.color = isDark ? '#94a3b8' : '#475569';
-                    chartInstance.options.scales.y.ticks.color = isDark ? '#94a3b8' : '#475569';
-                    chartInstance.options.scales.y.grid.color = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
+                // Ak je graf otvorený, aktualizovať farby mriežky
+                if (chartInstance) {
+                    const dark = body.classList.contains('dark');
+                    const g    = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.09)';
+                    const t    = dark ? '#94A3B8' : '#3A5068';
+                    chartInstance.options.scales.x.ticks.color = t;
+                    chartInstance.options.scales.y.ticks.color = t;
+                    chartInstance.options.scales.y.grid.color  = g;
                     chartInstance.update();
                 }
             });
