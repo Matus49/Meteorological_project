@@ -54,7 +54,7 @@
             border-color: rgba(59, 130, 246, 0.5); /* Modrý accent na hover */
         }
 
-        /* Dynamické pozadia počasia (Logika na prepínanie) */
+        /* Dynamické pozadia počasia */
         .weather-rain { background: linear-gradient(to bottom, #1e293b, #0f172a); position: relative; }
         .weather-rain::after { content: ''; position: absolute; top:0; left:0; right:0; bottom:0; background: url('data:image/svg+xml;utf8,<svg ... raindrops ...></svg>'); opacity: 0.2; pointer-events: none; }
         .weather-storm { background: linear-gradient(to bottom, #334155, #0f172a); }
@@ -166,9 +166,9 @@
 
     <script>
         // URL TVOJHO BACKENDU (Uprav ak beží na inej adrese)
- const API_URL = 'http://127.0.0.1:8000/api/dashboard'
-        let globalData = null
-let chartInstance = null;
+        const API_URL = 'http://127.0.0.1:8000/api/dashboard';
+        let globalData = null;
+        let chartInstance = null;
 
         // --- INICIALIZÁCIA ---
         document.addEventListener('DOMContentLoaded', () => {
@@ -322,10 +322,6 @@ let chartInstance = null;
                 document.getElementById('chart-loader').innerHTML = '<span class="text-rose-500">Historické dáta nie sú dostupné.</span>';
             }
         }
-
-        document.getElementsById = function(id) {
-            return document.getElementById(id);
-        };
 
         function closeModal() {
             const modal = document.getElementById('chart-modal');
