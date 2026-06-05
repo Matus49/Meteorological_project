@@ -34,24 +34,32 @@ def row(data: dict) -> dict:
     rows = data.get("rows", []) if isinstance(data, dict) else []
     return rows[0] if rows else {}
 
+def g(d, *keys):
+    """Skus viacero nazvov klucov, vrat prvy najdeny."""
+    for k in keys:
+        v = d.get(k)
+        if v is not None:
+            return v
+    return "--"
+
 @app.get("/api/uvod")
 async def get_uvod():
     async with httpx.AsyncClient() as client:
         data = await fetch(client, source=0, limit=1)
     c = row(data)
     return {
-        "temperature":    {"title": "Teplota",           "value": c.get("temperature", "--"),    "unit": "C",   "icon": "thermometer"},
-        "feels_like":     {"title": "Pocitova teplota",  "value": c.get("feels_like", "--"),     "unit": "C",   "icon": "cloud-sun"},
-        "humidity":       {"title": "Vlhkost",           "value": c.get("humidity", "--"),       "unit": "%",    "icon": "droplet"},
-        "pressure":       {"title": "Tlak",              "value": c.get("pressure", "--"),       "unit": "hPa",  "icon": "gauge"},
-        "wind_speed":     {"title": "Rychlost vetra",    "value": c.get("wind_speed", "--"),     "unit": "m/s",  "icon": "wind"},
-        "wind_direction": {"title": "Smer vetra",        "value": c.get("wind_direction", "--"), "unit": "deg",  "icon": "compass"},
-        "cloudiness":     {"title": "Oblacnost",         "value": c.get("cloudiness", "--"),     "unit": "%",    "icon": "cloud"},
-        "rain_1h":        {"title": "Zrazky (1h)",       "value": c.get("rain_1h", "--"),        "unit": "mm",   "icon": "cloud-rain"},
-        "snow_1h":        {"title": "Snezenie (1h)",     "value": c.get("snow_1h", "--"),        "unit": "mm",   "icon": "cloud-snow"},
-        "ghi":            {"title": "Ziarenie GHI",      "value": c.get("ghi", "--"),            "unit": "W/m2", "icon": "sun"},
-        "clear_sky_ghi":  {"title": "Jasna obloha GHI",  "value": c.get("clear_sky_ghi", "--"), "unit": "W/m2", "icon": "sun-dim"},
-        "timestamp":      c.get("timestamp", "--"),
+        "temperature":    {"title": "Teplota",          "value": g(c, "temperature"),    "unit": "°C",   "icon": "thermometer"},
+        "feels_like":     {"title": "Pocitova teplota", "value": g(c, "feels_like"),     "unit": "°C",   "icon": "cloud-sun"},
+        "humidity":       {"title": "Vlhkost",          "value": g(c, "humidity"),       "unit": "%",    "icon": "droplet"},
+        "pressure":       {"title": "Tlak",             "value": g(c, "pressure"),       "unit": "hPa",  "icon": "gauge"},
+        "wind_speed":     {"title": "Rychlost vetra",   "value": g(c, "wind_speed"),     "unit": "m/s",  "icon": "wind"},
+        "wind_direction": {"title": "Smer vetra",       "value": g(c, "wind_direction"), "unit": "°",    "icon": "compass"},
+        "cloudiness":     {"title": "Oblacnost",        "value": g(c, "cloudiness"),     "unit": "%",    "icon": "cloud"},
+        "rain_1h":        {"title": "Zrazky (1h)",      "value": g(c, "rain_1h"),        "unit": "mm",   "icon": "cloud-rain"},
+        "snow_1h":        {"title": "Snezenie (1h)",    "value": g(c, "snow_1h"),        "unit": "mm",   "icon": "cloud-snow"},
+        "ghi":            {"title": "Ziarenie GHI",     "value": g(c, "ghi"),            "unit": "W/m2", "icon": "sun"},
+        "clear_sky_ghi":  {"title": "Jasna obloha GHI", "value": g(c, "clear_sky_ghi"), "unit": "W/m2", "icon": "sun-dim"},
+        "timestamp": c.get("timestamp", "--"),
     }
 
 @app.get("/api/skola")
@@ -60,14 +68,15 @@ async def get_skola():
     async with httpx.AsyncClient() as client:
         tasks = [fetch(client, s, limit=1) for s in sources]
         results = await asyncio.gather(*tasks)
+
     sensors = []
     temps = []
     for i, data in enumerate(results):
         c = row(data)
-        temp = c.get("TEMPC_SHT", c.get("tempc_sht", None))
-        hum  = c.get("HUM_SHT",   c.get("hum_sht",   None))
-        batv = c.get("BATV",      c.get("batv",       None))
-        if temp is not None:
+        temp = g(c, "TempC_SHT", "TEMPC_SHT", "tempc_sht")
+        hum  = g(c, "Hum_SHT",   "HUM_SHT",   "hum_sht")
+        batv = g(c, "BatV",      "BATV",       "batv")
+        if temp != "--":
             try:
                 temps.append(float(temp))
             except (ValueError, TypeError):
@@ -76,11 +85,12 @@ async def get_skola():
             "id":        i + 1,
             "source":    sources[i],
             "label":     f"TH sensor {i + 1:02d}",
-            "temp":      temp if temp is not None else "--",
-            "hum":       hum  if hum  is not None else "--",
-            "batv":      batv if batv is not None else "--",
+            "temp":      temp,
+            "hum":       hum,
+            "batv":      batv,
             "timestamp": c.get("timestamp", "--"),
         })
+
     avg_temp = round(sum(temps) / len(temps), 2) if temps else "--"
     return {"sensors": sensors, "avg_temp": avg_temp}
 
@@ -98,7 +108,7 @@ async def get_trieda():
     lux  = row(lux_d)
     door = row(door_d)
 
-    door_raw = door.get("Exti_status", "--")
+    door_raw = g(door, "Exti_status", "exti_status")
     if door_raw == "True":
         door_val = "Otvorene"
     elif door_raw == "False":
@@ -108,23 +118,23 @@ async def get_trieda():
 
     return {
         "ambient": {
-            "temperature": {"title": "Teplota (vnutri)",  "value": amb.get("temperature", amb.get("temp", "--")), "unit": "C",   "icon": "thermometer", "source": 1, "key": "temperature"},
-            "humidity":    {"title": "Vlhkost (vnutri)",  "value": amb.get("humidity",    amb.get("hum", "--")),  "unit": "%",   "icon": "droplet",     "source": 1, "key": "humidity"},
-            "co2":         {"title": "CO2",               "value": amb.get("co2",         amb.get("CO2", "--")),  "unit": "ppm", "icon": "wind",        "source": 1, "key": "co2"},
-            "pressure":    {"title": "Tlak (vnutri)",     "value": amb.get("pressure",    "--"),                  "unit": "hPa", "icon": "gauge",       "source": 1, "key": "pressure"},
+            "temperature": {"title": "Teplota (vnutri)", "value": g(amb, "temperature", "temp"), "unit": "°C",  "icon": "thermometer", "source": 1, "key": "temperature"},
+            "humidity":    {"title": "Vlhkost (vnutri)", "value": g(amb, "humidity", "hum"),     "unit": "%",   "icon": "droplet",     "source": 1, "key": "humidity"},
+            "co2":         {"title": "CO2",              "value": g(amb, "co2", "CO2"),          "unit": "ppm", "icon": "wind",        "source": 1, "key": "co2"},
+            "pressure":    {"title": "Tlak (vnutri)",    "value": g(amb, "pressure"),            "unit": "hPa", "icon": "gauge",       "source": 1, "key": "pressure"},
         },
         "power": {
-            "active_power":      {"title": "Aktivny vykon",   "value": pwr.get("active_power", "--"),      "unit": "W",  "icon": "zap",         "source": 2, "key": "active_power"},
-            "voltage":           {"title": "Napatie",         "value": pwr.get("voltage", "--"),           "unit": "V",  "icon": "activity",    "source": 2, "key": "voltage"},
-            "current":           {"title": "Prud",            "value": pwr.get("current", "--"),           "unit": "mA", "icon": "waves",       "source": 2, "key": "current"},
-            "power_consumption": {"title": "Spotreba",        "value": pwr.get("power_consumption", "--"), "unit": "Wh", "icon": "battery",     "source": 2, "key": "power_consumption"},
-            "power_factor":      {"title": "Ucinnik",         "value": pwr.get("power_factor", "--"),      "unit": "%",  "icon": "percent",     "source": 2, "key": "power_factor"},
-            "socket_status":     {"title": "Stav zasuvky",    "value": pwr.get("socket_status", "--"),     "unit": "",   "icon": "plug",        "source": 2, "key": "socket_status"},
+            "active_power":      {"title": "Aktivny vykon", "value": g(pwr, "active_power"),      "unit": "W",  "icon": "zap",      "source": 2, "key": "active_power"},
+            "voltage":           {"title": "Napatie",       "value": g(pwr, "voltage"),           "unit": "V",  "icon": "activity", "source": 2, "key": "voltage"},
+            "current":           {"title": "Prud",          "value": g(pwr, "current"),           "unit": "mA", "icon": "waves",    "source": 2, "key": "current"},
+            "power_consumption": {"title": "Spotreba",      "value": g(pwr, "power_consumption"), "unit": "Wh", "icon": "battery",  "source": 2, "key": "power_consumption"},
+            "power_factor":      {"title": "Ucinnik",       "value": g(pwr, "power_factor"),      "unit": "%",  "icon": "percent",  "source": 2, "key": "power_factor"},
+            "socket_status":     {"title": "Stav zasuvky",  "value": g(pwr, "socket_status"),     "unit": "",   "icon": "plug",     "source": 2, "key": "socket_status"},
         },
         "lux": {
-            "ILL_lux":   {"title": "Intenzita svetla", "value": lux.get("ILL_lux", "--"),   "unit": "lx", "icon": "sun",         "source": 3, "key": "ILL_lux"},
-            "TempC_SHT": {"title": "Teplota (lux)",    "value": lux.get("TempC_SHT", "--"), "unit": "C",  "icon": "thermometer", "source": 3, "key": "TempC_SHT"},
-            "Hum_SHT":   {"title": "Vlhkost (lux)",    "value": lux.get("Hum_SHT", "--"),   "unit": "%",  "icon": "droplet",     "source": 3, "key": "Hum_SHT"},
+            "ILL_lux":   {"title": "Intenzita svetla", "value": g(lux, "ILL_lux", "ill_lux"), "unit": "lx", "icon": "sun",         "source": 3, "key": "ILL_lux"},
+            "TempC_SHT": {"title": "Teplota (lux)",   "value": g(lux, "TempC_SHT"),          "unit": "°C", "icon": "thermometer", "source": 3, "key": "TempC_SHT"},
+            "Hum_SHT":   {"title": "Vlhkost (lux)",   "value": g(lux, "Hum_SHT"),            "unit": "%",  "icon": "droplet",     "source": 3, "key": "Hum_SHT"},
         },
         "door": {
             "state":     {"title": "Dvere (IT ucebna)", "value": door_val, "unit": "", "icon": "door-closed", "source": 8, "key": "Exti_status"},
