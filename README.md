@@ -51,3 +51,8 @@ graph TD
     E -.-> B
     F -.-> C
     G -.-> C
+
+
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/7beba836-ac3f-4797-bb72-e4e2d872b647" />
+
