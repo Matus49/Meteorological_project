@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="sk">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GaiaSenzor Core | Premium Dashboard</title>
@@ -12,855 +12,690 @@
     <!-- Prémiové fonty -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Playfair+Display:wght@400;600&display=swap"
-      rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-    /* ============================================================
+        /* ============================================================
            CSS PREMENNÉ & RESET
         ============================================================ */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    :root {
-      --accent: #60a5fa;
-      --accent-dim: rgba(96, 165, 250, 0.18);
-      --accent-glow: rgba(96, 165, 250, 0.35);
+        :root {
+            --accent:       #60A5FA;
+            --accent-dim:   rgba(96, 165, 250, 0.18);
+            --accent-glow:  rgba(96, 165, 250, 0.35);
 
-      /* Glass – tmavý režim (predvolený) */
-      --glass-bg: rgba(8, 15, 30, 0.52);
-      --glass-border: rgba(255, 255, 255, 0.1);
-      --glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
-      --glass-blur: 16px;
+            /* Glass – tmavý režim (predvolený) */
+            --glass-bg:     rgba(8, 15, 30, 0.52);
+            --glass-border: rgba(255, 255, 255, 0.10);
+            --glass-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
+            --glass-blur:   16px;
 
-      --text-primary: #f0f4ff;
-      --text-secondary: #94a3b8;
-      --text-muted: #5a6a80;
+            --text-primary:   #F0F4FF;
+            --text-secondary: #94A3B8;
+            --text-muted:     #5A6A80;
 
-      --header-bg: rgba(5, 10, 22, 0.7);
-      --overlay-bg: rgba(0, 0, 0, 0.38);
+            --header-bg:    rgba(5, 10, 22, 0.70);
+            --overlay-bg:   rgba(0, 0, 0, 0.38);
 
-      --radius-card: 20px;
-      --radius-pill: 999px;
+            --radius-card:  20px;
+            --radius-pill:  999px;
 
-      --font-body: "DM Sans", sans-serif;
-      --font-display: "Playfair Display", serif;
+            --font-body:    'DM Sans', sans-serif;
+            --font-display: 'Playfair Display', serif;
 
-      --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      --transition-mid: 0.3s ease;
-      --transition-fast: 0.15s ease;
-    }
+            --transition-slow: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-mid:  0.3s ease;
+            --transition-fast: 0.15s ease;
+        }
 
-    /* ── Svetlý režim ── */
-    body.light {
-      --glass-bg: rgba(240, 248, 255, 0.55);
-      --glass-border: rgba(255, 255, 255, 0.55);
-      --glass-shadow: 0 8px 40px rgba(30, 60, 120, 0.12);
+        /* ── Svetlý režim ── */
+        body.light {
+            --glass-bg:     rgba(240, 248, 255, 0.55);
+            --glass-border: rgba(255, 255, 255, 0.55);
+            --glass-shadow: 0 8px 40px rgba(30, 60, 120, 0.12);
 
-      --text-primary: #0d1b2a;
-      --text-secondary: #3a5068;
-      --text-muted: #7a92aa;
+            --text-primary:   #0D1B2A;
+            --text-secondary: #3A5068;
+            --text-muted:     #7A92AA;
 
-      --header-bg: rgba(240, 248, 255, 0.72);
-      --overlay-bg: rgba(10, 20, 40, 0.22);
-    }
+            --header-bg:    rgba(240, 248, 255, 0.72);
+            --overlay-bg:   rgba(10, 20, 40, 0.22);
+        }
 
-    /* ============================================================
+        /* ============================================================
            POZADIE – CROSSFADE SLIDESHOW
         ============================================================ */
 
-    /* Kontajner vrstiev pozadí */
-    #bg-slideshow {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      overflow: hidden;
-    }
+        /* Kontajner vrstiev pozadí */
+        #bg-slideshow {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            overflow: hidden;
+        }
 
-    /* Každá vrstva = jeden obrázok z Unsplash */
-    .bg-layer {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      opacity: 0;
-      transition: opacity 2s ease-in-out;
-      transform: scale(1.04); /* Jemný Ken-Burns efekt */
-      animation: subtle-zoom 18s ease-in-out infinite alternate;
-    }
+        /* Každá vrstva = jeden obrázok z Unsplash */
+        .bg-layer {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            transform: scale(1.04); /* Jemný Ken-Burns efekt */
+            animation: subtle-zoom 18s ease-in-out infinite alternate;
+        }
 
-    /* Aktívna vrstva je viditeľná */
-    .bg-layer.active {
-      opacity: 1;
-    }
+        /* Aktívna vrstva je viditeľná */
+        .bg-layer.active {
+            opacity: 1;
+        }
 
-    /* Jemný Ken Burns pohyb */
-    @keyframes subtle-zoom {
-      from {
-        transform: scale(1.04) translate(0%, 0%);
-      }
-      to {
-        transform: scale(1) translate(-0.8%, -0.3%);
-      }
-    }
+        /* Jemný Ken Burns pohyb */
+        @keyframes subtle-zoom {
+            from { transform: scale(1.04) translate(0%, 0%); }
+            to   { transform: scale(1.00) translate(-0.8%, -0.3%); }
+        }
 
-    /* Sada prírodných fotografií s rôznymi poveternostnými podmienkami */
-    .bg-layer:nth-child(1) {
-      background-image: url("https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=85");
-    } /* les po daždi */
-    .bg-layer:nth-child(2) {
-      background-image: url("https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
-    } /* hmlistý les */
-    .bg-layer:nth-child(3) {
-      background-image: url("https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1920&q=85");
-    } /* pohľad z hory */
-    .bg-layer:nth-child(4) {
-      background-image: url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=85");
-    } /* horské štíty */
-    .bg-layer:nth-child(5) {
-      background-image: url("https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=1920&q=85");
-    } /* oblaky nad krajinou */
-    .bg-layer:nth-child(6) {
-      background-image: url("https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=1920&q=85");
-    } /* dramatická obloha */
-    .bg-layer:nth-child(7) {
-      background-image: url("https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=1920&q=85");
-    } /* ranná hmla v údolí */
-    .bg-layer:nth-child(8) {
-      background-image: url("https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=1920&q=85");
-    } /* západ slnka v horách */
-    .bg-layer:nth-child(9) {
-      background-image: url("https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=1920&q=85");
-    } /* les po búrke */
-    .bg-layer:nth-child(10) {
-      background-image: url("https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1920&q=85");
-    } /* horské údolie */
-    .bg-layer:nth-child(11) {
-      background-image: url("https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=1920&q=85");
-    } /* krajina s búrkovými mrakmi */
-    .bg-layer:nth-child(12) {
-      background-image: url("https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1920&q=85");
-    } /* mlha nad lúkami */
+        /* Sada prírodných fotografií s rôznymi poveternostnými podmienkami */
+        .bg-layer:nth-child(1)  { background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?w=1920&q=85'); } /* les po daždi */
+        .bg-layer:nth-child(2)  { background-image: url('https://images.unsplash.com/photo-1467810563316-b5476525c0f9?w=1920&q=85'); } /* hmlistý les */
+        .bg-layer:nth-child(3)  { background-image: url('https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=1920&q=85'); } /* pohľad z hory */
+        .bg-layer:nth-child(4)  { background-image: url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1920&q=85'); } /* horské štíty */
+        .bg-layer:nth-child(5)  { background-image: url('https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=1920&q=85'); } /* oblaky nad krajinou */
+        .bg-layer:nth-child(6)  { background-image: url('https://images.unsplash.com/photo-1516912481808-3406841bd33c?w=1920&q=85'); } /* dramatická obloha */
+        .bg-layer:nth-child(7)  { background-image: url('https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=1920&q=85'); } /* ranná hmla v údolí */
+        .bg-layer:nth-child(8)  { background-image: url('https://images.unsplash.com/photo-1508739773434-c26b3d09e071?w=1920&q=85'); } /* západ slnka v horách */
+        .bg-layer:nth-child(9)  { background-image: url('https://images.unsplash.com/photo-1534088568595-a066f410bcda?w=1920&q=85'); } /* les po búrke */
+        .bg-layer:nth-child(10) { background-image: url('https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1920&q=85'); } /* horské údolie */
+        .bg-layer:nth-child(11) { background-image: url('https://images.unsplash.com/photo-1505765050516-f72dcac9c60e?w=1920&q=85'); } /* krajina s búrkovými mrakmi */
+        .bg-layer:nth-child(12) { background-image: url('https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1920&q=85'); } /* mlha nad lúkami */
 
-    /* Tmavý polopriehľadný overlay pre čitateľnosť */
-    #bg-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      background: var(--overlay-bg);
-      transition: background var(--transition-slow);
-      /* Jemný gradientový vinyting – okraje tmavšie */
-      background: radial-gradient(
-        ellipse at 50% 40%,
-        var(--overlay-bg) 0%,
-        rgba(0, 0, 0, 0.55) 100%
-      );
-    }
+        /* Tmavý polopriehľadný overlay pre čitateľnosť */
+        #bg-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            background: var(--overlay-bg);
+            transition: background var(--transition-slow);
+            /* Jemný gradientový vinyting – okraje tmavšie */
+            background: radial-gradient(
+                ellipse at 50% 40%,
+                var(--overlay-bg) 0%,
+                rgba(0, 0, 0, 0.55) 100%
+            );
+        }
 
-    body.light #bg-overlay {
-      background: radial-gradient(
-        ellipse at 50% 40%,
-        rgba(200, 220, 240, 0.3) 0%,
-        rgba(10, 30, 60, 0.38) 100%
-      );
-    }
+        body.light #bg-overlay {
+            background: radial-gradient(
+                ellipse at 50% 40%,
+                rgba(200, 220, 240, 0.30) 0%,
+                rgba(10, 30, 60, 0.38) 100%
+            );
+        }
 
-    /* ============================================================
+        /* ============================================================
            LAYOUT – HLAVNÉ VRSTVY
         ============================================================ */
 
-    body {
-      font-family: var(--font-body);
-      color: var(--text-primary);
-      min-height: 100vh;
-      position: relative;
-      overflow-x: hidden;
-      transition: color var(--transition-mid);
-    }
+        body {
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            transition: color var(--transition-mid);
+        }
 
-    /* Všetok obsah nad pozadím */
-    #app-shell {
-      position: relative;
-      z-index: 2;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+        /* Všetok obsah nad pozadím */
+        #app-shell {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
-    /* Vlastný scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: var(--accent);
-      border-radius: 10px;
-      opacity: 0.7;
-    }
+        /* Vlastný scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; opacity: 0.7; }
 
-    /* ============================================================
+        /* ============================================================
            SKLENENÝ EFEKT – GLASSMORPHISM POMOCNÁ TRIEDA
         ============================================================ */
 
-    .glass-card {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      backdrop-filter: blur(var(--glass-blur));
-      -webkit-backdrop-filter: blur(var(--glass-blur));
-      border-radius: var(--radius-card);
-      transition:
-        transform var(--transition-mid),
-        border-color var(--transition-mid),
-        box-shadow var(--transition-mid);
-    }
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(var(--glass-blur));
+            -webkit-backdrop-filter: blur(var(--glass-blur));
+            border-radius: var(--radius-card);
+            transition:
+                transform       var(--transition-mid),
+                border-color    var(--transition-mid),
+                box-shadow      var(--transition-mid);
+        }
 
-    .glass-card:hover {
-      transform: translateY(-3px);
-      border-color: var(--accent-glow);
-      box-shadow:
-        var(--glass-shadow),
-        0 0 0 1px var(--accent-glow);
-    }
+        .glass-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-glow);
+            box-shadow: var(--glass-shadow), 0 0 0 1px var(--accent-glow);
+        }
 
-    /* ============================================================
+        /* ============================================================
            HLAVIČKA (HEADER)
         ============================================================ */
 
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      background: var(--header-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--glass-border);
-      padding: 16px 28px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      transition: background var(--transition-slow);
-    }
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            padding: 16px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            transition: background var(--transition-slow);
+        }
 
-    /* Logo & Názov */
-    .header-brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-    }
+        /* Logo & Názov */
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
 
-    .brand-icon-wrap {
-      background: var(--accent-dim);
-      padding: 9px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid var(--glass-border);
-    }
+        .brand-icon-wrap {
+            background: var(--accent-dim);
+            padding: 9px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--glass-border);
+        }
 
-    .brand-icon-wrap svg {
-      color: var(--accent);
-      width: 22px;
-      height: 22px;
-    }
+        .brand-icon-wrap svg {
+            color: var(--accent);
+            width: 22px; height: 22px;
+        }
 
-    /* Pulzujúca animácia ikony aktivity */
-    @keyframes pulse-glow {
-      0%,
-      100% {
-        opacity: 1;
-        filter: drop-shadow(0 0 4px var(--accent));
-      }
-      50% {
-        opacity: 0.65;
-        filter: drop-shadow(0 0 10px var(--accent));
-      }
-    }
-    .brand-icon-wrap svg {
-      animation: pulse-glow 3s ease-in-out infinite;
-    }
+        /* Pulzujúca animácia ikony aktivity */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px var(--accent)); }
+            50%       { opacity: 0.65; filter: drop-shadow(0 0 10px var(--accent)); }
+        }
+        .brand-icon-wrap svg { animation: pulse-glow 3s ease-in-out infinite; }
 
-    .brand-title {
-      font-family: var(--font-display);
-      font-size: 1.25rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      color: var(--text-primary);
-      line-height: 1.2;
-    }
-    .brand-title .accent {
-      color: var(--accent);
-    }
+        .brand-title {
+            font-family: var(--font-display);
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
+            line-height: 1.2;
+        }
+        .brand-title .accent { color: var(--accent); }
 
-    #api-status {
-      font-size: 0.68rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-top: 2px;
-      display: block;
-    }
+        #api-status {
+            font-size: 0.68rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-top: 2px;
+            display: block;
+        }
 
-    /* Vyhľadávací vstup */
-    .search-wrap {
-      position: relative;
-      width: 100%;
-      max-width: 380px;
-      flex: 1 1 280px;
-    }
-    .search-wrap svg {
-      position: absolute;
-      left: 13px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 15px;
-      height: 15px;
-      color: var(--text-muted);
-      pointer-events: none;
-    }
-    #searchInput {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-pill);
-      padding: 9px 16px 9px 38px;
-      font-size: 0.875rem;
-      font-family: var(--font-body);
-      color: var(--text-primary);
-      outline: none;
-      transition:
-        border-color var(--transition-fast),
-        background var(--transition-fast);
-    }
-    #searchInput::placeholder {
-      color: var(--text-muted);
-    }
-    #searchInput:focus {
-      border-color: var(--accent);
-      background: rgba(255, 255, 255, 0.11);
-    }
+        /* Vyhľadávací vstup */
+        .search-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            flex: 1 1 280px;
+        }
+        .search-wrap svg {
+            position: absolute;
+            left: 13px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px; height: 15px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+        #searchInput {
+            width: 100%;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            padding: 9px 16px 9px 38px;
+            font-size: 0.875rem;
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            outline: none;
+            transition:
+                border-color var(--transition-fast),
+                background   var(--transition-fast);
+        }
+        #searchInput::placeholder { color: var(--text-muted); }
+        #searchInput:focus {
+            border-color: var(--accent);
+            background: rgba(255,255,255,0.11);
+        }
 
-    /* Tlačidlo prepínania témy */
-    #theme-toggle {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      background: rgba(255, 255, 255, 0.07);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-pill);
-      padding: 8px 16px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      font-family: var(--font-body);
-      color: var(--text-primary);
-      cursor: pointer;
-      transition:
-        background var(--transition-fast),
-        border-color var(--transition-fast),
-        color var(--transition-fast);
-      flex-shrink: 0;
-    }
-    #theme-toggle:hover {
-      background: rgba(255, 255, 255, 0.13);
-      border-color: var(--accent);
-    }
-    #theme-toggle svg {
-      width: 16px;
-      height: 16px;
-    }
+        /* Tlačidlo prepínania témy */
+        #theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            font-family: var(--font-body);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition:
+                background   var(--transition-fast),
+                border-color var(--transition-fast),
+                color        var(--transition-fast);
+            flex-shrink: 0;
+        }
+        #theme-toggle:hover {
+            background: rgba(255,255,255,0.13);
+            border-color: var(--accent);
+        }
+        #theme-toggle svg { width: 16px; height: 16px; }
 
-    /* ============================================================
+        /* ============================================================
            HLAVNÝ GRID OBSAHU
         ============================================================ */
 
-    main {
-      flex: 1;
-      max-width: 1400px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 32px 24px 48px;
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 32px;
-    }
+        main {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            gap: 32px;
+        }
 
-    @media (max-width: 1024px) {
-      main {
-        grid-template-columns: 1fr;
-      }
-    }
+        @media (max-width: 1024px) {
+            main { grid-template-columns: 1fr; }
+        }
 
-    /* ============================================================
+        /* ============================================================
            ĽAVÝ STĹPEC – KAMERY
         ============================================================ */
 
-    aside {
-      grid-column: 1;
-    }
-    .aside-sticky {
-      position: sticky;
-      top: 90px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
+        aside {
+            grid-column: 1;
+        }
 
-    .section-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      margin-bottom: 12px;
-    }
-    .section-label svg {
-      width: 14px;
-      height: 14px;
-    }
+        .aside-sticky {
+            position: sticky;
+            top: 90px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-    /* Karta kamery */
-    .camera-card {
-      padding: 8px;
-      position: relative;
-      overflow: hidden;
-      cursor: default;
-    }
-    .camera-card:hover {
-      transform: translateY(-2px);
-    }
+        .section-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 12px;
+        }
+        .section-label svg { width: 14px; height: 14px; }
 
-    .cam-badge {
-      position: absolute;
-      top: 18px;
-      left: 18px;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      padding: 4px 9px;
-      border-radius: 6px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #fff;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .rec-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #f87171;
-      animation: blink 1.2s step-start infinite;
-    }
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
+        /* Karta kamery */
+        .camera-card {
+            padding: 8px;
+            position: relative;
+            overflow: hidden;
+            cursor: default;
+        }
+        .camera-card:hover { transform: translateY(-2px); }
 
-    .camera-card img {
-      width: 100%;
-      height: auto;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      border-radius: 14px;
-      display: block;
-      transition: transform 0.7s ease;
-    }
-    .camera-card:hover img {
-      transform: scale(1.04);
-    }
+        .cam-badge {
+            position: absolute;
+            top: 18px; left: 18px;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            padding: 4px 9px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #fff;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .rec-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: #F87171;
+            animation: blink 1.2s step-start infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
 
-    /* ============================================================
+        .camera-card img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            border-radius: 14px;
+            display: block;
+            transition: transform 0.7s ease;
+        }
+        .camera-card:hover img { transform: scale(1.04); }
+
+        /* ============================================================
            PRAVÝ STĹPEC – SENZORY
         ============================================================ */
 
-    section.sensor-section {
-      grid-column: 2;
-      display: flex;
-      flex-direction: column;
-      gap: 40px;
-    }
+        section.sensor-section { grid-column: 2; display: flex; flex-direction: column; gap: 40px; }
 
-    @media (max-width: 1024px) {
-      aside,
-      section.sensor-section {
-        grid-column: 1;
-      }
-    }
+        @media (max-width: 1024px) {
+            aside, section.sensor-section { grid-column: 1; }
+        }
 
-    /* Nadpis bloku */
-    .block-header {
-      border-bottom: 1px solid var(--glass-border);
-      padding-bottom: 12px;
-      margin-bottom: 16px;
-    }
-    .block-title {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      color: var(--text-primary);
-    }
-    .block-title svg {
-      width: 18px;
-      height: 18px;
-      color: var(--accent);
-    }
-    .block-desc {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      margin-top: 5px;
-    }
+        /* Nadpis bloku */
+        .block-header {
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .block-title {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--text-primary);
+        }
+        .block-title svg { width: 18px; height: 18px; color: var(--accent); }
+        .block-desc {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
 
-    /* Grid senzorov */
-    .sensor-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-    }
+        /* Grid senzorov */
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
 
-    @media (max-width: 900px) {
-      .sensor-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-    }
-    @media (max-width: 500px) {
-      .sensor-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+        @media (max-width: 900px)  { .sensor-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 500px)  { .sensor-grid { grid-template-columns: 1fr; } }
 
-    /* Karta senzoru */
-    .sensor-card {
-      padding: 18px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 110px;
-      position: relative;
-      overflow: hidden;
-    }
+        /* Karta senzoru */
+        .sensor-card {
+            padding: 18px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 110px;
+            position: relative;
+            overflow: hidden;
+        }
 
-    /* Jemný svietivý kruh v pozadí karty */
-    .sensor-card::before {
-      content: "";
-      position: absolute;
-      top: -30px;
-      right: -30px;
-      width: 90px;
-      height: 90px;
-      background: var(--accent-glow);
-      border-radius: 50%;
-      filter: blur(28px);
-      opacity: 0;
-      transition: opacity var(--transition-mid);
-      pointer-events: none;
-    }
-    .sensor-card:hover::before {
-      opacity: 1;
-    }
+        /* Jemný svietivý kruh v pozadí karty */
+        .sensor-card::before {
+            content: '';
+            position: absolute;
+            top: -30px; right: -30px;
+            width: 90px; height: 90px;
+            background: var(--accent-glow);
+            border-radius: 50%;
+            filter: blur(28px);
+            opacity: 0;
+            transition: opacity var(--transition-mid);
+            pointer-events: none;
+        }
+        .sensor-card:hover::before { opacity: 1; }
 
-    /* Rozšírená karta (importance: main) */
-    .sensor-card.main {
-      grid-column: span 2;
-      padding: 24px;
-      min-height: 130px;
-    }
+        /* Rozšírená karta (importance: main) */
+        .sensor-card.main {
+            grid-column: span 2;
+            padding: 24px;
+            min-height: 130px;
+        }
 
-    .card-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-    }
-    .card-label {
-      font-size: 0.68rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-    .card-icon-wrap {
-      background: var(--accent-dim);
-      border: 1px solid var(--glass-border);
-      border-radius: 10px;
-      padding: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .card-icon-wrap svg {
-      width: 18px;
-      height: 18px;
-      color: var(--accent);
-    }
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+        .card-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .card-icon-wrap {
+            background: var(--accent-dim);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .card-icon-wrap svg { width: 18px; height: 18px; color: var(--accent); }
 
-    .card-value-row {
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-    }
-    .card-value {
-      font-weight: 700;
-      line-height: 1;
-      color: var(--text-primary);
-    }
-    .sensor-card.main .card-value {
-      font-size: 2.8rem;
-    }
-    .sensor-card:not(.main) .card-value {
-      font-size: 1.75rem;
-    }
+        .card-value-row {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .card-value {
+            font-weight: 700;
+            line-height: 1;
+            color: var(--text-primary);
+        }
+        .sensor-card.main .card-value { font-size: 2.8rem; }
+        .sensor-card:not(.main) .card-value { font-size: 1.75rem; }
 
-    .card-unit {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--text-secondary);
-    }
+        .card-unit {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
 
-    /* Farby pre dvere */
-    .val-open {
-      color: #f87171;
-    }
-    .val-closed {
-      color: #34d399;
-    }
+        /* Farby pre dvere */
+        .val-open    { color: #F87171; }
+        .val-closed  { color: #34D399; }
 
-    /* ============================================================
+        /* ============================================================
            MODÁLNE OKNO S GRAFOM
         ============================================================ */
 
-    #chart-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      padding: 20px;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    #chart-modal.open {
-      opacity: 1;
-      pointer-events: all;
-    }
+        #chart-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.60);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        #chart-modal.open {
+            opacity: 1;
+            pointer-events: all;
+        }
 
-    #chart-modal-content {
-      width: 100%;
-      max-width: 860px;
-      padding: 36px;
-      position: relative;
-      transform: scale(0.95);
-      transition: transform 0.3s ease;
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-radius: 28px;
-    }
-    #chart-modal.open #chart-modal-content {
-      transform: scale(1);
-    }
+        #chart-modal-content {
+            width: 100%;
+            max-width: 860px;
+            padding: 36px;
+            position: relative;
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 28px;
+        }
+        #chart-modal.open #chart-modal-content { transform: scale(1); }
 
-    /* Zatvárací gombík */
-    .modal-close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--glass-border);
-      border-radius: 50%;
-      width: 38px;
-      height: 38px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--text-secondary);
-      transition:
-        background var(--transition-fast),
-        color var(--transition-fast);
-    }
-    .modal-close:hover {
-      background: rgba(255, 255, 255, 0.14);
-      color: var(--text-primary);
-    }
-    .modal-close svg {
-      width: 18px;
-      height: 18px;
-    }
+        /* Zatvárací gombík */
+        .modal-close {
+            position: absolute;
+            top: 20px; right: 20px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            width: 38px; height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: background var(--transition-fast), color var(--transition-fast);
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.14); color: var(--text-primary); }
+        .modal-close svg { width: 18px; height: 18px; }
 
-    #modal-title {
-      font-family: var(--font-display);
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: var(--text-primary);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 4px;
-    }
-    .modal-subtitle {
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      margin-bottom: 28px;
-    }
+        #modal-title {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+        }
+        .modal-subtitle {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+        }
 
-    /* Loader spinner */
-    #chart-loader {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 300px;
-    }
-    #chart-loader svg {
-      width: 36px;
-      height: 36px;
-      color: var(--accent);
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+        /* Loader spinner */
+        #chart-loader {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 300px;
+        }
+        #chart-loader svg {
+            width: 36px; height: 36px;
+            color: var(--accent);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-    #chart-container {
-      position: relative;
-      height: 300px;
-      width: 100%;
-    }
-    #chart-container.hidden {
-      display: none;
-    }
+        #chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        #chart-container.hidden { display: none; }
 
-    /* ============================================================
+        /* ============================================================
            STAVOVÉ INDIKÁTORY V HLAVIČKE
         ============================================================ */
 
-    .status-live {
-      color: #34d399;
-    }
-    .status-error {
-      color: #f87171;
-    }
+        .status-live   { color: #34D399; }
+        .status-error  { color: #F87171; }
 
-    /* ============================================================
+        /* ============================================================
            ANIMÁCIA PRÍCHODU KARIET
         ============================================================ */
 
-    @keyframes card-in {
-      from {
-        opacity: 0;
-        transform: translateY(18px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    .sensor-card {
-      animation: card-in 0.4s ease both;
-    }
+        @keyframes card-in {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .sensor-card { animation: card-in 0.4s ease both; }
 
-    /* Kaskáda pre rôzne oneskorenie */
-    .sensor-card:nth-child(1) {
-      animation-delay: 0.05s;
-    }
-    .sensor-card:nth-child(2) {
-      animation-delay: 0.1s;
-    }
-    .sensor-card:nth-child(3) {
-      animation-delay: 0.15s;
-    }
-    .sensor-card:nth-child(4) {
-      animation-delay: 0.2s;
-    }
-    .sensor-card:nth-child(5) {
-      animation-delay: 0.25s;
-    }
-    .sensor-card:nth-child(6) {
-      animation-delay: 0.3s;
-    }
-    .sensor-card:nth-child(7) {
-      animation-delay: 0.35s;
-    }
-    .sensor-card:nth-child(8) {
-      animation-delay: 0.4s;
-    }
+        /* Kaskáda pre rôzne oneskorenie */
+        .sensor-card:nth-child(1)  { animation-delay: 0.05s; }
+        .sensor-card:nth-child(2)  { animation-delay: 0.10s; }
+        .sensor-card:nth-child(3)  { animation-delay: 0.15s; }
+        .sensor-card:nth-child(4)  { animation-delay: 0.20s; }
+        .sensor-card:nth-child(5)  { animation-delay: 0.25s; }
+        .sensor-card:nth-child(6)  { animation-delay: 0.30s; }
+        .sensor-card:nth-child(7)  { animation-delay: 0.35s; }
+        .sensor-card:nth-child(8)  { animation-delay: 0.40s; }
 
-    /* ============================================================
+        /* ============================================================
            RESPONZÍVNOSŤ
         ============================================================ */
 
-    @media (max-width: 700px) {
-      header {
-        padding: 14px 16px;
-      }
-      main {
-        padding: 20px 14px 40px;
-      }
-      .sensor-card.main {
-        grid-column: span 1;
-      } /* Na mobile nema main 2-stĺpcové rozloženie */
-      #chart-modal-content {
-        padding: 24px 18px;
-      }
-    }
+        @media (max-width: 700px) {
+            header { padding: 14px 16px; }
+            main   { padding: 20px 14px 40px; }
+            .sensor-card.main { grid-column: span 1; } /* Na mobile nema main 2-stĺpcové rozloženie */
+            #chart-modal-content { padding: 24px 18px; }
+        }
     </style>
-  </head>
+</head>
 
-  <!-- body: predvolene tmavý režim, trieda "dark" pre JS logiku -->
-  <body class="dark" id="body-layout">
+<!-- body: predvolene tmavý režim, trieda "dark" pre JS logiku -->
+<body class="dark" id="body-layout">
+
     <!-- ====================================================
          VRSTVENÉ POZADIE – Crossfade slideshow (12 obrázkov)
     ==================================================== -->
     <div id="bg-slideshow" aria-hidden="true">
-      <!-- Každá .bg-layer = jeden prírodný záber, CSS definuje obrázky -->
-      <div class="bg-layer active"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
-      <div class="bg-layer"></div>
+        <!-- Každá .bg-layer = jeden prírodný záber, CSS definuje obrázky -->
+        <div class="bg-layer active"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
+        <div class="bg-layer"></div>
     </div>
 
     <!-- Polopriehľadný overlay pre lepšiu čitateľnosť textu -->
@@ -870,262 +705,241 @@
          OBSAH APLIKÁCIE (nad pozadím)
     ==================================================== -->
     <div id="app-shell">
-      <!-- ── HLAVIČKA ── -->
-      <header>
-        <!-- Logo + Názov -->
-        <div class="header-brand">
-          <div class="brand-icon-wrap">
-            <i data-lucide="activity"></i>
-          </div>
-          <div>
-            <div class="brand-title">
-              GaiaSenzor <span class="accent">Core</span>
+
+        <!-- ── HLAVIČKA ── -->
+        <header>
+            <!-- Logo + Názov -->
+            <div class="header-brand">
+                <div class="brand-icon-wrap">
+                    <i data-lucide="activity"></i>
+                </div>
+                <div>
+                    <div class="brand-title">GaiaSenzor <span class="accent">Core</span></div>
+                    <span id="api-status">Pripájanie...</span>
+                </div>
             </div>
-            <span id="api-status">Pripájanie...</span>
-          </div>
-        </div>
 
-        <!-- Vyhľadávanie / Filter -->
-        <div class="search-wrap">
-          <i data-lucide="search"></i>
-          <input
-            type="text"
-            id="searchInput"
-            placeholder="Filtrovať veličiny (napr. teplota, tlak)..."
-          >
-        </div>
+            <!-- Vyhľadávanie / Filter -->
+            <div class="search-wrap">
+                <i data-lucide="search"></i>
+                <input type="text" id="searchInput"
+                       placeholder="Filtrovať veličiny (napr. teplota, tlak)...">
+            </div>
 
-        <!-- Prepínač témy -->
-        <button id="theme-toggle">
-          <i data-lucide="sun" style="color:#FBBF24;"></i>
-          <span id="theme-text">Svetlý režim</span>
-        </button>
-      </header>
+            <!-- Prepínač témy -->
+            <button id="theme-toggle">
+                <i data-lucide="sun" style="color:#FBBF24;"></i>
+                <span id="theme-text">Svetlý režim</span>
+            </button>
+        </header>
 
-      <!-- ── HLAVNÝ OBSAH ── -->
-      <main>
-        <!-- ── ĽAVÝ STĹPEC: Kamery ── -->
-        <aside class="col-span-1">
-          <div class="aside-sticky">
-            <div>
-              <div class="section-label">
-                <i data-lucide="camera"></i>
-                Školské Kamery
-              </div>
-              <div style="display:flex;flex-direction:column;gap:14px;">
-                <!-- Kamera 1 -->
-                <div class="glass-card camera-card">
-                  <div class="cam-badge">
-                    <span class="rec-dot"></span>
-                    REC 01
-                  </div>
-                  <img
-                    id="cam0"
-                    src="https://projekttb.sksnr.sk/data/camera.php?cam=0"
-                    alt="Kamera 1"
-                  >
+        <!-- ── HLAVNÝ OBSAH ── -->
+        <main>
+
+            <!-- ── ĽAVÝ STĹPEC: Kamery ── -->
+            <aside class="col-span-1">
+                <div class="aside-sticky">
+                    <div>
+                        <div class="section-label">
+                            <i data-lucide="camera"></i>
+                            Školské Kamery
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:14px;">
+
+                            <!-- Kamera 1 -->
+                            <div class="glass-card camera-card">
+                                <div class="cam-badge">
+                                    <span class="rec-dot"></span> REC 01
+                                </div>
+                                <img id="cam0"
+                                     src="https://projekttb.sksnr.sk/data/camera.php?cam=0"
+                                     alt="Kamera 1">
+                            </div>
+
+                            <!-- Kamera 2 -->
+                            <div class="glass-card camera-card">
+                                <div class="cam-badge">
+                                    <span class="rec-dot"></span> REC 02
+                                </div>
+                                <img id="cam1"
+                                     src="https://projekttb.sksnr.sk/data/camera.php?cam=1"
+                                     alt="Kamera 2">
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- ── PRAVÝ STĹPEC: Senzory ── -->
+            <section class="sensor-section">
+
+                <!-- Meteo stanica -->
+                <div id="block-meteo">
+                    <div class="block-header">
+                        <div class="block-title">
+                            <i data-lucide="cloud-sun"></i>
+                            Meteo stanica
+                        </div>
+                        <p class="block-desc">Monitoruje vonkajšie klimatické podmienky v okolí školy.</p>
+                    </div>
+                    <div class="sensor-grid" id="grid-meteo"></div>
                 </div>
 
-                <!-- Kamera 2 -->
-                <div class="glass-card camera-card">
-                  <div class="cam-badge">
-                    <span class="rec-dot"></span>
-                    REC 02
-                  </div>
-                  <img
-                    id="cam1"
-                    src="https://projekttb.sksnr.sk/data/camera.php?cam=1"
-                    alt="Kamera 2"
-                  >
+                <!-- Trieda -->
+                <div id="block-trieda">
+                    <div class="block-header">
+                        <div class="block-title">
+                            <i data-lucide="users"></i>
+                            Trieda
+                        </div>
+                        <p class="block-desc">Sleduje kvalitu vnútorného prostredia a mikroklímu v školskej učebni.</p>
+                    </div>
+                    <div class="sensor-grid" id="grid-trieda"></div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </aside>
 
-        <!-- ── PRAVÝ STĹPEC: Senzory ── -->
-        <section class="sensor-section">
-          <!-- Meteo stanica -->
-          <div id="block-meteo">
-            <div class="block-header">
-              <div class="block-title">
-                <i data-lucide="cloud-sun"></i>
-                Meteo stanica
-              </div>
-              <p class="block-desc">
-                Monitoruje vonkajšie klimatické podmienky v okolí školy.
-              </p>
-            </div>
-            <div class="sensor-grid" id="grid-meteo"></div>
-          </div>
+                <!-- Dvere -->
+                <div id="block-dvere">
+                    <div class="block-header">
+                        <div class="block-title">
+                            <i data-lucide="door-open"></i>
+                            Dvere
+                        </div>
+                        <p class="block-desc">Zabezpečuje bezpečnosť a prehľad o stave vstupu.</p>
+                    </div>
+                    <div class="sensor-grid" id="grid-dvere"></div>
+                </div>
 
-          <!-- Trieda -->
-          <div id="block-trieda">
-            <div class="block-header">
-              <div class="block-title">
-                <i data-lucide="users"></i>
-                Trieda
-              </div>
-              <p class="block-desc">
-                Sleduje kvalitu vnútorného prostredia a mikroklímu v školskej
-                učebni.
-              </p>
-            </div>
-            <div class="sensor-grid" id="grid-trieda"></div>
-          </div>
-
-          <!-- Dvere -->
-          <div id="block-dvere">
-            <div class="block-header">
-              <div class="block-title">
-                <i data-lucide="door-open"></i>
-                Dvere
-              </div>
-              <p class="block-desc">
-                Zabezpečuje bezpečnosť a prehľad o stave vstupu.
-              </p>
-            </div>
-            <div class="sensor-grid" id="grid-dvere"></div>
-          </div>
-        </section>
-      </main>
-    </div>
-    <!-- /app-shell -->
+            </section>
+        </main>
+    </div><!-- /app-shell -->
 
     <!-- ====================================================
          MODÁLNE OKNO – Historický graf senzoru
     ==================================================== -->
-    <div
-      id="chart-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      <div id="chart-modal-content">
-        <!-- Zatvárací gombík -->
-        <button class="modal-close" onclick="closeModal()" aria-label="Zavrieť">
-          <i data-lucide="x"></i>
-        </button>
+    <div id="chart-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div id="chart-modal-content">
 
-        <!-- Hlavička modálu -->
-        <h3 id="modal-title">Názov Veličiny</h3>
-        <p class="modal-subtitle">História posledných 500 meraní</p>
+            <!-- Zatvárací gombík -->
+            <button class="modal-close" onclick="closeModal()" aria-label="Zavrieť">
+                <i data-lucide="x"></i>
+            </button>
 
-        <!-- Načítavací spinner -->
-        <div id="chart-loader">
-          <i data-lucide="loader-2"></i>
+            <!-- Hlavička modálu -->
+            <h3 id="modal-title">Názov Veličiny</h3>
+            <p class="modal-subtitle">História posledných 500 meraní</p>
+
+            <!-- Načítavací spinner -->
+            <div id="chart-loader">
+                <i data-lucide="loader-2"></i>
+            </div>
+
+            <!-- Kontajner plátna grafu (skrytý počas načítavania) -->
+            <div id="chart-container" class="hidden">
+                <canvas id="historyChart"></canvas>
+            </div>
+
         </div>
-
-        <!-- Kontajner plátna grafu (skrytý počas načítavania) -->
-        <div id="chart-container" class="hidden">
-          <canvas id="historyChart"></canvas>
-        </div>
-      </div>
     </div>
 
     <!-- ====================================================
          JAVASCRIPT – Celá pôvodná logika zachovaná
     ==================================================== -->
     <script>
-    // ── CROSSFADE SLIDESHOW ──────────────────────────────────────
-    // Automatické striedanie vrstiev pozadia s plynulým fade efektom
-    (function () {
-      const layers = document.querySelectorAll(".bg-layer");
-      let current = 0;
-      const INTERVAL = 7000; // 7 sekúnd na každý obrázok
+        // ── CROSSFADE SLIDESHOW ──────────────────────────────────────
+        // Automatické striedanie vrstiev pozadia s plynulým fade efektom
+        ;(function() {
+            const layers  = document.querySelectorAll('.bg-layer');
+            let current   = 0;
+            const INTERVAL = 7000; // 7 sekúnd na každý obrázok
 
-      function nextSlide() {
-        layers[current].classList.remove("active");
-        current = (current + 1) % layers.length;
-        layers[current].classList.add("active");
-      }
+            function nextSlide() {
+                layers[current].classList.remove('active');
+                current = (current + 1) % layers.length;
+                layers[current].classList.add('active');
+            }
 
-      setInterval(nextSlide, INTERVAL);
-    })();
+            setInterval(nextSlide, INTERVAL);
+        })();
 
-    // ── KONFIGURÁCIA API ─────────────────────────────────────────
-    const API_URL = "http://127.0.0.1:8000/api/dashboard";
-    let globalData = null;
-    let chartInstance = null;
+        // ── KONFIGURÁCIA API ─────────────────────────────────────────
+        const API_URL = 'http://127.0.0.1:8000/api/dashboard';
+        let globalData    = null;
+        let chartInstance = null;
 
-    // ── INICIALIZÁCIA PO NAČÍTANÍ DOM ────────────────────────────
-    document.addEventListener("DOMContentLoaded", () => {
-      lucide.createIcons();
-      setupThemeToggle();
-      setupSearch();
-      fetchDashboardData();
+        // ── INICIALIZÁCIA PO NAČÍTANÍ DOM ────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            setupThemeToggle();
+            setupSearch();
+            fetchDashboardData();
 
-      // Auto-refresh dát každých 30 sekúnd
-      setInterval(fetchDashboardData, 30000);
+            // Auto-refresh dát každých 30 sekúnd
+            setInterval(fetchDashboardData, 30000);
 
-      // Auto-refresh kamier každých 5 sekúnd (cache-bust)
-      setInterval(() => {
-        const t = Date.now();
-        document.getElementById("cam0").src =
-          `https://projekttb.sksnr.sk/data/camera.php?cam=0&t=${t}`;
-        document.getElementById("cam1").src =
-          `https://projekttb.sksnr.sk/data/camera.php?cam=1&t=${t}`;
-      }, 5000);
+            // Auto-refresh kamier každých 5 sekúnd (cache-bust)
+            setInterval(() => {
+                const t = Date.now();
+                document.getElementById('cam0').src =
+                    `https://projekttb.sksnr.sk/data/camera.php?cam=0&t=${t}`;
+                document.getElementById('cam1').src =
+                    `https://projekttb.sksnr.sk/data/camera.php?cam=1&t=${t}`;
+            }, 5000);
 
-      // Zatvoriť modál klávesou Escape
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeModal();
-      });
-    });
+            // Zatvoriť modál klávesou Escape
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') closeModal();
+            });
+        });
 
-    // ── FETCH DÁT ZO SENZOROVÉHO API ─────────────────────────────
-    async function fetchDashboardData() {
-      const statusEl = document.getElementById("api-status");
-      try {
-        const response = await fetch(API_URL);
-        if (!response.ok) throw new Error("Chyba servera");
-        const data = await response.json();
+        // ── FETCH DÁT ZO SENZOROVÉHO API ─────────────────────────────
+        async function fetchDashboardData() {
+            const statusEl = document.getElementById('api-status');
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) throw new Error('Chyba servera');
+                const data = await response.json();
 
-        globalData = data;
-        statusEl.innerHTML = `<span class="status-live">●</span> Živé dáta`;
-        renderAllSensors(data);
-      } catch (error) {
-        console.error("Chyba:", error);
-        statusEl.innerHTML = `<span class="status-error">●</span> Režim zálohy / Offline`;
-      }
-    }
+                globalData = data;
+                statusEl.innerHTML = `<span class="status-live">●</span> Živé dáta`;
+                renderAllSensors(data);
 
-    // ── VYKRESLENIE VŠETKÝCH KARIET SENZOROV ─────────────────────
-    function renderAllSensors(data) {
-      const meteoGrid = document.getElementById("grid-meteo");
-      const triedaGrid = document.getElementById("grid-trieda");
-      const dvereGrid = document.getElementById("grid-dvere");
-
-      meteoGrid.innerHTML = "";
-      triedaGrid.innerHTML = "";
-      dvereGrid.innerHTML = "";
-
-      Object.keys(data).forEach((key) => {
-        const item = data[key];
-        if (typeof item !== "object" || !item.group) return;
-
-        // Hlavné veličiny zaberajú 2 stĺpce
-        const isMain = item.importance === "main";
-        const mainClass = isMain ? "main" : "";
-
-        // Špeciálne formátovanie stavu dverí
-        let displayValue = item.value;
-        let valueExtraClass = "";
-
-        if (item.group === "dvere") {
-          if (item.value == 1) {
-            displayValue = "Otvorené";
-            valueExtraClass = "val-open";
-          } else if (item.value == 0) {
-            displayValue = "Zatvorené";
-            valueExtraClass = "val-closed";
-          } else {
-            displayValue = "--";
-          }
+            } catch (error) {
+                console.error('Chyba:', error);
+                statusEl.innerHTML = `<span class="status-error">●</span> Režim zálohy / Offline`;
+            }
         }
 
-        // HTML karty senzoru
-        const cardHTML = `
+        // ── VYKRESLENIE VŠETKÝCH KARIET SENZOROV ─────────────────────
+        function renderAllSensors(data) {
+            const meteoGrid  = document.getElementById('grid-meteo');
+            const triedaGrid = document.getElementById('grid-trieda');
+            const dvereGrid  = document.getElementById('grid-dvere');
+
+            meteoGrid.innerHTML  = '';
+            triedaGrid.innerHTML = '';
+            dvereGrid.innerHTML  = '';
+
+            Object.keys(data).forEach(key => {
+                const item = data[key];
+                if (typeof item !== 'object' || !item.group) return;
+
+                // Hlavné veličiny zaberajú 2 stĺpce
+                const isMain     = item.importance === 'main';
+                const mainClass  = isMain ? 'main' : '';
+
+                // Špeciálne formátovanie stavu dverí
+                let displayValue   = item.value;
+                let valueExtraClass = '';
+
+                if (item.group === 'dvere') {
+                    if      (item.value == 1) { displayValue = 'Otvorené';  valueExtraClass = 'val-open';   }
+                    else if (item.value == 0) { displayValue = 'Zatvorené'; valueExtraClass = 'val-closed'; }
+                    else                      { displayValue = '--'; }
+                }
+
+                // HTML karty senzoru
+                const cardHTML = `
                     <div class="glass-card sensor-card ${mainClass}"
                          onclick="openModal('${key}', '${item.title}', '${item.group}', '${item.unit}')"
                          data-title="${item.title.toLowerCase()}"
@@ -1133,7 +947,7 @@
                         <div class="card-top">
                             <span class="card-label">${item.title}</span>
                             <div class="card-icon-wrap">
-                                <i data-lucide="${item.icon || "activity"}"></i>
+                                <i data-lucide="${item.icon || 'activity'}"></i>
                             </div>
                         </div>
                         <div class="card-value-row">
@@ -1143,199 +957,179 @@
                     </div>
                 `;
 
-        if (item.group === "meteo") meteoGrid.innerHTML += cardHTML;
-        else if (item.group === "trieda") triedaGrid.innerHTML += cardHTML;
-        else if (item.group === "dvere") dvereGrid.innerHTML += cardHTML;
-      });
+                if      (item.group === 'meteo')  meteoGrid.innerHTML  += cardHTML;
+                else if (item.group === 'trieda') triedaGrid.innerHTML += cardHTML;
+                else if (item.group === 'dvere')  dvereGrid.innerHTML  += cardHTML;
+            });
 
-      // Znovu inicializovať Lucide ikony po vložení HTML
-      lucide.createIcons();
+            // Znovu inicializovať Lucide ikony po vložení HTML
+            lucide.createIcons();
 
-      // Re-aplikovať aktuálny filter vyhľadávania
-      document.getElementById("searchInput").dispatchEvent(new Event("input"));
-    }
-
-    // ── VYHĽADÁVANIE / FILTER KARIET ─────────────────────────────
-    function setupSearch() {
-      document.getElementById("searchInput").addEventListener("input", (e) => {
-        const term = e.target.value.toLowerCase();
-        document
-          .querySelectorAll(".sensor-card[data-title]")
-          .forEach((card) => {
-            card.style.display = card.dataset.title.includes(term)
-              ? "flex"
-              : "none";
-          });
-      });
-    }
-
-    // ── OTVORENIE MODÁLNEHO OKNA S GRAFOM ────────────────────────
-    async function openModal(key, title, group, unit) {
-      const modal = document.getElementById("chart-modal");
-      const loader = document.getElementById("chart-loader");
-      const container = document.getElementById("chart-container");
-
-      // Nastaviť nadpis a zobraziť loader
-      document.getElementById("modal-title").textContent = title;
-      container.classList.add("hidden");
-      loader.classList.remove("hidden");
-      loader.innerHTML = '<i data-lucide="loader-2"></i>';
-      lucide.createIcons();
-
-      // Animácia otvorenia
-      modal.classList.add("open");
-
-      // Mapovanie skupiny na ID zdroja pre API
-      const sourceMap = { meteo: 0, trieda: 1, dvere: 8 };
-      const sourceId = sourceMap[group] !== undefined ? sourceMap[group] : 0;
-
-      try {
-        // Načítanie histórie (posledných 500 záznamov)
-        const res = await fetch(
-          `https://projekttb.sksnr.sk/data/api.php?source=${sourceId}&sort=timestamp&dir=desc&limit=500`,
-          { headers: { Authorization: "Basic " + btoa("sks:kolbe") } },
-        );
-
-        const data = await res.json();
-        const rows = (data.rows || []).reverse(); // Chronologicky vzostupne
-
-        // Labely časovej osi (HH:MM)
-        const labels = rows.map((r) => {
-          const d = new Date(r.timestamp);
-          return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-        });
-
-        // Mapovanie kľúča (door_state → state)
-        const apiKey = key === "door_state" ? "state" : key;
-        const dataset = rows.map((r) =>
-          r[apiKey] !== undefined ? r[apiKey] : null,
-        );
-
-        drawChart(labels, dataset, title, unit);
-      } catch (e) {
-        console.error("Chyba načítania histórie:", e);
-        loader.innerHTML =
-          '<span style="color:#F87171;">Historické dáta nie sú dostupné.</span>';
-      }
-    }
-
-    // ── ZATVORENIE MODÁLNEHO OKNA ─────────────────────────────────
-    function closeModal() {
-      const modal = document.getElementById("chart-modal");
-      modal.classList.remove("open");
-      if (chartInstance) {
-        chartInstance.destroy();
-        chartInstance = null;
-      }
-    }
-
-    // ── VYKRESLENIE GRAFU ─────────────────────────────────────────
-    function drawChart(labels, data, labelName, unit) {
-      document.getElementById("chart-loader").classList.add("hidden");
-      const container = document.getElementById("chart-container");
-      container.classList.remove("hidden");
-
-      const ctx = document.getElementById("historyChart").getContext("2d");
-      const isDark = !document.body.classList.contains("light");
-      const grid = isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.09)";
-      const tick = isDark ? "#94A3B8" : "#3A5068";
-
-      if (chartInstance) chartInstance.destroy();
-
-      // Gradientová výplň pod čiarou
-      const grad = ctx.createLinearGradient(0, 0, 0, 300);
-      grad.addColorStop(0, "rgba(96,165,250,0.45)");
-      grad.addColorStop(1, "rgba(96,165,250,0.00)");
-
-      chartInstance = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels,
-          datasets: [
-            {
-              label: `${labelName} (${unit})`,
-              data,
-              borderColor: "#60A5FA",
-              backgroundColor: grad,
-              borderWidth: 2,
-              pointRadius: 0,
-              pointHoverRadius: 5,
-              pointHoverBackgroundColor: "#60A5FA",
-              fill: true,
-              tension: 0.4,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              mode: "index",
-              intersect: false,
-              backgroundColor: isDark
-                ? "rgba(8,15,30,0.92)"
-                : "rgba(240,248,255,0.95)",
-              titleColor: isDark ? "#F0F4FF" : "#0D1B2A",
-              bodyColor: isDark ? "#94A3B8" : "#3A5068",
-              borderColor: "rgba(96,165,250,0.4)",
-              borderWidth: 1,
-              padding: 10,
-              cornerRadius: 10,
-            },
-          },
-          scales: {
-            x: {
-              grid: { display: false },
-              ticks: {
-                maxTicksLimit: 10,
-                color: tick,
-                font: { family: "'DM Sans', sans-serif", size: 11 },
-              },
-            },
-            y: {
-              grid: { color: grid, borderDash: [5, 5] },
-              ticks: {
-                color: tick,
-                font: { family: "'DM Sans', sans-serif", size: 11 },
-              },
-            },
-          },
-        },
-      });
-    }
-
-    // ── PREPÍNANIE SVETLÉHO / TMAVÉHO REŽIMU ──────────────────────
-    function setupThemeToggle() {
-      const btn = document.getElementById("theme-toggle");
-      const body = document.getElementById("body-layout");
-
-      btn.addEventListener("click", () => {
-        const goLight = body.classList.contains("dark");
-
-        if (goLight) {
-          body.classList.replace("dark", "light");
-          btn.innerHTML = `<i data-lucide="moon" style="color:var(--accent);"></i> <span>Temný režim</span>`;
-        } else {
-          body.classList.replace("light", "dark");
-          btn.innerHTML = `<i data-lucide="sun" style="color:#FBBF24;"></i> <span>Svetlý režim</span>`;
+            // Re-aplikovať aktuálny filter vyhľadávania
+            document.getElementById('searchInput').dispatchEvent(new Event('input'));
         }
 
-        lucide.createIcons();
-
-        // Ak je graf otvorený, aktualizovať farby mriežky
-        if (chartInstance) {
-          const dark = body.classList.contains("dark");
-          const g = dark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.09)";
-          const t = dark ? "#94A3B8" : "#3A5068";
-          chartInstance.options.scales.x.ticks.color = t;
-          chartInstance.options.scales.y.ticks.color = t;
-          chartInstance.options.scales.y.grid.color = g;
-          chartInstance.update();
+        // ── VYHĽADÁVANIE / FILTER KARIET ─────────────────────────────
+        function setupSearch() {
+            document.getElementById('searchInput').addEventListener('input', e => {
+                const term = e.target.value.toLowerCase();
+                document.querySelectorAll('.sensor-card[data-title]').forEach(card => {
+                    card.style.display = card.dataset.title.includes(term) ? 'flex' : 'none';
+                });
+            });
         }
-      });
-    }
+
+        // ── OTVORENIE MODÁLNEHO OKNA S GRAFOM ────────────────────────
+        async function openModal(key, title, group, unit) {
+            const modal   = document.getElementById('chart-modal');
+            const loader  = document.getElementById('chart-loader');
+            const container = document.getElementById('chart-container');
+
+            // Nastaviť nadpis a zobraziť loader
+            document.getElementById('modal-title').textContent = title;
+            container.classList.add('hidden');
+            loader.classList.remove('hidden');
+            loader.innerHTML = '<i data-lucide="loader-2"></i>';
+            lucide.createIcons();
+
+            // Animácia otvorenia
+            modal.classList.add('open');
+
+            // Mapovanie skupiny na ID zdroja pre API
+            const sourceMap = { meteo: 0, trieda: 1, dvere: 8 };
+            const sourceId  = sourceMap[group] !== undefined ? sourceMap[group] : 0;
+
+            try {
+                // Načítanie histórie (posledných 500 záznamov)
+                const res = await fetch(
+                    `https://projekttb.sksnr.sk/data/api.php?source=${sourceId}&sort=timestamp&dir=desc&limit=500`,
+                    { headers: { 'Authorization': 'Basic ' + btoa('sks:kolbe') } }
+                );
+
+                const data = await res.json();
+                const rows = (data.rows || []).reverse(); // Chronologicky vzostupne
+
+                // Labely časovej osi (HH:MM)
+                const labels = rows.map(r => {
+                    const d = new Date(r.timestamp);
+                    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                });
+
+                // Mapovanie kľúča (door_state → state)
+                const apiKey  = key === 'door_state' ? 'state' : key;
+                const dataset = rows.map(r => r[apiKey] !== undefined ? r[apiKey] : null);
+
+                drawChart(labels, dataset, title, unit);
+
+            } catch (e) {
+                console.error('Chyba načítania histórie:', e);
+                loader.innerHTML = '<span style="color:#F87171;">Historické dáta nie sú dostupné.</span>';
+            }
+        }
+
+        // ── ZATVORENIE MODÁLNEHO OKNA ─────────────────────────────────
+        function closeModal() {
+            const modal = document.getElementById('chart-modal');
+            modal.classList.remove('open');
+            if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+        }
+
+        // ── VYKRESLENIE GRAFU ─────────────────────────────────────────
+        function drawChart(labels, data, labelName, unit) {
+            document.getElementById('chart-loader').classList.add('hidden');
+            const container = document.getElementById('chart-container');
+            container.classList.remove('hidden');
+
+            const ctx     = document.getElementById('historyChart').getContext('2d');
+            const isDark  = !document.body.classList.contains('light');
+            const grid    = isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.09)';
+            const tick    = isDark ? '#94A3B8' : '#3A5068';
+
+            if (chartInstance) chartInstance.destroy();
+
+            // Gradientová výplň pod čiarou
+            const grad = ctx.createLinearGradient(0, 0, 0, 300);
+            grad.addColorStop(0, 'rgba(96,165,250,0.45)');
+            grad.addColorStop(1, 'rgba(96,165,250,0.00)');
+
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: `${labelName} (${unit})`,
+                        data,
+                        borderColor: '#60A5FA',
+                        backgroundColor: grad,
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: '#60A5FA',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: isDark ? 'rgba(8,15,30,0.92)' : 'rgba(240,248,255,0.95)',
+                            titleColor:  isDark ? '#F0F4FF' : '#0D1B2A',
+                            bodyColor:   isDark ? '#94A3B8' : '#3A5068',
+                            borderColor: 'rgba(96,165,250,0.4)',
+                            borderWidth: 1,
+                            padding: 10,
+                            cornerRadius: 10
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: { maxTicksLimit: 10, color: tick, font: { family: "'DM Sans', sans-serif", size: 11 } }
+                        },
+                        y: {
+                            grid: { color: grid, borderDash: [5, 5] },
+                            ticks: { color: tick, font: { family: "'DM Sans', sans-serif", size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ── PREPÍNANIE SVETLÉHO / TMAVÉHO REŽIMU ──────────────────────
+        function setupThemeToggle() {
+            const btn  = document.getElementById('theme-toggle');
+            const body = document.getElementById('body-layout');
+
+            btn.addEventListener('click', () => {
+                const goLight = body.classList.contains('dark');
+
+                if (goLight) {
+                    body.classList.replace('dark', 'light');
+                    btn.innerHTML = `<i data-lucide="moon" style="color:var(--accent);"></i> <span>Temný režim</span>`;
+                } else {
+                    body.classList.replace('light', 'dark');
+                    btn.innerHTML = `<i data-lucide="sun" style="color:#FBBF24;"></i> <span>Svetlý režim</span>`;
+                }
+
+                lucide.createIcons();
+
+                // Ak je graf otvorený, aktualizovať farby mriežky
+                if (chartInstance) {
+                    const dark = body.classList.contains('dark');
+                    const g    = dark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.09)';
+                    const t    = dark ? '#94A3B8' : '#3A5068';
+                    chartInstance.options.scales.x.ticks.color = t;
+                    chartInstance.options.scales.y.ticks.color = t;
+                    chartInstance.options.scales.y.grid.color  = g;
+                    chartInstance.update();
+                }
+            });
+        }
     </script>
-  </body>
+</body>
 </html>
