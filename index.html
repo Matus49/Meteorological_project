@@ -166,16 +166,16 @@
 
     <script>
         // URL TVOJHO BACKENDU (Uprav ak beží na inej adrese)
-const API_URL = 'http://127.0.0.1:8000/api/dashboard';
+        const API_URL = 'http://127.0.0.1:8000/api/dashboard';
         let globalData = null;
         let chartInstance = null;
 
         // --- INICIALIZÁCIA ---
         document.addEventListener('DOMContentLoaded', () => {
-        lucide.createIcons();
+            lucide.createIcons();
             setupThemeToggle();
-                                    setupSearch();
-             fetchDashboardData();
+            setupSearch();
+            fetchDashboardData();
             
             // Auto-refresh dát každých 30 sekúnd
             setInterval(fetchDashboardData, 30000);
@@ -192,7 +192,6 @@ const API_URL = 'http://127.0.0.1:8000/api/dashboard';
         async function fetchDashboardData() {
             const statusEl = document.getElementById('api-status');
             try {
-                // Pre testovacie účely, ak ti backend ešte nebeží, odkomentuj riadok nižšie a vymaž fetch
                 const response = await fetch(API_URL);
                 if (!response.ok) throw new Error('Chyba servera');
                 const data = await response.json();
@@ -297,13 +296,13 @@ const API_URL = 'http://127.0.0.1:8000/api/dashboard';
             try {
                 // Fetch histórie (LIMIT 500)
                 const res = await fetch(`https://projekttb.sksnr.sk/data/api.php?source=${sourceId}&sort=timestamp&dir=desc&limit=500`, {
-                    headers: { 'Authorization': 'Basic ' + btoa('sks:kolbe') } // Basic auth pre priamy prístup, lepšie by bolo ťahať to cez tvoj Python backend
+                    headers: { 'Authorization': 'Basic ' + btoa('sks:kolbe') }
                 });
                 
                 const data = await res.json();
                 const rows = data.rows || [];
                 
-                // Reverz poľa pre graf (najstaršie vľavo, najnovšie vpravo)
+                // Reverz poľa pre graf
                 rows.reverse();
 
                 const labels = rows.map(r => {
@@ -311,7 +310,6 @@ const API_URL = 'http://127.0.0.1:8000/api/dashboard';
                     return `${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
                 });
                 
-                // Mapovanie kľúča (ak sa frontend key nezhoduje s API kľúčom)
                 let apiKey = key;
                 if(key === 'door_state') apiKey = 'state';
 
@@ -324,6 +322,10 @@ const API_URL = 'http://127.0.0.1:8000/api/dashboard';
                 document.getElementById('chart-loader').innerHTML = '<span class="text-rose-500">Historické dáta nie sú dostupné.</span>';
             }
         }
+
+        document.getElementsById = function(id) {
+            return document.getElementById(id);
+        };
 
         function closeModal() {
             const modal = document.getElementById('chart-modal');
@@ -347,9 +349,8 @@ const API_URL = 'http://127.0.0.1:8000/api/dashboard';
 
             if(chartInstance) chartInstance.destroy();
 
-            // Vytvorenie pekného prechodu pre čiaru grafu
             const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)'); // brand.accent
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
             gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
 
             chartInstance = new Chart(ctx, {
@@ -362,10 +363,10 @@ const API_URL = 'http://127.0.0.1:8000/api/dashboard';
                         borderColor: '#3B82F6',
                         backgroundColor: gradient,
                         borderWidth: 2,
-                        pointRadius: 0, // Schová body pre čistý vzhľad
+                        pointRadius: 0,
                         pointHoverRadius: 4,
                         fill: true,
-                        tension: 0.4 // Plynulé krivky
+                        tension: 0.4
                     }]
                 },
                 options: {
@@ -404,18 +405,15 @@ const API_URL = 'http://127.0.0.1:8000/api/dashboard';
             
             btn.addEventListener('click', () => {
                 if (body.classList.contains('dark')) {
-                    // Prepnúť na Light
                     body.classList.remove('dark', 'bg-brand-darkBg');
                     body.classList.add('light', 'bg-brand-lightBg');
                     btn.innerHTML = `<i data-lucide="moon" class="w-4 h-4 text-brand-accent"></i> <span>Temný režim</span>`;
                 } else {
-                    // Prepnúť na Dark
                     body.classList.remove('light', 'bg-brand-lightBg');
                     body.classList.add('dark', 'bg-brand-darkBg');
                     btn.innerHTML = `<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i> <span>Svetlý režim</span>`;
                 }
                 lucide.createIcons();
-                // Ak je otvorený graf, prekresliť ho s novými farbami
                 if(chartInstance) {
                     const isDark = body.classList.contains('dark');
                     chartInstance.options.scales.x.ticks.color = isDark ? '#94a3b8' : '#475569';
