@@ -1,0 +1,27 @@
+name: Biome Auto-Format
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  format-and-check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Umožní robotovi zapísať upravený kód späť
+    steps:
+      - name: Stiahnutie kódu
+        uses: actions/checkout@v4
+
+      - name: Nastavenie Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: latest
+
+      - name: Spustenie formátovania kódu
+        run: biome format --write .
+
+      - name: Automatické uloženie vyčisteného kódu
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "⚙️ style: automatické formátovanie cez Biome"
