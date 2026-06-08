@@ -1,7 +1,8 @@
 import logging
 import asyncio
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 import httpx
 
 app = FastAPI(title="GaiaSenzor Core API")
@@ -35,33 +36,57 @@ def row(data: dict) -> dict:
     return rows[0] if rows else {}
 
 def g(d, *keys):
-    """Skus viacero nazvov klucov, vrat prvy najdeny."""
     for k in keys:
         v = d.get(k)
         if v is not None:
             return v
     return "--"
 
+# ── CAMERA PROXY ──────────────────────────────────────────────────────────────
+@app.get("/api/camera/{cam_id}")
+async def get_camera(cam_id: int):
+    """Proxy pre kamery – frontend nepotrebuje byť prihlásený na školskej stránke."""
+    if cam_id not in (0, 1):
+        raise HTTPException(status_code=404, detail="Kamera neexistuje")
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            r = await client.get(
+                f"https://projekttb.sksnr.sk/data/camera.php?cam={cam_id}",
+                auth=AUTH,
+            )
+            if r.status_code != 200:
+                raise Exception(f"HTTP {r.status_code}")
+            return StreamingResponse(
+                iter([r.content]),
+                media_type=r.headers.get("content-type", "image/jpeg"),
+                headers={"Cache-Control": "no-store"},
+            )
+    except Exception as e:
+        logger.error(f"Kamera {cam_id} chyba: {e}")
+        raise HTTPException(status_code=502, detail="Kamera nedostupná")
+
+# ── ÚVOD ──────────────────────────────────────────────────────────────────────
 @app.get("/api/uvod")
 async def get_uvod():
     async with httpx.AsyncClient() as client:
         data = await fetch(client, source=0, limit=1)
     c = row(data)
     return {
-        "temperature":    {"title": "Teplota",          "value": g(c, "temperature"),    "unit": "°C",   "icon": "thermometer"},
-        "feels_like":     {"title": "Pocitova teplota", "value": g(c, "feels_like"),     "unit": "°C",   "icon": "cloud-sun"},
-        "humidity":       {"title": "Vlhkost",          "value": g(c, "humidity"),       "unit": "%",    "icon": "droplet"},
-        "pressure":       {"title": "Tlak",             "value": g(c, "pressure"),       "unit": "hPa",  "icon": "gauge"},
-        "wind_speed":     {"title": "Rychlost vetra",   "value": g(c, "wind_speed"),     "unit": "m/s",  "icon": "wind"},
-        "wind_direction": {"title": "Smer vetra",       "value": g(c, "wind_direction"), "unit": "°",    "icon": "compass"},
-        "cloudiness":     {"title": "Oblacnost",        "value": g(c, "cloudiness"),     "unit": "%",    "icon": "cloud"},
-        "rain_1h":        {"title": "Zrazky (1h)",      "value": g(c, "rain_1h"),        "unit": "mm",   "icon": "cloud-rain"},
-        "snow_1h":        {"title": "Snezenie (1h)",    "value": g(c, "snow_1h"),        "unit": "mm",   "icon": "cloud-snow"},
-        "ghi":            {"title": "Ziarenie GHI",     "value": g(c, "ghi"),            "unit": "W/m2", "icon": "sun"},
-        "clear_sky_ghi":  {"title": "Jasna obloha GHI", "value": g(c, "clear_sky_ghi"), "unit": "W/m2", "icon": "sun-dim"},
+        "temperature":    {"title": "Vonkajšia teplota",   "value": g(c, "temperature"),    "unit": "°C",   "icon": "thermometer"},
+        "feels_like":     {"title": "Pocitová teplota",    "value": g(c, "feels_like"),     "unit": "°C",   "icon": "cloud-sun"},
+        "humidity":       {"title": "Vlhkosť",             "value": g(c, "humidity"),       "unit": "%",    "icon": "droplet"},
+        "pressure":       {"title": "Tlak",                "value": g(c, "pressure"),       "unit": "hPa",  "icon": "gauge"},
+        "wind_speed":     {"title": "Rýchlosť vetra",      "value": g(c, "wind_speed"),     "unit": "m/s",  "icon": "wind"},
+        "wind_direction": {"title": "Smer vetra",          "value": g(c, "wind_direction"), "unit": "°",    "icon": "compass"},
+        "cloudiness":     {"title": "Oblačnosť",           "value": g(c, "cloudiness"),     "unit": "%",    "icon": "cloud"},
+        "rain_1h":        {"title": "Zrážky (1h)",         "value": g(c, "rain_1h"),        "unit": "mm",   "icon": "cloud-rain"},
+        "snow_1h":        {"title": "Sneženie (1h)",       "value": g(c, "snow_1h"),        "unit": "mm",   "icon": "cloud-snow"},
+        "ghi":            {"title": "Žiarenie GHI",        "value": g(c, "ghi"),            "unit": "W/m²", "icon": "sun"},
+        "clear_sky_ghi":  {"title": "Jasná obloha GHI",   "value": g(c, "clear_sky_ghi"), "unit": "W/m²", "icon": "sun-dim"},
         "timestamp": c.get("timestamp", "--"),
     }
 
+# ── ŠKOLA ─────────────────────────────────────────────────────────────────────
 @app.get("/api/skola")
 async def get_skola():
     sources = list(range(9, 29))
@@ -94,6 +119,7 @@ async def get_skola():
     avg_temp = round(sum(temps) / len(temps), 2) if temps else "--"
     return {"sensors": sensors, "avg_temp": avg_temp}
 
+# ── TRIEDA ────────────────────────────────────────────────────────────────────
 @app.get("/api/trieda")
 async def get_trieda():
     async with httpx.AsyncClient() as client:
@@ -109,39 +135,40 @@ async def get_trieda():
     door = row(door_d)
 
     door_raw = g(door, "Exti_status", "exti_status")
-    if door_raw == "True":
-        door_val = "Otvorene"
-    elif door_raw == "False":
-        door_val = "Zatvorene"
-    else:
-        door_val = "--"
+    door_val = "Otvorené" if door_raw == "True" else ("Zatvorené" if door_raw == "False" else "--")
+
+    socket_raw = g(pwr, "socket_status")
+    socket_val = "Zapnutá" if str(socket_raw).lower() in ("true", "1", "on", "zapnuta", "zapnutá") else ("Vypnutá" if socket_raw != "--" else "--")
 
     return {
         "ambient": {
-            "temperature": {"title": "Teplota (vnutri)", "value": g(amb, "temperature", "temp"), "unit": "°C",  "icon": "thermometer", "source": 1, "key": "temperature"},
-            "humidity":    {"title": "Vlhkost (vnutri)", "value": g(amb, "humidity", "hum"),     "unit": "%",   "icon": "droplet",     "source": 1, "key": "humidity"},
+            "temperature": {"title": "Teplota (vnútri)", "value": g(amb, "temperature", "temp"), "unit": "°C",  "icon": "thermometer", "source": 1, "key": "temperature"},
+            "humidity":    {"title": "Vlhkosť (vnútri)", "value": g(amb, "humidity", "hum"),     "unit": "%",   "icon": "droplet",     "source": 1, "key": "humidity"},
             "co2":         {"title": "CO2",              "value": g(amb, "co2", "CO2"),          "unit": "ppm", "icon": "wind",        "source": 1, "key": "co2"},
-            "pressure":    {"title": "Tlak (vnutri)",    "value": g(amb, "pressure"),            "unit": "hPa", "icon": "gauge",       "source": 1, "key": "pressure"},
+            "pressure":    {"title": "Tlak (vnútri)",    "value": g(amb, "pressure"),            "unit": "hPa", "icon": "gauge",       "source": 1, "key": "pressure"},
         },
         "power": {
-            "active_power":      {"title": "Aktivny vykon", "value": g(pwr, "active_power"),      "unit": "W",  "icon": "zap",      "source": 2, "key": "active_power"},
-            "voltage":           {"title": "Napatie",       "value": g(pwr, "voltage"),           "unit": "V",  "icon": "activity", "source": 2, "key": "voltage"},
-            "current":           {"title": "Prud",          "value": g(pwr, "current"),           "unit": "mA", "icon": "waves",    "source": 2, "key": "current"},
-            "power_consumption": {"title": "Spotreba",      "value": g(pwr, "power_consumption"), "unit": "Wh", "icon": "battery",  "source": 2, "key": "power_consumption"},
-            "power_factor":      {"title": "Ucinnik",       "value": g(pwr, "power_factor"),      "unit": "%",  "icon": "percent",  "source": 2, "key": "power_factor"},
-            "socket_status":     {"title": "Stav zasuvky",  "value": g(pwr, "socket_status"),     "unit": "",   "icon": "plug",     "source": 2, "key": "socket_status"},
+            "active_power":      {"title": "Aktívny výkon",  "value": g(pwr, "active_power"),      "unit": "W",  "icon": "zap",      "source": 2, "key": "active_power"},
+            "voltage":           {"title": "Napätie",        "value": g(pwr, "voltage"),           "unit": "V",  "icon": "activity", "source": 2, "key": "voltage"},
+            "current":           {"title": "Prúd",           "value": g(pwr, "current"),           "unit": "mA", "icon": "waves",    "source": 2, "key": "current"},
+            "power_consumption": {"title": "Spotreba",       "value": g(pwr, "power_consumption"), "unit": "Wh", "icon": "battery",  "source": 2, "key": "power_consumption"},
+            "power_factor":      {"title": "Účinník",        "value": g(pwr, "power_factor"),      "unit": "%",  "icon": "percent",  "source": 2, "key": "power_factor"},
+            "socket_status":     {"title": "Stav zásuvky",   "value": socket_val,                  "unit": "",   "icon": "plug",     "source": 2, "key": "socket_status"},
         },
         "lux": {
             "ILL_lux":   {"title": "Intenzita svetla", "value": g(lux, "ILL_lux", "ill_lux"), "unit": "lx", "icon": "sun",         "source": 3, "key": "ILL_lux"},
             "TempC_SHT": {"title": "Teplota (lux)",   "value": g(lux, "TempC_SHT"),          "unit": "°C", "icon": "thermometer", "source": 3, "key": "TempC_SHT"},
-            "Hum_SHT":   {"title": "Vlhkost (lux)",   "value": g(lux, "Hum_SHT"),            "unit": "%",  "icon": "droplet",     "source": 3, "key": "Hum_SHT"},
+            "Hum_SHT":   {"title": "Vlhkosť (lux)",   "value": g(lux, "Hum_SHT"),            "unit": "%",  "icon": "droplet",     "source": 3, "key": "Hum_SHT"},
         },
         "door": {
-            "state":     {"title": "Dvere (IT ucebna)", "value": door_val, "unit": "", "icon": "door-closed", "source": 8, "key": "Exti_status"},
+            "state":     {"title": "Dvere (IT učebňa)", "value": door_val, "unit": "", "icon": "door-closed", "source": 8, "key": "Exti_status"},
             "timestamp": door.get("timestamp", "--"),
         },
+        "co2_value": float(g(amb, "co2", "CO2")) if g(amb, "co2", "CO2") not in ("--", None) else None,
+        "rain_value": None,
     }
 
+# ── HISTÓRIA ──────────────────────────────────────────────────────────────────
 @app.get("/api/history/{source}")
 async def get_history(source: int, limit: int = 500):
     async with httpx.AsyncClient() as client:
