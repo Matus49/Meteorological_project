@@ -1479,7 +1479,8 @@
                   Počasie v Nitre – prehľad
                 </div>
                 <p class="block-desc">
-                  Teplota · pocitová teplota · stav oblohy · aktualizácia každých 30 s
+                  Teplota · pocitová teplota · stav oblohy · aktualizácia
+                  každých 30 s
                 </p>
               </div>
 
@@ -2483,13 +2484,13 @@
       const temp = d.temperature;
       if (temp) {
         row.innerHTML += `
-          <div class="glass-card sensor-card-large" onclick="openModal('temperature','${temp.title}','src0','${temp.unit}',0)" data-title="${(temp.title || '').toLowerCase()}" title="Kliknite pre históriu" style="flex:1;">
+          <div class="glass-card sensor-card-large" onclick="openModal('temperature','${temp.title}','src0','${temp.unit}',0)" data-title="${(temp.title || "").toLowerCase()}" title="Kliknite pre históriu" style="flex:1;">
             <div class="card-top">
               <span class="card-label">${temp.title}</span>
-              <div class="card-icon-wrap"><i data-lucide="${temp.icon || 'thermometer'}"></i></div>
+              <div class="card-icon-wrap"><i data-lucide="${temp.icon || "thermometer"}"></i></div>
             </div>
             <div class="card-value-row">
-              <span class="card-value">${temp.value !== null && temp.value !== undefined ? temp.value : '--'}</span>
+              <span class="card-value">${temp.value !== null && temp.value !== undefined ? temp.value : "--"}</span>
               <span class="card-unit">${temp.unit}</span>
             </div>
           </div>`;
@@ -2499,13 +2500,13 @@
       const feels = d.feels_like;
       if (feels) {
         row.innerHTML += `
-          <div class="glass-card sensor-card-large" onclick="openModal('feels_like','${feels.title}','src0','${feels.unit}',0)" data-title="${(feels.title || '').toLowerCase()}" title="Kliknite pre históriu" style="flex:1;">
+          <div class="glass-card sensor-card-large" onclick="openModal('feels_like','${feels.title}','src0','${feels.unit}',0)" data-title="${(feels.title || "").toLowerCase()}" title="Kliknite pre históriu" style="flex:1;">
             <div class="card-top">
               <span class="card-label">${feels.title}</span>
-              <div class="card-icon-wrap"><i data-lucide="${feels.icon || 'thermometer'}"></i></div>
+              <div class="card-icon-wrap"><i data-lucide="${feels.icon || "thermometer"}"></i></div>
             </div>
             <div class="card-value-row">
-              <span class="card-value">${feels.value !== null && feels.value !== undefined ? feels.value : '--'}</span>
+              <span class="card-value">${feels.value !== null && feels.value !== undefined ? feels.value : "--"}</span>
               <span class="card-unit">${feels.unit}</span>
             </div>
           </div>`;
