@@ -259,7 +259,16 @@
 
       /* ── UVOD ── */
       .uvod-grid { display: grid; grid-template-columns: 260px 1fr; gap: 24px; }
-      @media (max-width: 900px) { .uvod-grid { grid-template-columns: 1fr; } }
+      @media (max-width: 900px) {
+        .uvod-grid {
+          grid-template-columns: 1fr;
+          /* Na mobile: meteo nahor, kamery nadol */
+          display: flex;
+          flex-direction: column;
+        }
+        .cameras-col { order: 2; }
+        .meteo-col { order: 1; }
+      }
       .cameras-col { display: flex; flex-direction: column; gap: 14px; }
       .section-label {
         font-size: 0.67rem; font-weight: 700; letter-spacing: 0.14em;
@@ -325,6 +334,84 @@
       /* wind direction compass inline */
       .wind-dir-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
       .wind-dir-label { font-size: 0.75rem; font-weight: 700; color: var(--accent); }
+
+      /* ── SKY STATUS CARD ── */
+      .sky-status-card {
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        animation: card-in 0.4s ease both;
+      }
+      .sky-status-icon {
+        font-size: 2.2rem;
+        line-height: 1;
+        flex-shrink: 0;
+      }
+      .sky-status-info { flex: 1; }
+      .sky-status-label {
+        font-size: 0.63rem; font-weight: 700; letter-spacing: 0.13em;
+        text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+      }
+      .sky-status-value {
+        font-family: var(--font-display);
+        font-size: 1.25rem; font-weight: 600;
+        color: var(--text-primary);
+      }
+      .sky-status-sub {
+        font-size: 0.74rem; color: var(--text-secondary); margin-top: 3px;
+      }
+
+      /* ── SHMÚ VÝSTRAHY ── */
+      .shmu-section { margin-top: 4px; }
+      .shmu-section-title {
+        font-size: 0.67rem; font-weight: 700; letter-spacing: 0.14em;
+        text-transform: uppercase; color: var(--text-muted);
+        display: flex; align-items: center; gap: 7px; margin-bottom: 8px;
+      }
+      .shmu-section-title svg { width: 14px; height: 14px; }
+      .shmu-warnings-list { display: flex; flex-direction: column; gap: 8px; }
+      .shmu-warning-card {
+        padding: 12px 16px;
+        border-radius: 14px;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        animation: card-in 0.4s ease both;
+      }
+      .shmu-warning-card.level-1 {
+        background: rgba(251, 191, 36, 0.12);
+        border: 1px solid rgba(251, 191, 36, 0.4);
+      }
+      .shmu-warning-card.level-2 {
+        background: rgba(251, 146, 60, 0.14);
+        border: 1px solid rgba(251, 146, 60, 0.45);
+      }
+      .shmu-warning-card.level-3 {
+        background: rgba(248, 113, 113, 0.14);
+        border: 1px solid rgba(248, 113, 113, 0.5);
+      }
+      .shmu-warn-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; margin-top: 2px; }
+      .shmu-warn-body { flex: 1; min-width: 0; }
+      .shmu-warn-title { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); margin-bottom: 3px; }
+      .shmu-warn-desc { font-size: 0.74rem; color: var(--text-secondary); line-height: 1.45; }
+      .shmu-warn-meta { font-size: 0.67rem; color: var(--text-muted); margin-top: 4px; }
+      .shmu-badge {
+        padding: 2px 9px;
+        border-radius: 999px;
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        flex-shrink: 0;
+        align-self: flex-start;
+        margin-top: 2px;
+      }
+      .shmu-badge.level-1 { background: rgba(251,191,36,0.25); color: #fbbf24; }
+      .shmu-badge.level-2 { background: rgba(251,146,60,0.25); color: #fb923c; }
+      .shmu-badge.level-3 { background: rgba(248,113,113,0.25); color: #f87171; }
 
       /* ── SKOLA ── */
       .skola-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
@@ -480,7 +567,7 @@
               <i data-lucide="school"></i> Škola
             </button>
             <button class="nav-tab" data-screen="trieda" onclick="switchScreen('trieda')">
-              <i data-lucide="monitor"></i> I.IT
+              <i data-lucide="monitor"></i> IT Učebňa
             </button>
           </nav>
           <div class="header-right">
@@ -507,7 +594,7 @@
         <div id="screen-uvod" class="screen active">
           <div class="uvod-grid">
             <div class="cameras-col">
-              <div class="section-label"><i data-lucide="camera"></i> Školské Kamery</div>
+              <div class="section-label"><i data-lucide="camera"></i> Školské kamery</div>
               <div class="glass-card camera-card" onclick="window.openCam(0)">
                 <div class="cam-badge" style="pointer-events:none;"><span class="rec-dot"></span> REC 01</div>
                 <img id="cam0" src="" alt="Kamera 1" style="pointer-events:none;" />
@@ -522,7 +609,14 @@
                 <div class="block-title"><i data-lucide="cloud-sun"></i> Meteostanica – aktuálne počasie v Nitre</div>
                 <p class="block-desc">Vonkajšie klimatické podmienky · aktualizácia každých 30 s</p>
               </div>
+
+              <!-- Stav oblohy -->
+              <div id="sky-status-wrap"></div>
+
               <div class="sensor-grid" id="grid-uvod-meteo"></div>
+
+              <!-- SHMÚ výstrahy -->
+              <div id="shmu-wrap"></div>
             </div>
           </div>
         </div>
@@ -550,24 +644,24 @@
         <!-- TRIEDA IT -->
         <div id="screen-trieda" class="screen">
           <div class="block-header" style="margin-bottom:20px;">
-            <div class="block-title"><i data-lucide="monitor"></i> Trieda I.IT – monitorovanie prostredia</div>
-            <p class="block-desc">Ambient senzor · Power Meter 3D tlačiarne · Lux senzor · Door sensor 05</p>
+            <div class="block-title"><i data-lucide="monitor"></i> IT učebňa – monitorovanie prostredia</div>
+            <p class="block-desc">Ambient senzor · merač výkonu 3D tlačiarne · lux senzor · dverový senzor 05</p>
           </div>
           <div class="trieda-grid">
             <div class="trieda-block">
-              <div class="trieda-block-title"><i data-lucide="wind"></i> Ambient sensor 01</div>
+              <div class="trieda-block-title"><i data-lucide="wind"></i> Ambient senzor 01</div>
               <div class="mini-sensor-grid" id="grid-ambient"></div>
             </div>
             <div class="trieda-block">
-              <div class="trieda-block-title"><i data-lucide="zap"></i> Power Meter – 3D tlačiareň</div>
+              <div class="trieda-block-title"><i data-lucide="zap"></i> Merač výkonu – 3D tlačiareň</div>
               <div class="mini-sensor-grid" id="grid-power"></div>
             </div>
             <div class="trieda-block">
-              <div class="trieda-block-title"><i data-lucide="sun"></i> Lux sensor 01</div>
+              <div class="trieda-block-title"><i data-lucide="sun"></i> Lux senzor 01</div>
               <div class="mini-sensor-grid" id="grid-lux"></div>
             </div>
             <div class="trieda-block">
-              <div class="trieda-block-title"><i data-lucide="door-open"></i> Door sensor 05</div>
+              <div class="trieda-block-title"><i data-lucide="door-open"></i> Dverový senzor 05</div>
               <div id="grid-door"></div>
             </div>
           </div>
@@ -632,6 +726,160 @@
         return dirs[Math.round(d / 22.5) % 16];
       }
 
+      // ── STAV OBLOHY ──────────────────────────────────────────────────────────
+      function skyStatusFromData(d) {
+        // Odhadneme stav oblohy z dostupných meteorologických dát
+        const cloudiness = d.cloudiness ? parseFloat(d.cloudiness.value) : NaN;
+        const rain = d.rain_1h ? parseFloat(d.rain_1h.value) : NaN;
+        const snow = d.snow_1h ? parseFloat(d.snow_1h.value) : NaN;
+
+        if (!isNaN(snow) && snow > 0) return { emoji: "❄️", label: "Sneženie", sub: `${snow} mm/h`, color: "#93c5fd" };
+        if (!isNaN(rain) && rain > 5) return { emoji: "⛈️", label: "Búrky / silný dážď", sub: `${rain} mm/h`, color: "#f87171" };
+        if (!isNaN(rain) && rain > 0) return { emoji: "🌧️", label: "Dážď", sub: `${rain} mm/h`, color: "#60a5fa" };
+        if (!isNaN(cloudiness)) {
+          if (cloudiness >= 90) return { emoji: "☁️", label: "Zamračené", sub: `${cloudiness} % oblačnosť`, color: "#94a3b8" };
+          if (cloudiness >= 60) return { emoji: "🌥️", label: "Oblačno", sub: `${cloudiness} % oblačnosť`, color: "#94a3b8" };
+          if (cloudiness >= 25) return { emoji: "⛅", label: "Polooblačno", sub: `${cloudiness} % oblačnosť`, color: "#fbbf24" };
+          return { emoji: "☀️", label: "Jasno", sub: `${cloudiness} % oblačnosť`, color: "#fbbf24" };
+        }
+        return null;
+      }
+
+      function renderSkyStatus(d) {
+        const wrap = document.getElementById("sky-status-wrap");
+        if (!wrap) return;
+        const sky = skyStatusFromData(d);
+        if (!sky) { wrap.innerHTML = ""; return; }
+        wrap.innerHTML = `
+          <div class="glass-card sky-status-card" style="margin-bottom:12px;">
+            <div class="sky-status-icon">${sky.emoji}</div>
+            <div class="sky-status-info">
+              <div class="sky-status-label">Aktuálny stav oblohy</div>
+              <div class="sky-status-value" style="color:${sky.color};">${sky.label}</div>
+              <div class="sky-status-sub">${sky.sub}</div>
+            </div>
+          </div>`;
+      }
+
+      // ── SHMÚ VÝSTRAHY ─────────────────────────────────────────────────────────
+      // Výstrahy načítame zo SHMÚ RSS/JSON feedu cez cors.sh proxy.
+      // Ak sa nepodará načítať, ticho nič nezobrazíme.
+
+      // Mapovanie kľúčových slov z SHMÚ na slovenčinu + ikony
+      const SHMU_KEYWORD_MAP = [
+        { re: /dažď|zrážky|prší|zrážkov/i, label: "Zrážky",     emoji: "🌧️" },
+        { re: /sneži|sneh|snežen/i,          label: "Sneženie",   emoji: "❄️" },
+        { re: /ľad|poľadovica/i,             label: "Poľadovica", emoji: "🧊" },
+        { re: /hmla|hmlav/i,                 label: "Hmla",       emoji: "🌫️" },
+        { re: /vietor|víchor|orkán|búrka/i,  label: "Silný vietor / búrka", emoji: "🌬️" },
+        { re: /búrk/i,                       label: "Búrky",      emoji: "⛈️" },
+      ];
+
+      // Mapa úrovní výstrah
+      function shmuLevel(text) {
+        if (/stupeň\s*3|stupeň\s*III|červen/i.test(text)) return 3;
+        if (/stupeň\s*2|stupeň\s*II|oranž/i.test(text)) return 2;
+        return 1;
+      }
+
+      async function fetchShmuWarnings() {
+        const wrap = document.getElementById("shmu-wrap");
+        if (!wrap) return;
+        try {
+          // Skúsime rôzne prístupy k SHMÚ RSS feedu
+          // Primárne: SHMÚ výstrahy RSS cez cors proxy
+          const corsProxies = [
+            "https://api.allorigins.win/get?url=" + encodeURIComponent("https://www.shmu.sk/sk/?page=2&id=meteo_rss"),
+          ];
+
+          let xmlText = null;
+          for (const proxyUrl of corsProxies) {
+            try {
+              const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(7000) });
+              if (!resp.ok) continue;
+              const json = await resp.json();
+              xmlText = json.contents || null;
+              if (xmlText) break;
+            } catch (_) { /* skúsime ďalší */ }
+          }
+
+          if (!xmlText) { wrap.innerHTML = ""; return; }
+
+          // Parsovanie RSS XML
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+          const items = Array.from(xmlDoc.querySelectorAll("item"));
+
+          // Filtrujeme relevantné výstrahy
+          const relevant = [];
+          items.forEach(item => {
+            const title = item.querySelector("title")?.textContent || "";
+            const desc  = item.querySelector("description")?.textContent || "";
+            const pub   = item.querySelector("pubDate")?.textContent || "";
+            const combined = title + " " + desc;
+
+            // Hľadáme relevantné výstrahy
+            const isWarning = /výstrah|varovani|upozorneni/i.test(combined);
+            if (!isWarning) return;
+
+            let matched = SHMU_KEYWORD_MAP.find(m => m.re.test(combined));
+            if (!matched) {
+              // Ak je výstraha, ale nezapadá do kategórie, zaradíme ju obecne
+              matched = { label: "Meteorologická výstraha", emoji: "⚠️" };
+            }
+
+            const level = shmuLevel(combined);
+            // Formátujeme dátum
+            let dateStr = "";
+            if (pub) {
+              try {
+                const d = new Date(pub);
+                const dd = String(d.getDate()).padStart(2,"0");
+                const mm = String(d.getMonth()+1).padStart(2,"0");
+                const hh = String(d.getHours()).padStart(2,"0");
+                const min = String(d.getMinutes()).padStart(2,"0");
+                dateStr = `${dd}.${mm}. ${hh}:${min}`;
+              } catch(_) { dateStr = pub.slice(0,16); }
+            }
+
+            // Orezanie popisu na rozumnú dĺžku
+            let cleanDesc = desc.replace(/<[^>]+>/g, "").trim();
+            if (cleanDesc.length > 200) cleanDesc = cleanDesc.slice(0,200) + "…";
+
+            relevant.push({ emoji: matched.emoji, label: matched.label, title: title.trim(), desc: cleanDesc, level, dateStr });
+          });
+
+          if (!relevant.length) { wrap.innerHTML = ""; return; }
+
+          // Zoradiť podľa úrovne (najvyššie prvé)
+          relevant.sort((a, b) => b.level - a.level);
+          const top = relevant.slice(0, 4);
+
+          const levelLabel = { 1: "Stupeň 1", 2: "Stupeň 2", 3: "Stupeň 3" };
+
+          wrap.innerHTML = `
+            <div class="shmu-section">
+              <div class="shmu-section-title"><i data-lucide="triangle-alert"></i> Výstrahy SHMÚ</div>
+              <div class="shmu-warnings-list">
+                ${top.map(w => `
+                  <div class="shmu-warning-card level-${w.level}">
+                    <div class="shmu-warn-icon">${w.emoji}</div>
+                    <div class="shmu-warn-body">
+                      <div class="shmu-warn-title">${w.label}</div>
+                      ${w.desc ? `<div class="shmu-warn-desc">${w.desc}</div>` : ""}
+                      ${w.dateStr ? `<div class="shmu-warn-meta">Vydané: ${w.dateStr}</div>` : ""}
+                    </div>
+                    <span class="shmu-badge level-${w.level}">${levelLabel[w.level]}</span>
+                  </div>`).join("")}
+              </div>
+            </div>`;
+          lucide.createIcons();
+        } catch (_) {
+          // Ticho – nezobrazujeme žiadne chybové hlásenie
+          if (wrap) wrap.innerHTML = "";
+        }
+      }
+
       // ── SLOVENSKÝ KALENDÁR (meniny + sviatky) ────────────────────────────────
       const SK_CALENDAR = {
         "01-01":"Nový rok","01-06":"Traja králi","01-08":"Severín","01-12":"Ernest","01-13":"Rastislav",
@@ -641,18 +889,18 @@
         "02-08":"Zoja","02-10":"Gabriela","02-13":"Vlasta","02-14":"Valentín","02-17":"Miloslava",
         "02-18":"Jaromír","02-21":"Eleonóra","02-22":"Etela","02-24":"Matej","02-27":"Alexander",
         "03-01":"Albín","03-03":"Bohumil","03-05":"Fridrich","03-07":"Tomáš","03-08":"Alan",
-        "03-10":"Branislav","03-11":"Anežka","03-12":"Gregora","03-14":"Matilda","03-17":"Ľubica",
+        "03-10":"Branislav","03-11":"Anežka","03-12":"Gregor","03-14":"Matilda","03-17":"Ľubica",
         "03-18":"Eduard","03-19":"Jozef","03-20":"Víťazoslav","03-21":"Blahoslav","03-23":"Adrián",
         "03-24":"Gabriel","03-25":"Marián","03-26":"Emanuel","03-28":"Soňa","03-31":"Benjamín",
         "04-01":"Hugo","04-02":"Zita","04-04":"Izidor","04-05":"Miroslava","04-06":"Irena",
         "04-07":"Zoltán","04-10":"Igor","04-11":"Július","04-12":"Estera","04-14":"Justína",
-        "04-15":"Anastázia","04-16":"Dana/Danica","04-19":"Jela","04-20":"Marcel","04-21":"Ervín",
+        "04-15":"Anastázia","04-16":"Dana / Danica","04-19":"Jela","04-20":"Marcel","04-21":"Ervín",
         "04-22":"Slavomír","04-23":"Vojtech","04-24":"Juraj","04-25":"Marek","04-26":"Jaroslava",
         "04-28":"Jarmila","04-29":"Lea","04-30":"Anastázia",
         "05-01":"Sviatok práce","05-02":"Zigmund","05-03":"Galina","05-04":"Florián","05-06":"Hermína",
         "05-07":"Monika","05-08":"Deň víťazstva","05-09":"Roland","05-10":"Viktória","05-12":"Pankrác",
         "05-13":"Servác","05-14":"Bonifác","05-15":"Žofia","05-16":"Svetozár","05-17":"Gizela",
-        "05-18":"Viola","05-19":"Gertrúda","05-20":"Bernard","05-21":"Zina","05-22":"Júlia/Juliana",
+        "05-18":"Viola","05-19":"Gertrúda","05-20":"Bernard","05-21":"Zina","05-22":"Júlia / Juliana",
         "05-23":"Želmíra","05-25":"Urban","05-26":"Dušan","05-27":"Iveta","05-28":"Viliam",
         "05-29":"Marta","05-31":"Petronela",
         "06-01":"Žaneta","06-02":"Xénia","06-03":"Karolína","06-04":"Lenka","06-05":"Laura",
@@ -672,7 +920,7 @@
         "08-13":"Ľubomíra","08-14":"Mojmír","08-15":"Nanebovzatie Panny Márie","08-16":"Leonard",
         "08-17":"Milica","08-18":"Elena","08-19":"Lýdia","08-20":"Anabela","08-21":"Jana",
         "08-22":"Tichomír","08-23":"Filip","08-24":"Bartolomej","08-25":"Ľudovít","08-26":"Samuel",
-        "08-27":"Silvia","08-28":"Augustín","08-29":"Nikola","08-30":"Ružena","08-31":"Nora/Daniela",
+        "08-27":"Silvia","08-28":"Augustín","08-29":"Nikola","08-30":"Ružena","08-31":"Nora / Daniela",
         "09-01":"Darina","09-02":"Konštantín","09-03":"Belo","09-04":"Rozália","09-05":"Regina",
         "09-06":"Alžbeta","09-07":"Marianna","09-08":"Mária","09-09":"Martina","09-10":"Oleg",
         "09-12":"Mária","09-13":"Ctibor","09-14":"Ľudmila","09-15":"Jolana","09-16":"Ľudomila",
@@ -689,11 +937,11 @@
         "11-01":"Všetkých svätých","11-02":"Pamiatka zosnulých","11-04":"Karol","11-05":"Imrich",
         "11-06":"René","11-07":"Rút","11-08":"Bohumír","11-09":"Teodor","11-10":"Tibor",
         "11-11":"Martin","11-12":"Benedikt","11-13":"Stanislav","11-14":"Irma","11-15":"Leopold",
-        "11-16":"Agnesa","11-17":"Klaudia; Deň boja za slobodu","11-18":"Eugen","11-19":"Alžbeta",
+        "11-16":"Agnesa","11-17":"Klaudia · Deň boja za slobodu","11-18":"Eugen","11-19":"Alžbeta",
         "11-20":"Félix","11-21":"Elvíra","11-22":"Cecília","11-23":"Klement","11-24":"Emília",
         "11-25":"Katarína","11-26":"Kornel","11-27":"Milan","11-28":"Henrieta","11-29":"Vratko",
         "11-30":"Ondrej",
-        "12-01":"Edmund","12-02":"Bibiána","12-03":"Oldrich","12-04":"Barbora","12-05":"Ábel",
+        "12-01":"Edmund","12-02":"Bibiána","12-03":"Oldřich","12-04":"Barbora","12-05":"Ábel",
         "12-06":"Mikuláš","12-07":"Ambróz","12-08":"Panny Márie","12-09":"Izabela","12-10":"Radúz",
         "12-11":"Hilda","12-12":"Otília","12-13":"Lucia","12-14":"Branislava","12-15":"Ivica",
         "12-16":"Albína","12-17":"Kornélia","12-18":"Sláva","12-19":"Judita","12-20":"Dagmara",
@@ -744,7 +992,7 @@
         let html = "";
         const co2 = parseFloat(co2Val);
         if (!isNaN(co2) && co2 > 1000) {
-          html += `<div class="alert-pill danger"><i data-lucide="wind"></i> CO₂ nad normou (${co2} ppm) – otvor okno v I.IT!</div>`;
+          html += `<div class="alert-pill danger"><i data-lucide="wind"></i> CO₂ nad normou (${co2} ppm) – otvor okno v IT učebni!</div>`;
         }
         const rain = parseFloat(rainVal);
         if (!isNaN(rain) && rain > 0) {
@@ -783,6 +1031,10 @@
 
         loadScreen("uvod");
         setInterval(() => loadScreen(currentScreen), 30000);
+
+        // SHMÚ výstrahy načítame raz a potom každých 15 minút
+        fetchShmuWarnings();
+        setInterval(fetchShmuWarnings, 15 * 60 * 1000);
 
         // Auto-refresh kamier každých 5 sekúnd
         setInterval(() => {
@@ -829,6 +1081,7 @@
           if (!res.ok) throw new Error();
           const d = await res.json();
           setStatus(true);
+          renderSkyStatus(d);
           renderUvod(d);
           // Upozornenia
           renderAlerts(null, d.rain_1h?.value, d.snow_1h?.value);
@@ -915,7 +1168,7 @@
           const d = await res.json();
           setStatus(true);
           renderTrieda(d);
-          // CO2 upozornenie
+          // Upozornenie CO₂
           renderAlerts(d.co2_value, null, null);
         } catch { setStatus(false); }
       }
@@ -968,7 +1221,7 @@
         const dvClass = dv === "Otvorené" ? "val-open" : dv === "Zatvorené" ? "val-closed" : "";
         const dvIcon = dv === "Otvorené" ? "door-open" : "door-closed";
         doorGrid.innerHTML = `
-          <div class="glass-card it-card" onclick="openModal('Exti_status','Door sensor 05 – história','dvere','',8)" data-title="dvere it učebňa">
+          <div class="glass-card it-card" onclick="openModal('Exti_status','Dverový senzor 05 – história','dvere','',8)" data-title="dvere it učebňa">
             <div class="card-top">
               <span class="card-label">${doorItem.title}</span>
               <div class="card-icon-wrap"><i data-lucide="${dvIcon}"></i></div>
@@ -1044,7 +1297,7 @@
         const loader = document.getElementById("chart-loader");
         const container = document.getElementById("chart-container");
         document.getElementById("modal-title").textContent = title;
-        document.getElementById("modal-subtitle").textContent = `História posledných 500 meraní · source=${source}`;
+        document.getElementById("modal-subtitle").textContent = `História posledných 500 meraní · zdroj=${source}`;
         container.classList.add("hidden");
         container.innerHTML = "";
         loader.style.display = "flex";
@@ -1057,6 +1310,9 @@
         const isWindDir = key === "wind_direction";
         const isDoor = key === "Exti_status" || key === "state";
         const isSocket = key === "socket_status";
+
+        // Detekcia grafu teploty
+        const isTempKey = key === "temperature" || key === "TempC_SHT" || key === "tempc_sht" || key === "TEMPC_SHT" || (unit === "°C");
 
         try {
           const res = await fetch(`${API}/history/${source}?limit=500`);
@@ -1083,7 +1339,7 @@
           } else if (isPct) {
             drawPieChart(dataset, labels, title, unit);
           } else {
-            drawChart(labels, dataset, title, unit, "line");
+            drawChart(labels, dataset, title, unit, "line", isTempKey);
           }
         } catch {
           loader.innerHTML = '<span style="color:#F87171;">Historické dáta nie sú dostupné.</span>';
@@ -1166,26 +1422,21 @@
                 <div class="compass-svg-wrap">
                   <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="compass-bg">
                     <circle cx="100" cy="100" r="95" fill="rgba(8,15,30,0.6)" stroke="rgba(96,165,250,0.3)" stroke-width="1.5"/>
-                    <!-- Ružica vetra – čiary každých 30° -->
                     ${Array.from({length:12},(_,i)=>{
                       const a = i*30*Math.PI/180;
                       const r1=75,r2=90;
                       return `<line x1="${100+r1*Math.sin(a)}" y1="${100-r1*Math.cos(a)}" x2="${100+r2*Math.sin(a)}" y2="${100-r2*Math.cos(a)}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>`;
                     }).join("")}
-                    <!-- Hlavné svetové strany -->
                     <text x="100" y="18" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="700" font-family="DM Sans,sans-serif">S</text>
                     <text x="100" y="190" text-anchor="middle" fill="rgba(148,163,184,0.8)" font-size="12" font-family="DM Sans,sans-serif">J</text>
                     <text x="186" y="105" text-anchor="middle" fill="rgba(148,163,184,0.8)" font-size="12" font-family="DM Sans,sans-serif">V</text>
                     <text x="14" y="105" text-anchor="middle" fill="rgba(148,163,184,0.8)" font-size="12" font-family="DM Sans,sans-serif">Z</text>
-                    <!-- Medzisvetové strany -->
                     <text x="155" y="50" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">SV</text>
                     <text x="155" y="160" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">JV</text>
                     <text x="45" y="160" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">JZ</text>
                     <text x="45" y="50" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">SZ</text>
-                    <!-- Kruhy -->
                     <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
                     <circle cx="100" cy="100" r="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-                    <!-- Ručička – transformovaná podľa aktuálneho smeru -->
                     <g transform="rotate(${latest}, 100, 100)">
                       <polygon points="100,30 96,100 100,110 104,100" fill="#f87171" opacity="0.9"/>
                       <polygon points="100,170 96,100 100,110 104,100" fill="rgba(255,255,255,0.3)" opacity="0.7"/>
@@ -1348,8 +1599,8 @@
         _sparkInstance.update("none");
       }
 
-      // ── LINE CHART ────────────────────────────────────────────────────────────
-      function drawChart(labels, data, labelName, unit, type="line") {
+      // ── LINE CHART (s vylepšenou osou Y pre teploty) ──────────────────────────
+      function drawChart(labels, data, labelName, unit, type="line", isTempKey=false) {
         document.getElementById("chart-loader").style.display="none";
         const container=document.getElementById("chart-container");
         container.classList.remove("hidden");
@@ -1363,18 +1614,103 @@
         const grad=ctx.createLinearGradient(0,0,0,280);
         grad.addColorStop(0,"rgba(96,165,250,0.45)"); grad.addColorStop(1,"rgba(96,165,250,0.00)");
 
+        // Farebná škála pre teploty
+        function tempTickColor(val) {
+          if (val < 0)  return "#93c5fd";   // mráz – modrá
+          if (val < 10) return "#67e8f9";   // chladno – tyrkys
+          if (val < 18) return "#34d399";   // príjemné – zelená
+          if (val < 25) return "#fbbf24";   // teplo – žltá
+          return "#f87171";                 // horúco – červená
+        }
+
+        // Callback pre os Y s teplomerom
+        const yTickCallback = isTempKey
+          ? (val) => `🌡 ${val} °C`
+          : undefined;
+
+        // Gradient farba bodu podľa hodnoty (pre teploty)
+        let pointColors = undefined;
+        if (isTempKey && data.length) {
+          pointColors = data.map(v => v !== null ? tempTickColor(parseFloat(v)) : "transparent");
+        }
+
         chartInstance=new Chart(ctx,{
           type,
-          data:{labels,datasets:[{label:`${labelName}${unit?" ("+unit+")":""}`,data,borderColor:"#60A5FA",backgroundColor:type==="bar"?"rgba(96,165,250,0.55)":grad,borderWidth:type==="bar"?0:2,pointRadius:0,pointHoverRadius:5,pointHoverBackgroundColor:"#60A5FA",fill:true,tension:0.4}]},
+          data:{
+            labels,
+            datasets:[{
+              label:`${labelName}${unit?" ("+unit+")":""}`,
+              data,
+              borderColor:"#60A5FA",
+              backgroundColor:type==="bar"?"rgba(96,165,250,0.55)":grad,
+              borderWidth:type==="bar"?0:2,
+              pointRadius: isTempKey ? 0 : 0,
+              pointHoverRadius: isTempKey ? 6 : 5,
+              pointHoverBackgroundColor: isTempKey ? pointColors : "#60A5FA",
+              fill:true,
+              tension:0.4
+            }]
+          },
           options:{
             responsive:true,maintainAspectRatio:false,
-            plugins:{legend:{display:false},tooltip:{mode:"index",intersect:false,backgroundColor:isDark?"rgba(8,15,30,0.92)":"rgba(240,248,255,0.95)",titleColor:isDark?"#F0F4FF":"#0D1B2A",bodyColor:isDark?"#94A3B8":"#3A5068",borderColor:"rgba(96,165,250,0.4)",borderWidth:1,padding:10,cornerRadius:10}},
+            plugins:{
+              legend:{display:false},
+              tooltip:{
+                mode:"index",intersect:false,
+                backgroundColor:isDark?"rgba(8,15,30,0.92)":"rgba(240,248,255,0.95)",
+                titleColor:isDark?"#F0F4FF":"#0D1B2A",
+                bodyColor:isDark?"#94A3B8":"#3A5068",
+                borderColor:"rgba(96,165,250,0.4)",borderWidth:1,padding:10,cornerRadius:10,
+                callbacks: isTempKey ? {
+                  label: (c) => {
+                    const v = c.parsed.y;
+                    let feeling = "";
+                    if (v < 0)  feeling = "❄️ Mráz";
+                    else if (v < 10) feeling = "🥶 Chladno";
+                    else if (v < 18) feeling = "😊 Príjemné";
+                    else if (v < 25) feeling = "☀️ Teplo";
+                    else feeling = "🌡️ Horúco";
+                    return ` ${v} °C  ${feeling}`;
+                  }
+                } : undefined
+              }
+            },
             scales:{
-              x:{grid:{display:false},ticks:{maxTicksLimit:12,color:tick,font:{family:"'DM Sans',sans-serif",size:11}}},
-              y:{grid:{color:gridC,borderDash:[5,5]},ticks:{color:tick,font:{family:"'DM Sans',sans-serif",size:11}}}
+              x:{
+                grid:{display:false},
+                ticks:{maxTicksLimit:12,color:tick,font:{family:"'DM Sans',sans-serif",size:11}}
+              },
+              y:{
+                grid:{color:gridC,borderDash:[5,5]},
+                ticks:{
+                  color:tick,
+                  font:{family:"'DM Sans',sans-serif",size:11},
+                  callback: yTickCallback
+                }
+              }
             }
           }
         });
+
+        // Pre teploty pridáme farebnú legendu pod grafom
+        if (isTempKey) {
+          const legend = document.createElement("div");
+          legend.style.cssText = "display:flex;justify-content:center;gap:14px;margin-top:14px;flex-wrap:wrap;";
+          const tempLevels = [
+            { color:"#93c5fd", label:"Mráz (< 0 °C)" },
+            { color:"#67e8f9", label:"Chladno (< 10 °C)" },
+            { color:"#34d399", label:"Príjemné (< 18 °C)" },
+            { color:"#fbbf24", label:"Teplo (< 25 °C)" },
+            { color:"#f87171", label:"Horúco (≥ 25 °C)" },
+          ];
+          legend.innerHTML = tempLevels.map(l=>
+            `<div style="display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--text-secondary);">
+               <span style="width:10px;height:10px;border-radius:50%;background:${l.color};display:inline-block;flex-shrink:0;"></span>
+               ${l.label}
+             </div>`
+          ).join("");
+          container.appendChild(legend);
+        }
       }
 
       // ── CAMERA LIGHTBOX ───────────────────────────────────────────────────────
