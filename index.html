@@ -425,7 +425,106 @@
       display: block;
     }
 
-    /* ── UVOD ── */
+    /* ── UVOD (nová zjednodušená karta) ── */
+    .uvod-simple-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 28px;
+    }
+    @media (max-width: 960px) {
+      .uvod-simple-grid {
+        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
+      }
+      .uvod-simple-cameras {
+        order: 2;
+      }
+      .uvod-simple-meteo {
+        order: 1;
+      }
+    }
+    .uvod-simple-cameras {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .uvod-simple-meteo {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    /* Väčšie sensor karty pre zjednodušený úvod */
+    .sensor-card-large {
+      padding: 28px 30px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 160px;
+      position: relative;
+      overflow: hidden;
+      animation: card-in 0.4s ease both;
+      flex: 1;
+    }
+    .sensor-card-large::before {
+      content: "";
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 130px;
+      height: 130px;
+      background: var(--accent-glow);
+      border-radius: 50%;
+      filter: blur(36px);
+      opacity: 0;
+      transition: opacity var(--transition-mid);
+      pointer-events: none;
+    }
+    .sensor-card-large:hover::before {
+      opacity: 1;
+    }
+    .sensor-card-large .card-value {
+      font-size: 3.4rem;
+    }
+    .sensor-card-large .card-unit {
+      font-size: 1.1rem;
+    }
+    .sensor-card-large .card-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .sensor-card-large .card-icon-wrap {
+      background: var(--accent-dim);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .sensor-card-large .card-icon-wrap svg {
+      width: 22px;
+      height: 22px;
+      color: var(--accent);
+    }
+    .uvod-temp-row {
+      display: flex;
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .uvod-temp-row {
+        flex-direction: column;
+      }
+      .sensor-card-large .card-value {
+        font-size: 2.6rem;
+      }
+    }
+
+    /* ── DETAILY (pôvodný úvod) ── */
     .uvod-grid {
       display: grid;
       grid-template-columns: 260px 1fr;
@@ -434,7 +533,6 @@
     @media (max-width: 900px) {
       .uvod-grid {
         grid-template-columns: 1fr;
-        /* Na mobile: meteo nahor, kamery nadol */
         display: flex;
         flex-direction: column;
       }
@@ -706,6 +804,29 @@
       font-size: 0.74rem;
       color: var(--text-secondary);
       margin-top: 3px;
+    }
+
+    /* Väčší sky status pre jednoduchý úvod */
+    .sky-status-card-large {
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      animation: card-in 0.4s ease both;
+    }
+    .sky-status-card-large .sky-status-icon {
+      font-size: 3.2rem;
+    }
+    .sky-status-card-large .sky-status-value {
+      font-size: 1.65rem;
+    }
+    .sky-status-card-large .sky-status-sub {
+      font-size: 0.88rem;
+      margin-top: 5px;
+    }
+    .sky-status-card-large .sky-status-label {
+      font-size: 0.68rem;
+      margin-bottom: 6px;
     }
 
     /* ── SHMÚ VÝSTRAHY ── */
@@ -1275,6 +1396,14 @@
             </button>
             <button
               class="nav-tab"
+              data-screen="detaily"
+              onclick="switchScreen('detaily')"
+            >
+              <i data-lucide="layout-dashboard"></i>
+              Detaily
+            </button>
+            <button
+              class="nav-tab"
               data-screen="skola"
               onclick="switchScreen('skola')"
             >
@@ -1310,10 +1439,10 @@
       </header>
 
       <main>
-        <!-- ÚVOD -->
+        <!-- ÚVOD (nová zjednodušená karta) -->
         <div id="screen-uvod" class="screen active">
-          <div class="uvod-grid">
-            <div class="cameras-col">
+          <div class="uvod-simple-grid">
+            <div class="uvod-simple-cameras">
               <div class="section-label">
                 <i data-lucide="camera"></i>
                 Školské kamery
@@ -1337,6 +1466,59 @@
                 </div>
                 <img
                   id="cam1"
+                  src=""
+                  alt="Kamera 2"
+                  style="pointer-events:none;"
+                >
+              </div>
+            </div>
+            <div class="uvod-simple-meteo">
+              <div class="block-header">
+                <div class="block-title">
+                  <i data-lucide="cloud-sun"></i>
+                  Počasie v Nitre – prehľad
+                </div>
+                <p class="block-desc">
+                  Teplota · pocitová teplota · stav oblohy · aktualizácia každých 30 s
+                </p>
+              </div>
+
+              <!-- Stav oblohy (veľký) -->
+              <div id="sky-status-wrap-uvod"></div>
+
+              <!-- Teplota + pocitová teplota (veľké karty) -->
+              <div class="uvod-temp-row" id="uvod-temp-row"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DETAILY (pôvodná karta Úvod, kompletná) -->
+        <div id="screen-detaily" class="screen">
+          <div class="uvod-grid">
+            <div class="cameras-col">
+              <div class="section-label">
+                <i data-lucide="camera"></i>
+                Školské kamery
+              </div>
+              <div class="glass-card camera-card" onclick="window.openCam(0)">
+                <div class="cam-badge" style="pointer-events:none;">
+                  <span class="rec-dot"></span>
+                  REC 01
+                </div>
+                <img
+                  id="cam0-detaily"
+                  src=""
+                  alt="Kamera 1"
+                  style="pointer-events:none;"
+                >
+              </div>
+              <div class="glass-card camera-card" onclick="window.openCam(1)">
+                <div class="cam-badge" style="pointer-events:none;">
+                  <span class="rec-dot"></span>
+                  REC 02
+                </div>
+                <img
+                  id="cam1-detaily"
                   src=""
                   alt="Kamera 2"
                   style="pointer-events:none;"
@@ -1569,7 +1751,6 @@
 
     // ── STAV OBLOHY ──────────────────────────────────────────────────────────
     function skyStatusFromData(d) {
-      // Odhadneme stav oblohy z dostupných meteorologických dát
       const cloudiness = d.cloudiness ? parseFloat(d.cloudiness.value) : NaN;
       const rain = d.rain_1h ? parseFloat(d.rain_1h.value) : NaN;
       const snow = d.snow_1h ? parseFloat(d.snow_1h.value) : NaN;
@@ -1627,6 +1808,7 @@
       return null;
     }
 
+    // Render stavu oblohy pre kartu Detaily (pôvodný štýl)
     function renderSkyStatus(d) {
       const wrap = document.getElementById("sky-status-wrap");
       if (!wrap) return;
@@ -1646,11 +1828,27 @@
           </div>`;
     }
 
-    // ── SHMÚ VÝSTRAHY ─────────────────────────────────────────────────────────
-    // Výstrahy načítame zo SHMÚ RSS/JSON feedu cez cors.sh proxy.
-    // Ak sa nepodará načítať, ticho nič nezobrazíme.
+    // Render stavu oblohy pre zjednodušený Úvod (väčší štýl)
+    function renderSkyStatusUvod(d) {
+      const wrap = document.getElementById("sky-status-wrap-uvod");
+      if (!wrap) return;
+      const sky = skyStatusFromData(d);
+      if (!sky) {
+        wrap.innerHTML = "";
+        return;
+      }
+      wrap.innerHTML = `
+          <div class="glass-card sky-status-card-large" style="margin-bottom:4px;">
+            <div class="sky-status-icon">${sky.emoji}</div>
+            <div class="sky-status-info">
+              <div class="sky-status-label">Aktuálny stav oblohy</div>
+              <div class="sky-status-value" style="color:${sky.color};">${sky.label}</div>
+              <div class="sky-status-sub">${sky.sub}</div>
+            </div>
+          </div>`;
+    }
 
-    // Mapovanie kľúčových slov z SHMÚ na slovenčinu + ikony
+    // ── SHMÚ VÝSTRAHY ─────────────────────────────────────────────────────────
     const SHMU_KEYWORD_MAP = [
       { re: /dažď|zrážky|prší|zrážkov/i, label: "Zrážky", emoji: "🌧️" },
       { re: /sneži|sneh|snežen/i, label: "Sneženie", emoji: "❄️" },
@@ -1664,7 +1862,6 @@
       { re: /búrk/i, label: "Búrky", emoji: "⛈️" },
     ];
 
-    // Mapa úrovní výstrah
     function shmuLevel(text) {
       if (/stupeň\s*3|stupeň\s*III|červen/i.test(text)) return 3;
       if (/stupeň\s*2|stupeň\s*II|oranž/i.test(text)) return 2;
@@ -1675,8 +1872,6 @@
       const wrap = document.getElementById("shmu-wrap");
       if (!wrap) return;
       try {
-        // Skúsime rôzne prístupy k SHMÚ RSS feedu
-        // Primárne: SHMÚ výstrahy RSS cez cors proxy
         const corsProxies = [
           "https://api.allorigins.win/get?url=" +
             encodeURIComponent("https://www.shmu.sk/sk/?page=2&id=meteo_rss"),
@@ -1692,9 +1887,7 @@
             const json = await resp.json();
             xmlText = json.contents || null;
             if (xmlText) break;
-          } catch (_) {
-            /* skúsime ďalší */
-          }
+          } catch (_) {}
         }
 
         if (!xmlText) {
@@ -1702,12 +1895,10 @@
           return;
         }
 
-        // Parsovanie RSS XML
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, "text/xml");
         const items = Array.from(xmlDoc.querySelectorAll("item"));
 
-        // Filtrujeme relevantné výstrahy
         const relevant = [];
         items.forEach((item) => {
           const title = item.querySelector("title")?.textContent || "";
@@ -1715,18 +1906,15 @@
           const pub = item.querySelector("pubDate")?.textContent || "";
           const combined = title + " " + desc;
 
-          // Hľadáme relevantné výstrahy
           const isWarning = /výstrah|varovani|upozorneni/i.test(combined);
           if (!isWarning) return;
 
           let matched = SHMU_KEYWORD_MAP.find((m) => m.re.test(combined));
           if (!matched) {
-            // Ak je výstraha, ale nezapadá do kategórie, zaradíme ju obecne
             matched = { label: "Meteorologická výstraha", emoji: "⚠️" };
           }
 
           const level = shmuLevel(combined);
-          // Formátujeme dátum
           let dateStr = "";
           if (pub) {
             try {
@@ -1741,7 +1929,6 @@
             }
           }
 
-          // Orezanie popisu na rozumnú dĺžku
           let cleanDesc = desc.replace(/<[^>]+>/g, "").trim();
           if (cleanDesc.length > 200) cleanDesc = cleanDesc.slice(0, 200) + "…";
 
@@ -1760,7 +1947,6 @@
           return;
         }
 
-        // Zoradiť podľa úrovne (najvyššie prvé)
         relevant.sort((a, b) => b.level - a.level);
         const top = relevant.slice(0, 4);
 
@@ -1788,7 +1974,6 @@
             </div>`;
         lucide.createIcons();
       } catch (_) {
-        // Ticho – nezobrazujeme žiadne chybové hlásenie
         if (wrap) wrap.innerHTML = "";
       }
     }
@@ -2214,6 +2399,8 @@
       const t = Date.now();
       document.getElementById("cam0").src = `${CAM_BASE}/0?t=${t}`;
       document.getElementById("cam1").src = `${CAM_BASE}/1?t=${t}`;
+      document.getElementById("cam0-detaily").src = `${CAM_BASE}/0?t=${t}`;
+      document.getElementById("cam1-detaily").src = `${CAM_BASE}/1?t=${t}`;
 
       loadScreen("uvod");
       setInterval(() => loadScreen(currentScreen), 30000);
@@ -2227,8 +2414,12 @@
         const ts = Date.now();
         const c0 = document.getElementById("cam0");
         const c1 = document.getElementById("cam1");
+        const c0d = document.getElementById("cam0-detaily");
+        const c1d = document.getElementById("cam1-detaily");
         if (c0) c0.src = `${CAM_BASE}/0?t=${ts}`;
         if (c1) c1.src = `${CAM_BASE}/1?t=${ts}`;
+        if (c0d) c0d.src = `${CAM_BASE}/0?t=${ts}`;
+        if (c1d) c1d.src = `${CAM_BASE}/1?t=${ts}`;
       }, 5000);
 
       document.addEventListener("keydown", (e) => {
@@ -2256,6 +2447,7 @@
 
     function loadScreen(name) {
       if (name === "uvod") fetchUvod();
+      if (name === "detaily") fetchDetaily();
       if (name === "skola") fetchSkola();
       if (name === "trieda") fetchTrieda();
     }
@@ -2267,23 +2459,78 @@
         : '<span class="status-error">●</span> Offline / Záloha';
     }
 
-    // ── ÚVOD ──────────────────────────────────────────────────────────────────
+    // ── ÚVOD (zjednodušená karta) ─────────────────────────────────────────────
     async function fetchUvod() {
       try {
         const res = await fetch(`${API}/uvod`);
         if (!res.ok) throw new Error();
         const d = await res.json();
         setStatus(true);
-        renderSkyStatus(d);
-        renderUvod(d);
-        // Upozornenia
+        renderSkyStatusUvod(d);
+        renderUvodSimple(d);
         renderAlerts(null, d.rain_1h?.value, d.snow_1h?.value);
       } catch {
         setStatus(false);
       }
     }
 
-    function renderUvod(d) {
+    function renderUvodSimple(d) {
+      const row = document.getElementById("uvod-temp-row");
+      if (!row) return;
+      row.innerHTML = "";
+
+      // Teplota
+      const temp = d.temperature;
+      if (temp) {
+        row.innerHTML += `
+          <div class="glass-card sensor-card-large" onclick="openModal('temperature','${temp.title}','src0','${temp.unit}',0)" data-title="${(temp.title || '').toLowerCase()}" title="Kliknite pre históriu" style="flex:1;">
+            <div class="card-top">
+              <span class="card-label">${temp.title}</span>
+              <div class="card-icon-wrap"><i data-lucide="${temp.icon || 'thermometer'}"></i></div>
+            </div>
+            <div class="card-value-row">
+              <span class="card-value">${temp.value !== null && temp.value !== undefined ? temp.value : '--'}</span>
+              <span class="card-unit">${temp.unit}</span>
+            </div>
+          </div>`;
+      }
+
+      // Pocitová teplota
+      const feels = d.feels_like;
+      if (feels) {
+        row.innerHTML += `
+          <div class="glass-card sensor-card-large" onclick="openModal('feels_like','${feels.title}','src0','${feels.unit}',0)" data-title="${(feels.title || '').toLowerCase()}" title="Kliknite pre históriu" style="flex:1;">
+            <div class="card-top">
+              <span class="card-label">${feels.title}</span>
+              <div class="card-icon-wrap"><i data-lucide="${feels.icon || 'thermometer'}"></i></div>
+            </div>
+            <div class="card-value-row">
+              <span class="card-value">${feels.value !== null && feels.value !== undefined ? feels.value : '--'}</span>
+              <span class="card-unit">${feels.unit}</span>
+            </div>
+          </div>`;
+      }
+
+      lucide.createIcons();
+      applySearch();
+    }
+
+    // ── DETAILY (pôvodná karta Úvod, kompletná) ───────────────────────────────
+    async function fetchDetaily() {
+      try {
+        const res = await fetch(`${API}/uvod`);
+        if (!res.ok) throw new Error();
+        const d = await res.json();
+        setStatus(true);
+        renderSkyStatus(d);
+        renderDetaily(d);
+        renderAlerts(null, d.rain_1h?.value, d.snow_1h?.value);
+      } catch {
+        setStatus(false);
+      }
+    }
+
+    function renderDetaily(d) {
       const grid = document.getElementById("grid-uvod-meteo");
       grid.innerHTML = "";
       const items = [
@@ -2374,7 +2621,6 @@
         const d = await res.json();
         setStatus(true);
         renderTrieda(d);
-        // Upozornenie CO₂
         renderAlerts(d.co2_value, null, null);
       } catch {
         setStatus(false);
@@ -2492,7 +2738,6 @@
         source !== null && source !== undefined && dataKey
           ? `openModal('${dataKey}','${title}','src${source}','${unit}',${source})`
           : "";
-      // Extra: smer vetra – ukáž kompas
       const isWindDir = key === "wind_direction";
       const windExtra =
         isWindDir && cardinal
@@ -2570,7 +2815,6 @@
       const isDoor = key === "Exti_status" || key === "state";
       const isSocket = key === "socket_status";
 
-      // Detekcia grafu teploty
       const isTempKey =
         key === "temperature" ||
         key === "TempC_SHT" ||
@@ -2583,7 +2827,6 @@
         const data = await res.json();
         const rows = data.rows || [];
 
-        // Labely s dátumom pri zmene dňa
         const labels = rows.map((r, i) => {
           const dt = new Date(r.timestamp);
           const hhmm = `${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")}`;
@@ -3032,19 +3275,16 @@
       grad.addColorStop(0, "rgba(96,165,250,0.45)");
       grad.addColorStop(1, "rgba(96,165,250,0.00)");
 
-      // Farebná škála pre teploty
       function tempTickColor(val) {
-        if (val < 0) return "#93c5fd"; // mráz – modrá
-        if (val < 10) return "#67e8f9"; // chladno – tyrkys
-        if (val < 18) return "#34d399"; // príjemné – zelená
-        if (val < 25) return "#fbbf24"; // teplo – žltá
-        return "#f87171"; // horúco – červená
+        if (val < 0) return "#93c5fd";
+        if (val < 10) return "#67e8f9";
+        if (val < 18) return "#34d399";
+        if (val < 25) return "#fbbf24";
+        return "#f87171";
       }
 
-      // Callback pre os Y s teplomerom
       const yTickCallback = isTempKey ? (val) => `🌡 ${val} °C` : undefined;
 
-      // Gradient farba bodu podľa hodnoty (pre teploty)
       let pointColors = undefined;
       if (isTempKey && data.length) {
         pointColors = data.map((v) =>
@@ -3125,7 +3365,6 @@
         },
       });
 
-      // Pre teploty pridáme farebnú legendu pod grafom
       if (isTempKey) {
         const legend = document.createElement("div");
         legend.style.cssText =
