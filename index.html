@@ -107,7 +107,6 @@
     .bg-layer:nth-child(10) {
       background-image: url("https://images.unsplash.com/photo-1493246507139-91e8fad9978e?w=1920&q=85");
     }
-
     #bg-overlay {
       position: fixed;
       inset: 0;
@@ -131,8 +130,7 @@
       color: var(--text-primary);
       min-height: 100vh;
       overflow-x: hidden;
-      /* FIX: prevent white bar on mobile */
-      background: #050a16;
+      transition: color var(--transition-mid);
     }
     #app-shell {
       position: relative;
@@ -244,6 +242,7 @@
       display: block;
     }
 
+    /* ── DATE/NAME BAR ── */
     .date-bar {
       display: flex;
       align-items: center;
@@ -267,6 +266,7 @@
       color: #fbbf24;
     }
 
+    /* ── ALERTS ── */
     .alerts-bar {
       display: flex;
       gap: 8px;
@@ -306,6 +306,7 @@
       }
     }
 
+    /* ── NAV ── */
     .nav-tabs {
       display: flex;
       gap: 6px;
@@ -342,7 +343,6 @@
       border-color: var(--accent);
       color: var(--accent);
     }
-
     .header-right {
       display: flex;
       align-items: center;
@@ -383,7 +383,6 @@
       border-color: var(--accent);
       background: rgba(255, 255, 255, 0.11);
     }
-
     #theme-toggle {
       display: flex;
       align-items: center;
@@ -411,6 +410,7 @@
       height: 16px;
     }
 
+    /* ── MAIN ── */
     main {
       flex: 1;
       max-width: 1400px;
@@ -425,209 +425,36 @@
       display: block;
     }
 
-    /* ── PREDPOVEĎ POČASIA CARD (nahrádza stav oblohy v header area) ── */
-    .forecast-card {
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      animation: card-in 0.4s ease both;
-      flex-wrap: wrap;
-    }
-    .forecast-now {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-    }
-    .forecast-now-icon {
-      font-size: 2rem;
-      line-height: 1;
-    }
-    .forecast-now-info {
-    }
-    .forecast-now-label {
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.13em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 2px;
-    }
-    .forecast-now-value {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text-primary);
-    }
-    .forecast-now-sub {
-      font-size: 0.72rem;
-      color: var(--text-secondary);
-      margin-top: 2px;
-    }
-    .forecast-divider {
-      width: 1px;
-      height: 50px;
-      background: var(--glass-border);
-      flex-shrink: 0;
-    }
-    .forecast-hours {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      flex: 1;
-      padding-bottom: 2px;
-      scrollbar-width: none;
-    }
-    .forecast-hours::-webkit-scrollbar {
-      display: none;
-    }
-    .forecast-hour-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-      min-width: 48px;
-    }
-    .fh-time {
-      font-size: 0.62rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-    .fh-icon {
-      font-size: 1.1rem;
-      line-height: 1;
-    }
-    .fh-temp {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--text-primary);
-    }
-    .fh-rain {
-      font-size: 0.6rem;
-      color: #60a5fa;
-    }
-
-    /* Väčšia predpoveď pre úvod */
-    .forecast-card-large {
-      padding: 20px 24px;
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      animation: card-in 0.4s ease both;
-      flex-wrap: wrap;
-    }
-    .forecast-card-large .forecast-now-icon {
-      font-size: 2.8rem;
-    }
-    .forecast-card-large .forecast-now-value {
-      font-size: 1.4rem;
-    }
-
-    /* ── RADAR MAPA ── */
-    .radar-card {
-      position: relative;
-      overflow: hidden;
-      border-radius: var(--radius-card);
-      animation: card-in 0.4s ease both;
-    }
-    .radar-card-inner {
-      position: relative;
-      width: 100%;
-      padding-bottom: 62%;
-      overflow: hidden;
-      border-radius: calc(var(--radius-card) - 2px);
-    }
-    .radar-card-inner iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-    .radar-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0, 0, 0, 0.7);
-      backdrop-filter: blur(8px);
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #60a5fa;
-      z-index: 2;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      pointer-events: none;
-    }
-    .radar-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #60a5fa;
-      animation: blink 1.4s step-start infinite;
-    }
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
-
-    /* ── UVOD – nový layout ── */
-    .uvod-new-grid {
+    /* ── UVOD (nová zjednodušená karta) ── */
+    .uvod-simple-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
+      grid-template-columns: 320px 1fr;
+      gap: 28px;
     }
-    .uvod-left-col {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .uvod-right-col {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    /* Kamery + radar v pravom stĺpci – poradie: kamera1, radar, kamera2 */
-    .uvod-cameras-stack {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    @media (max-width: 900px) {
-      .uvod-new-grid {
+    @media (max-width: 960px) {
+      .uvod-simple-grid {
         grid-template-columns: 1fr;
-      }
-      .uvod-left-col {
-        order: 1;
-      }
-      .uvod-right-col {
-        order: 2;
-      }
-    }
-
-    /* ── TEMP ROW ── */
-    .uvod-temp-row {
-      display: flex;
-      gap: 16px;
-    }
-    @media (max-width: 600px) {
-      .uvod-temp-row {
+        display: flex;
         flex-direction: column;
       }
-      .sensor-card-large .card-value {
-        font-size: 2.6rem;
+      .uvod-simple-cameras {
+        order: 2;
+      }
+      .uvod-simple-meteo {
+        order: 1;
       }
     }
-
-    /* ── SENSOR CARDS LARGE ── */
+    .uvod-simple-cameras {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .uvod-simple-meteo {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    /* Väčšie sensor karty pre zjednodušený úvod */
     .sensor-card-large {
       padding: 28px 30px;
       cursor: pointer;
@@ -684,8 +511,20 @@
       height: 22px;
       color: var(--accent);
     }
+    .uvod-temp-row {
+      display: flex;
+      gap: 16px;
+    }
+    @media (max-width: 600px) {
+      .uvod-temp-row {
+        flex-direction: column;
+      }
+      .sensor-card-large .card-value {
+        font-size: 2.6rem;
+      }
+    }
 
-    /* ── DETAILY ── */
+    /* ── DETAILY (pôvodný úvod) ── */
     .uvod-grid {
       display: grid;
       grid-template-columns: 260px 1fr;
@@ -755,6 +594,11 @@
       background: #f87171;
       animation: blink 1.2s step-start infinite;
     }
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
     .camera-card img {
       width: 100%;
       aspect-ratio: 16 / 9;
@@ -766,7 +610,6 @@
     .camera-card:hover img {
       transform: scale(1.04);
     }
-
     .meteo-col {
       display: flex;
       flex-direction: column;
@@ -795,7 +638,6 @@
       color: var(--text-secondary);
       margin-top: 4px;
     }
-
     .sensor-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -811,7 +653,6 @@
         grid-template-columns: 1fr;
       }
     }
-
     .sensor-card {
       padding: 15px;
       cursor: pointer;
@@ -855,7 +696,6 @@
         transform: translateY(0);
       }
     }
-
     .card-top {
       display: flex;
       justify-content: space-between;
@@ -917,6 +757,7 @@
       color: #f87171;
     }
 
+    /* wind direction compass inline */
     .wind-dir-row {
       display: flex;
       align-items: center;
@@ -927,6 +768,65 @@
       font-size: 0.75rem;
       font-weight: 700;
       color: var(--accent);
+    }
+
+    /* ── SKY STATUS CARD ── */
+    .sky-status-card {
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      animation: card-in 0.4s ease both;
+    }
+    .sky-status-icon {
+      font-size: 2.2rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .sky-status-info {
+      flex: 1;
+    }
+    .sky-status-label {
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .sky-status-value {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .sky-status-sub {
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    /* Väčší sky status pre jednoduchý úvod */
+    .sky-status-card-large {
+      padding: 22px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      animation: card-in 0.4s ease both;
+    }
+    .sky-status-card-large .sky-status-icon {
+      font-size: 3.2rem;
+    }
+    .sky-status-card-large .sky-status-value {
+      font-size: 1.65rem;
+    }
+    .sky-status-card-large .sky-status-sub {
+      font-size: 0.88rem;
+      margin-top: 5px;
+    }
+    .sky-status-card-large .sky-status-label {
+      font-size: 0.68rem;
+      margin-bottom: 6px;
     }
 
     /* ── SHMÚ VÝSTRAHY ── */
@@ -1025,7 +925,7 @@
       color: #f87171;
     }
 
-    /* ── ŠKOLA ── */
+    /* ── SKOLA ── */
     .skola-header {
       display: flex;
       align-items: center;
@@ -1185,21 +1085,18 @@
       font-size: 1.45rem;
     }
 
-    /* ── MODAL – OPRAVENÉ PRE MOBILE ── */
+    /* ── MODAL ── */
     #chart-modal {
       position: fixed;
       inset: 0;
       z-index: 50;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
       background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      padding: 16px;
-      padding-top: env(safe-area-inset-top, 16px);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
+      padding: 20px;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
@@ -1221,7 +1118,6 @@
       backdrop-filter: blur(24px);
       -webkit-backdrop-filter: blur(24px);
       border-radius: 28px;
-      margin: auto;
     }
     #chart-modal.open #chart-modal-content {
       transform: scale(1);
@@ -1243,9 +1139,6 @@
       transition:
         background var(--transition-fast),
         color var(--transition-fast);
-      /* Väčší tap target na mobile */
-      min-width: 44px;
-      min-height: 44px;
     }
     .modal-close:hover {
       background: rgba(255, 255, 255, 0.14);
@@ -1260,7 +1153,6 @@
       font-size: 1.4rem;
       font-weight: 600;
       margin-bottom: 3px;
-      padding-right: 50px;
     }
     .modal-subtitle {
       font-size: 0.8rem;
@@ -1291,13 +1183,11 @@
     #chart-container.hidden {
       display: none;
     }
-
     .pie-layout {
       display: flex;
       align-items: center;
       gap: 28px;
       justify-content: center;
-      flex-wrap: wrap;
     }
     .pie-canvas-wrap {
       position: relative;
@@ -1358,6 +1248,7 @@
       width: 100%;
     }
 
+    /* compass modal */
     .compass-modal-wrap {
       display: flex;
       flex-direction: column;
@@ -1389,7 +1280,7 @@
       color: #f87171;
     }
 
-    /* ── CAMERA LIGHTBOX ── */
+    /* cam modal */
     #cam-modal {
       position: fixed;
       inset: 0;
@@ -1400,11 +1291,10 @@
       background: rgba(0, 0, 0, 0.82);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
-      padding: 16px;
+      padding: 20px;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s ease;
-      overflow-y: auto;
     }
     #cam-modal.open {
       opacity: 1;
@@ -1416,14 +1306,13 @@
       width: 100%;
       transform: scale(0.95);
       transition: transform 0.3s ease;
-      margin: auto;
     }
     #cam-modal.open #cam-modal-inner {
       transform: scale(1);
     }
     #cam-modal .cam-switch-btn {
       border-radius: 999px;
-      padding: 8px 20px;
+      padding: 6px 18px;
       font-size: 0.78rem;
       font-weight: 600;
       cursor: pointer;
@@ -1431,7 +1320,6 @@
         background 0.15s,
         color 0.15s,
         border-color 0.15s;
-      min-height: 40px;
     }
     #cam-modal .cam-switch-btn.active {
       background: rgba(96, 165, 250, 0.25);
@@ -1466,9 +1354,6 @@
       .pie-canvas-wrap {
         width: 190px;
         height: 190px;
-      }
-      .uvod-new-grid {
-        grid-template-columns: 1fr;
       }
     }
     </style>
@@ -1545,84 +1430,70 @@
             </button>
           </div>
         </div>
+
+        <!-- Dátum, meniny, sviatky -->
         <div class="date-bar" id="date-bar"></div>
+
+        <!-- Upozornenia -->
         <div class="alerts-bar" id="alerts-bar"></div>
       </header>
 
       <main>
-        <!-- ÚVOD – nový layout: vľavo text+predpoveď, vpravo kamera1+radar+kamera2 -->
+        <!-- ÚVOD (nová zjednodušená karta) -->
         <div id="screen-uvod" class="screen active">
-          <div class="uvod-new-grid">
-            <!-- ĽAVÝ STĹPEC: predpoveď + teploty -->
-            <div class="uvod-left-col">
+          <div class="uvod-simple-grid">
+            <div class="uvod-simple-cameras">
+              <div class="section-label">
+                <i data-lucide="camera"></i>
+                Školské kamery
+              </div>
+              <div class="glass-card camera-card" onclick="window.openCam(0)">
+                <div class="cam-badge" style="pointer-events:none;">
+                  <span class="rec-dot"></span>
+                  REC 01
+                </div>
+                <img
+                  id="cam0"
+                  src=""
+                  alt="Kamera 1"
+                  style="pointer-events:none;"
+                >
+              </div>
+              <div class="glass-card camera-card" onclick="window.openCam(1)">
+                <div class="cam-badge" style="pointer-events:none;">
+                  <span class="rec-dot"></span>
+                  REC 02
+                </div>
+                <img
+                  id="cam1"
+                  src=""
+                  alt="Kamera 2"
+                  style="pointer-events:none;"
+                >
+              </div>
+            </div>
+            <div class="uvod-simple-meteo">
               <div class="block-header">
                 <div class="block-title">
                   <i data-lucide="cloud-sun"></i>
-                  Počasie v Nitre
+                  Počasie v Nitre – prehľad
                 </div>
                 <p class="block-desc">
-                  Predpoveď · teplota · aktualizácia každých 30 s
+                  Teplota · pocitová teplota · stav oblohy · aktualizácia
+                  každých 30 s
                 </p>
               </div>
-              <!-- Predpoveď počasia (nahrádza stav oblohy) -->
-              <div id="forecast-wrap-uvod"></div>
-              <!-- Teplota + pocitová teplota -->
+
+              <!-- Stav oblohy (veľký) -->
+              <div id="sky-status-wrap-uvod"></div>
+
+              <!-- Teplota + pocitová teplota (veľké karty) -->
               <div class="uvod-temp-row" id="uvod-temp-row"></div>
-            </div>
-            <!-- PRAVÝ STĹPEC: kamera 1, radar, kamera 2 -->
-            <div class="uvod-right-col">
-              <div class="section-label">
-                <i data-lucide="camera"></i>
-                Školské kamery & radar
-              </div>
-              <div class="uvod-cameras-stack">
-                <!-- Kamera 1 -->
-                <div class="glass-card camera-card" onclick="window.openCam(0)">
-                  <div class="cam-badge" style="pointer-events:none;">
-                    <span class="rec-dot"></span>
-                    REC 01
-                  </div>
-                  <img
-                    id="cam0"
-                    src=""
-                    alt="Kamera 1"
-                    style="pointer-events:none;"
-                  >
-                </div>
-                <!-- RADAR -->
-                <div class="glass-card radar-card">
-                  <div class="radar-badge">
-                    <span class="radar-dot"></span>
-                    RADAR
-                  </div>
-                  <div class="radar-card-inner">
-                    <iframe
-                      src="https://embed.windy.com/embed2.html?lat=48.32&lon=18.09&detailLat=48.32&detailLon=18.09&width=650&height=450&zoom=8&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1"
-                      allowfullscreen
-                      loading="lazy"
-                      title="Radar zrážok – Nitra"
-                    ></iframe>
-                  </div>
-                </div>
-                <!-- Kamera 2 -->
-                <div class="glass-card camera-card" onclick="window.openCam(1)">
-                  <div class="cam-badge" style="pointer-events:none;">
-                    <span class="rec-dot"></span>
-                    REC 02
-                  </div>
-                  <img
-                    id="cam1"
-                    src=""
-                    alt="Kamera 2"
-                    style="pointer-events:none;"
-                  >
-                </div>
-              </div>
             </div>
           </div>
         </div>
 
-        <!-- DETAILY -->
+        <!-- DETAILY (pôvodná karta Úvod, kompletná) -->
         <div id="screen-detaily" class="screen">
           <div class="uvod-grid">
             <div class="cameras-col">
@@ -1654,21 +1525,6 @@
                   style="pointer-events:none;"
                 >
               </div>
-              <!-- RADAR v detailoch, pod kamerami -->
-              <div class="glass-card radar-card" style="margin-top:2px;">
-                <div class="radar-badge">
-                  <span class="radar-dot"></span>
-                  RADAR
-                </div>
-                <div class="radar-card-inner">
-                  <iframe
-                    src="https://embed.windy.com/embed2.html?lat=48.32&lon=18.09&detailLat=48.32&detailLon=18.09&width=650&height=450&zoom=8&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1"
-                    allowfullscreen
-                    loading="lazy"
-                    title="Radar zrážok – Nitra"
-                  ></iframe>
-                </div>
-              </div>
             </div>
             <div class="meteo-col">
               <div class="block-header">
@@ -1680,9 +1536,13 @@
                   Vonkajšie klimatické podmienky · aktualizácia každých 30 s
                 </p>
               </div>
-              <!-- Predpoveď namiesto stavu oblohy -->
-              <div id="forecast-wrap-detaily"></div>
+
+              <!-- Stav oblohy -->
+              <div id="sky-status-wrap"></div>
+
               <div class="sensor-grid" id="grid-uvod-meteo"></div>
+
+              <!-- SHMÚ výstrahy -->
               <div id="shmu-wrap"></div>
             </div>
           </div>
@@ -1762,14 +1622,9 @@
     </div>
 
     <!-- CHART MODAL -->
-    <div
-      id="chart-modal"
-      role="dialog"
-      aria-modal="true"
-      onclick="if(event.target===this)closeModal()"
-    >
+    <div id="chart-modal" role="dialog" aria-modal="true">
       <div id="chart-modal-content">
-        <button class="modal-close" onclick="closeModal()" aria-label="Zavrieť">
+        <button class="modal-close" onclick="closeModal()">
           <i data-lucide="x"></i>
         </button>
         <h3 id="modal-title">Graf</h3>
@@ -1808,7 +1663,7 @@
           </div>
           <button
             onclick="closeCam()"
-            style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;"
+            style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;"
           >
             <i data-lucide="x" style="width:18px;height:18px;"></i>
           </button>
@@ -1841,6 +1696,7 @@
     </div>
 
     <script>
+    // ── KONFIGURÁCIA ─────────────────────────────────────────────────────────
     const API = "https://meteorological-project.onrender.com/api";
     const CAM_BASE = `${API}/camera`;
 
@@ -1850,6 +1706,9 @@
       _pieLabels = [],
       _pieIdx = 0;
     let currentScreen = "uvod";
+    let _alertCO2 = false,
+      _alertRain = false,
+      _alertSnow = false;
 
     const PERCENT_KEYS = new Set([
       "humidity",
@@ -1865,7 +1724,7 @@
       return unit === "%" || PERCENT_KEYS.has(key);
     }
 
-    // ── SVETOVÉ STRANY ────────────────────────────────────────────────────
+    // ── SVETOVÉ STRANY ────────────────────────────────────────────────────────
     function degToCardinal(deg) {
       if (deg === "--" || deg === null || deg === undefined) return "";
       const d = parseFloat(deg);
@@ -1891,121 +1750,106 @@
       return dirs[Math.round(d / 22.5) % 16];
     }
 
-    // ── PREDPOVEĎ POČASIA Z OPEN-METEO (pre SHMÚ oblasť Nitra) ──────────
-    const NITRA_LAT = 48.32;
-    const NITRA_LON = 18.09;
+    // ── STAV OBLOHY ──────────────────────────────────────────────────────────
+    function skyStatusFromData(d) {
+      const cloudiness = d.cloudiness ? parseFloat(d.cloudiness.value) : NaN;
+      const rain = d.rain_1h ? parseFloat(d.rain_1h.value) : NaN;
+      const snow = d.snow_1h ? parseFloat(d.snow_1h.value) : NaN;
 
-    const WMO_CODES = {
-      0: { emoji: "☀️", label: "Jasno" },
-      1: { emoji: "🌤️", label: "Prevažne jasno" },
-      2: { emoji: "⛅", label: "Čiastočne oblačno" },
-      3: { emoji: "☁️", label: "Zamračené" },
-      45: { emoji: "🌫️", label: "Hmla" },
-      48: { emoji: "🌫️", label: "Mrznúca hmla" },
-      51: { emoji: "🌦️", label: "Slabé mrholenie" },
-      53: { emoji: "🌦️", label: "Mrholenie" },
-      55: { emoji: "🌧️", label: "Silné mrholenie" },
-      61: { emoji: "🌧️", label: "Slabý dážď" },
-      63: { emoji: "🌧️", label: "Dážď" },
-      65: { emoji: "🌧️", label: "Silný dážď" },
-      66: { emoji: "🌨️", label: "Mrznúci dážď" },
-      67: { emoji: "🌨️", label: "Silný mrznúci dážď" },
-      71: { emoji: "❄️", label: "Slabé sneženie" },
-      73: { emoji: "❄️", label: "Sneženie" },
-      75: { emoji: "❄️", label: "Silné sneženie" },
-      77: { emoji: "🌨️", label: "Snehové zrná" },
-      80: { emoji: "🌦️", label: "Prehánky" },
-      81: { emoji: "🌧️", label: "Silné prehánky" },
-      82: { emoji: "⛈️", label: "Prívalové prehánky" },
-      85: { emoji: "🌨️", label: "Snehové prehánky" },
-      86: { emoji: "🌨️", label: "Silné snehové prehánky" },
-      95: { emoji: "⛈️", label: "Búrka" },
-      96: { emoji: "⛈️", label: "Búrka s krupobitím" },
-      99: { emoji: "⛈️", label: "Silná búrka s krupobitím" },
-    };
-
-    function getWmo(code) {
-      return WMO_CODES[code] || { emoji: "🌡️", label: "Neznáme" };
-    }
-
-    let _forecastData = null;
-
-    async function fetchForecast() {
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${NITRA_LAT}&longitude=${NITRA_LON}&hourly=temperature_2m,precipitation_probability,weathercode&current_weather=true&forecast_days=2&timezone=Europe%2FPrague&windspeed_unit=ms`;
-        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-        if (!res.ok) throw new Error();
-        _forecastData = await res.json();
-        return _forecastData;
-      } catch (e) {
-        return null;
+      if (!isNaN(snow) && snow > 0)
+        return {
+          emoji: "❄️",
+          label: "Sneženie",
+          sub: `${snow} mm/h`,
+          color: "#93c5fd",
+        };
+      if (!isNaN(rain) && rain > 5)
+        return {
+          emoji: "⛈️",
+          label: "Búrky / silný dážď",
+          sub: `${rain} mm/h`,
+          color: "#f87171",
+        };
+      if (!isNaN(rain) && rain > 0)
+        return {
+          emoji: "🌧️",
+          label: "Dážď",
+          sub: `${rain} mm/h`,
+          color: "#60a5fa",
+        };
+      if (!isNaN(cloudiness)) {
+        if (cloudiness >= 90)
+          return {
+            emoji: "☁️",
+            label: "Zamračené",
+            sub: `${cloudiness} % oblačnosť`,
+            color: "#94a3b8",
+          };
+        if (cloudiness >= 60)
+          return {
+            emoji: "🌥️",
+            label: "Oblačno",
+            sub: `${cloudiness} % oblačnosť`,
+            color: "#94a3b8",
+          };
+        if (cloudiness >= 25)
+          return {
+            emoji: "⛅",
+            label: "Polooblačno",
+            sub: `${cloudiness} % oblačnosť`,
+            color: "#fbbf24",
+          };
+        return {
+          emoji: "☀️",
+          label: "Jasno",
+          sub: `${cloudiness} % oblačnosť`,
+          color: "#fbbf24",
+        };
       }
+      return null;
     }
 
-    function renderForecastCard(data, containerId, large = false) {
-      const wrap = document.getElementById(containerId);
+    // Render stavu oblohy pre kartu Detaily (pôvodný štýl)
+    function renderSkyStatus(d) {
+      const wrap = document.getElementById("sky-status-wrap");
       if (!wrap) return;
-      if (!data) {
-        wrap.innerHTML = `<div class="glass-card ${large ? "forecast-card-large" : "forecast-card"}" style="margin-bottom:12px;"><div style="color:var(--text-muted);font-size:0.8rem;">Predpoveď nedostupná</div></div>`;
+      const sky = skyStatusFromData(d);
+      if (!sky) {
+        wrap.innerHTML = "";
         return;
       }
-
-      const cw = data.current_weather;
-      const nowCode = cw ? cw.weathercode : 0;
-      const nowWmo = getWmo(nowCode);
-      const nowTemp = cw ? Math.round(cw.temperature) : "--";
-
-      // Nasledujúce hodiny (6 položiek)
-      const now = new Date();
-      const nowHour = now.getHours();
-      const times = data.hourly?.time || [];
-      const temps = data.hourly?.temperature_2m || [];
-      const precip = data.hourly?.precipitation_probability || [];
-      const codes = data.hourly?.weathercode || [];
-
-      const hours = [];
-      let count = 0;
-      for (let i = 0; i < times.length && count < 7; i++) {
-        const t = new Date(times[i]);
-        if (t > now) {
-          hours.push({
-            label: `${String(t.getHours()).padStart(2, "0")}:00`,
-            temp: Math.round(temps[i]),
-            rain: precip[i] || 0,
-            wmo: getWmo(codes[i]),
-          });
-          count++;
-        }
-      }
-
-      const hoursHtml = hours
-        .map(
-          (h) => `
-        <div class="forecast-hour-item">
-          <span class="fh-time">${h.label}</span>
-          <span class="fh-icon">${h.wmo.emoji}</span>
-          <span class="fh-temp">${h.temp}°</span>
-          ${h.rain > 0 ? `<span class="fh-rain">${h.rain}%</span>` : '<span class="fh-rain" style="opacity:0;">0%</span>'}
-        </div>`,
-        )
-        .join("");
-
       wrap.innerHTML = `
-        <div class="glass-card ${large ? "forecast-card-large" : "forecast-card"}" style="margin-bottom:12px;">
-          <div class="forecast-now">
-            <div class="forecast-now-icon">${nowWmo.emoji}</div>
-            <div class="forecast-now-info">
-              <div class="forecast-now-label">Predpoveď Nitra</div>
-              <div class="forecast-now-value" style="color:var(--accent);">${nowWmo.label}</div>
-              <div class="forecast-now-sub">${nowTemp}°C · práve teraz</div>
+          <div class="glass-card sky-status-card" style="margin-bottom:12px;">
+            <div class="sky-status-icon">${sky.emoji}</div>
+            <div class="sky-status-info">
+              <div class="sky-status-label">Aktuálny stav oblohy</div>
+              <div class="sky-status-value" style="color:${sky.color};">${sky.label}</div>
+              <div class="sky-status-sub">${sky.sub}</div>
             </div>
-          </div>
-          <div class="forecast-divider"></div>
-          <div class="forecast-hours">${hoursHtml}</div>
-        </div>`;
+          </div>`;
     }
 
-    // ── SHMÚ VÝSTRAHY ─────────────────────────────────────────────────────
+    // Render stavu oblohy pre zjednodušený Úvod (väčší štýl)
+    function renderSkyStatusUvod(d) {
+      const wrap = document.getElementById("sky-status-wrap-uvod");
+      if (!wrap) return;
+      const sky = skyStatusFromData(d);
+      if (!sky) {
+        wrap.innerHTML = "";
+        return;
+      }
+      wrap.innerHTML = `
+          <div class="glass-card sky-status-card-large" style="margin-bottom:4px;">
+            <div class="sky-status-icon">${sky.emoji}</div>
+            <div class="sky-status-info">
+              <div class="sky-status-label">Aktuálny stav oblohy</div>
+              <div class="sky-status-value" style="color:${sky.color};">${sky.label}</div>
+              <div class="sky-status-sub">${sky.sub}</div>
+            </div>
+          </div>`;
+    }
+
+    // ── SHMÚ VÝSTRAHY ─────────────────────────────────────────────────────────
     const SHMU_KEYWORD_MAP = [
       { re: /dažď|zrážky|prší|zrážkov/i, label: "Zrážky", emoji: "🌧️" },
       { re: /sneži|sneh|snežen/i, label: "Sneženie", emoji: "❄️" },
@@ -2018,27 +1862,35 @@
       },
       { re: /búrk/i, label: "Búrky", emoji: "⛈️" },
     ];
+
     function shmuLevel(text) {
       if (/stupeň\s*3|stupeň\s*III|červen/i.test(text)) return 3;
       if (/stupeň\s*2|stupeň\s*II|oranž/i.test(text)) return 2;
       return 1;
     }
+
     async function fetchShmuWarnings() {
       const wrap = document.getElementById("shmu-wrap");
       if (!wrap) return;
       try {
-        const proxyUrl =
+        const corsProxies = [
           "https://api.allorigins.win/get?url=" +
-          encodeURIComponent("https://www.shmu.sk/sk/?page=2&id=meteo_rss");
-        const resp = await fetch(proxyUrl, {
-          signal: AbortSignal.timeout(7000),
-        });
-        if (!resp.ok) {
-          wrap.innerHTML = "";
-          return;
+            encodeURIComponent("https://www.shmu.sk/sk/?page=2&id=meteo_rss"),
+        ];
+
+        let xmlText = null;
+        for (const proxyUrl of corsProxies) {
+          try {
+            const resp = await fetch(proxyUrl, {
+              signal: AbortSignal.timeout(7000),
+            });
+            if (!resp.ok) continue;
+            const json = await resp.json();
+            xmlText = json.contents || null;
+            if (xmlText) break;
+          } catch (_) {}
         }
-        const json = await resp.json();
-        const xmlText = json.contents || null;
+
         if (!xmlText) {
           wrap.innerHTML = "";
           return;
@@ -2047,28 +1899,40 @@
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, "text/xml");
         const items = Array.from(xmlDoc.querySelectorAll("item"));
+
         const relevant = [];
         items.forEach((item) => {
           const title = item.querySelector("title")?.textContent || "";
           const desc = item.querySelector("description")?.textContent || "";
           const pub = item.querySelector("pubDate")?.textContent || "";
           const combined = title + " " + desc;
-          if (!/výstrah|varovani|upozorneni/i.test(combined)) return;
+
+          const isWarning = /výstrah|varovani|upozorneni/i.test(combined);
+          if (!isWarning) return;
+
           let matched = SHMU_KEYWORD_MAP.find((m) => m.re.test(combined));
-          if (!matched)
+          if (!matched) {
             matched = { label: "Meteorologická výstraha", emoji: "⚠️" };
+          }
+
           const level = shmuLevel(combined);
           let dateStr = "";
           if (pub) {
             try {
               const d = new Date(pub);
-              dateStr = `${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}. ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+              const dd = String(d.getDate()).padStart(2, "0");
+              const mm = String(d.getMonth() + 1).padStart(2, "0");
+              const hh = String(d.getHours()).padStart(2, "0");
+              const min = String(d.getMinutes()).padStart(2, "0");
+              dateStr = `${dd}.${mm}. ${hh}:${min}`;
             } catch (_) {
               dateStr = pub.slice(0, 16);
             }
           }
+
           let cleanDesc = desc.replace(/<[^>]+>/g, "").trim();
           if (cleanDesc.length > 200) cleanDesc = cleanDesc.slice(0, 200) + "…";
+
           relevant.push({
             emoji: matched.emoji,
             label: matched.label,
@@ -2078,41 +1942,44 @@
             dateStr,
           });
         });
+
         if (!relevant.length) {
           wrap.innerHTML = "";
           return;
         }
+
         relevant.sort((a, b) => b.level - a.level);
         const top = relevant.slice(0, 4);
+
         const levelLabel = { 1: "Stupeň 1", 2: "Stupeň 2", 3: "Stupeň 3" };
+
         wrap.innerHTML = `
-          <div class="shmu-section">
-            <div class="shmu-section-title"><i data-lucide="triangle-alert"></i> Výstrahy SHMÚ</div>
-            <div class="shmu-warnings-list">
-              ${top
-                .map(
-                  (w) => `
-                <div class="shmu-warning-card level-${w.level}">
-                  <div class="shmu-warn-icon">${w.emoji}</div>
-                  <div class="shmu-warn-body">
-                    <div class="shmu-warn-title">${w.label}</div>
-                    ${w.desc ? `<div class="shmu-warn-desc">${w.desc}</div>` : ""}
-                    ${w.dateStr ? `<div class="shmu-warn-meta">Vydané: ${w.dateStr}</div>` : ""}
-                  </div>
-                  <span class="shmu-badge level-${w.level}">${levelLabel[w.level]}</span>
-                </div>`,
-                )
-                .join("")}
-            </div>
-          </div>`;
+            <div class="shmu-section">
+              <div class="shmu-section-title"><i data-lucide="triangle-alert"></i> Výstrahy SHMÚ</div>
+              <div class="shmu-warnings-list">
+                ${top
+                  .map(
+                    (w) => `
+                  <div class="shmu-warning-card level-${w.level}">
+                    <div class="shmu-warn-icon">${w.emoji}</div>
+                    <div class="shmu-warn-body">
+                      <div class="shmu-warn-title">${w.label}</div>
+                      ${w.desc ? `<div class="shmu-warn-desc">${w.desc}</div>` : ""}
+                      ${w.dateStr ? `<div class="shmu-warn-meta">Vydané: ${w.dateStr}</div>` : ""}
+                    </div>
+                    <span class="shmu-badge level-${w.level}">${levelLabel[w.level]}</span>
+                  </div>`,
+                  )
+                  .join("")}
+              </div>
+            </div>`;
         lucide.createIcons();
       } catch (_) {
         if (wrap) wrap.innerHTML = "";
       }
     }
 
-    // ── SLOVENSKÝ KALENDÁR ────────────────────────────────────────────────
-    // Meniny sú indexované ako "MM-DD"
+    // ── SLOVENSKÝ KALENDÁR (meniny + sviatky) ────────────────────────────────
     const SK_CALENDAR = {
       "01-01": "Nový rok",
       "01-06": "Traja králi",
@@ -2376,7 +2243,7 @@
       "11-14": "Irma",
       "11-15": "Leopold",
       "11-16": "Agnesa",
-      "11-17": "Klaudia",
+      "11-17": "Klaudia · Deň boja za slobodu",
       "11-18": "Eugen",
       "11-19": "Alžbeta",
       "11-20": "Félix",
@@ -2422,6 +2289,7 @@
       "12-30": "Dávid",
       "12-31": "Silvester",
     };
+
     const SK_HOLIDAYS = {
       "01-01": "Nový rok",
       "01-06": "Zjavenie Pána (Traja králi)",
@@ -2437,6 +2305,22 @@
       "12-25": "Prvý sviatok vianočný",
       "12-26": "Druhý sviatok vianočný",
     };
+
+    const SK_INTL_DAYS = {
+      "03-08": "Medzinárodný deň žien",
+      "04-22": "Deň Zeme",
+      "05-15": "Medzinárodný deň rodiny",
+      "06-01": "Medzinárodný deň detí",
+      "06-05": "Svetový deň životného prostredia",
+      "06-08": "Svetový deň oceánov",
+      "09-16": "Medzinárodný deň ozónovej vrstvy",
+      "10-04": "Svetový deň zvierat",
+      "10-16": "Svetový deň výživy",
+      "11-20": "Svetový deň detí (OSN)",
+      "12-01": "Svetový deň boja proti AIDS",
+      "12-10": "Medzinárodný deň ľudských práv",
+    };
+
     const SK_DAYS = ["Ne", "Po", "Ut", "St", "Št", "Pi", "So"];
     const SK_MONTHS = [
       "januára",
@@ -2454,7 +2338,6 @@
     ];
 
     function renderDateBar() {
-      // Použijeme skutočný aktuálny dátum z prehliadača
       const now = new Date();
       const dd = String(now.getDate()).padStart(2, "0");
       const mm = String(now.getMonth() + 1).padStart(2, "0");
@@ -2463,11 +2346,16 @@
       const dateStr = `${now.getDate()}. ${SK_MONTHS[now.getMonth()]} ${now.getFullYear()}`;
       const meniny = SK_CALENDAR[key] || "";
       const holiday = SK_HOLIDAYS[key] || "";
+      const intlDay = SK_INTL_DAYS[key] || "";
+
       let html = `<span class="date-bar-day">${dayName}, ${dateStr}</span>`;
       if (meniny)
         html += `<span class="date-bar-sep">·</span><span class="date-bar-meniny">🎂 Meniny: ${meniny}</span>`;
       if (holiday)
         html += `<span class="date-bar-sep">·</span><span class="date-bar-sviatok">🎉 ${holiday}</span>`;
+      else if (intlDay)
+        html += `<span class="date-bar-sep">·</span><span class="date-bar-sviatok">🌍 ${intlDay}</span>`;
+
       document.getElementById("date-bar").innerHTML = html;
     }
 
@@ -2475,19 +2363,22 @@
       const bar = document.getElementById("alerts-bar");
       let html = "";
       const co2 = parseFloat(co2Val);
-      if (!isNaN(co2) && co2 > 1000)
-        html += `<div class="alert-pill danger"><i data-lucide="wind"></i> CO₂ nad normou (${co2} ppm) – otvor okno!</div>`;
+      if (!isNaN(co2) && co2 > 1000) {
+        html += `<div class="alert-pill danger"><i data-lucide="wind"></i> CO₂ nad normou (${co2} ppm) – otvor okno v IT učebni!</div>`;
+      }
       const rain = parseFloat(rainVal);
-      if (!isNaN(rain) && rain > 0)
+      if (!isNaN(rain) && rain > 0) {
         html += `<div class="alert-pill warn"><i data-lucide="cloud-rain"></i> Aktuálne prší (${rain} mm/h)</div>`;
+      }
       const snow = parseFloat(snowVal);
-      if (!isNaN(snow) && snow > 0)
+      if (!isNaN(snow) && snow > 0) {
         html += `<div class="alert-pill warn"><i data-lucide="cloud-snow"></i> Aktuálne sneží (${snow} mm/h)</div>`;
+      }
       bar.innerHTML = html;
       if (html) lucide.createIcons();
     }
 
-    // ── SLIDESHOW ─────────────────────────────────────────────────────────
+    // ── SLIDESHOW ────────────────────────────────────────────────────────────
     (function () {
       const layers = document.querySelectorAll(".bg-layer");
       let cur = 0;
@@ -2498,47 +2389,30 @@
       }, 7000);
     })();
 
-    // ── INIT ──────────────────────────────────────────────────────────────
+    // ── INIT ──────────────────────────────────────────────────────────────────
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
       setupThemeToggle();
       setupSearch();
       renderDateBar();
 
+      // Kamery cez backend proxy – nevyžaduje prihlásenie
       const t = Date.now();
       document.getElementById("cam0").src = `${CAM_BASE}/0?t=${t}`;
       document.getElementById("cam1").src = `${CAM_BASE}/1?t=${t}`;
       document.getElementById("cam0-detaily").src = `${CAM_BASE}/0?t=${t}`;
       document.getElementById("cam1-detaily").src = `${CAM_BASE}/1?t=${t}`;
 
-      // Predpoveď – načítaj raz a pak každých 15 min
-      fetchForecast().then((data) => {
-        renderForecastCard(data, "forecast-wrap-uvod", true);
-        renderForecastCard(data, "forecast-wrap-detaily", false);
-      });
-      setInterval(
-        async () => {
-          const data = await fetchForecast();
-          renderForecastCard(data, "forecast-wrap-uvod", true);
-          renderForecastCard(data, "forecast-wrap-detaily", false);
-        },
-        15 * 60 * 1000,
-      );
-
       loadScreen("uvod");
       setInterval(() => loadScreen(currentScreen), 30000);
 
+      // SHMÚ výstrahy načítame raz a potom každých 15 minút
       fetchShmuWarnings();
       setInterval(fetchShmuWarnings, 15 * 60 * 1000);
 
+      // Auto-refresh kamier každých 5 sekúnd
       setInterval(() => {
         const ts = Date.now();
-        ["cam0", "cam1", "cam0-detaily", "cam1-detaily"].forEach((id) => {
-          const el = document.getElementById(id);
-          if (el)
-            el.src = `${CAM_BASE}/${id.includes("1") && !id.includes("0") ? 1 : id.includes("1") ? 1 : 0}?t=${ts}`;
-        });
-        // Presnejší refresh
         const c0 = document.getElementById("cam0");
         const c1 = document.getElementById("cam1");
         const c0d = document.getElementById("cam0-detaily");
@@ -2557,7 +2431,7 @@
       });
     });
 
-    // ── NAVIGÁCIA ─────────────────────────────────────────────────────────
+    // ── NAVIGÁCIA ─────────────────────────────────────────────────────────────
     function switchScreen(name) {
       currentScreen = name;
       document
@@ -2571,12 +2445,14 @@
         );
       loadScreen(name);
     }
+
     function loadScreen(name) {
       if (name === "uvod") fetchUvod();
       if (name === "detaily") fetchDetaily();
       if (name === "skola") fetchSkola();
       if (name === "trieda") fetchTrieda();
     }
+
     function setStatus(ok) {
       const el = document.getElementById("api-status");
       el.innerHTML = ok
@@ -2584,13 +2460,14 @@
         : '<span class="status-error">●</span> Offline / Záloha';
     }
 
-    // ── ÚVOD ──────────────────────────────────────────────────────────────
+    // ── ÚVOD (zjednodušená karta) ─────────────────────────────────────────────
     async function fetchUvod() {
       try {
         const res = await fetch(`${API}/uvod`);
         if (!res.ok) throw new Error();
         const d = await res.json();
         setStatus(true);
+        renderSkyStatusUvod(d);
         renderUvodSimple(d);
         renderAlerts(null, d.rain_1h?.value, d.snow_1h?.value);
       } catch {
@@ -2602,6 +2479,8 @@
       const row = document.getElementById("uvod-temp-row");
       if (!row) return;
       row.innerHTML = "";
+
+      // Teplota
       const temp = d.temperature;
       if (temp) {
         row.innerHTML += `
@@ -2616,6 +2495,8 @@
             </div>
           </div>`;
       }
+
+      // Pocitová teplota
       const feels = d.feels_like;
       if (feels) {
         row.innerHTML += `
@@ -2630,23 +2511,26 @@
             </div>
           </div>`;
       }
+
       lucide.createIcons();
       applySearch();
     }
 
-    // ── DETAILY ───────────────────────────────────────────────────────────
+    // ── DETAILY (pôvodná karta Úvod, kompletná) ───────────────────────────────
     async function fetchDetaily() {
       try {
         const res = await fetch(`${API}/uvod`);
         if (!res.ok) throw new Error();
         const d = await res.json();
         setStatus(true);
+        renderSkyStatus(d);
         renderDetaily(d);
         renderAlerts(null, d.rain_1h?.value, d.snow_1h?.value);
       } catch {
         setStatus(false);
       }
     }
+
     function renderDetaily(d) {
       const grid = document.getElementById("grid-uvod-meteo");
       grid.innerHTML = "";
@@ -2684,7 +2568,7 @@
       applySearch();
     }
 
-    // ── ŠKOLA ─────────────────────────────────────────────────────────────
+    // ── ŠKOLA ─────────────────────────────────────────────────────────────────
     async function fetchSkola() {
       try {
         const res = await fetch(`${API}/skola`);
@@ -2696,6 +2580,7 @@
         setStatus(false);
       }
     }
+
     function renderSkola(d) {
       document.getElementById("avg-temp").textContent =
         d.avg_temp !== "--" ? d.avg_temp : "--";
@@ -2706,16 +2591,20 @@
         const tempClass = tempColor(temp);
         const timeStr = s.timestamp !== "--" ? s.timestamp.slice(11, 16) : "--";
         grid.innerHTML += `
-          <div class="glass-card th-card" onclick="openModal('TempC_SHT','${s.label} – Teplota','th','°C',${s.source})" data-title="${s.label.toLowerCase()}" style="animation-delay:${i * 0.04}s">
-            <div class="th-card-num">${s.label}</div>
-            <div class="th-temp ${tempClass}">${s.temp !== "--" ? s.temp : "--"}<span> °C</span></div>
-            <div class="th-hum"><i data-lucide="droplet" style="width:11px;height:11px;display:inline;"></i> ${s.hum} %</div>
-            <div class="th-time">${timeStr}</div>
-          </div>`;
+            <div class="glass-card th-card"
+                 onclick="openModal('TempC_SHT','${s.label} – Teplota','th','°C',${s.source})"
+                 data-title="${s.label.toLowerCase()}"
+                 style="animation-delay:${i * 0.04}s">
+              <div class="th-card-num">${s.label}</div>
+              <div class="th-temp ${tempClass}">${s.temp !== "--" ? s.temp : "--"}<span> °C</span></div>
+              <div class="th-hum"><i data-lucide="droplet" style="width:11px;height:11px;display:inline;"></i> ${s.hum} %</div>
+              <div class="th-time">${timeStr}</div>
+            </div>`;
       });
       lucide.createIcons();
       applySearch();
     }
+
     function tempColor(t) {
       if (t === null) return "";
       if (t < 10) return "temp-cold";
@@ -2725,7 +2614,7 @@
       return "temp-hot";
     }
 
-    // ── TRIEDA ────────────────────────────────────────────────────────────
+    // ── TRIEDA ────────────────────────────────────────────────────────────────
     async function fetchTrieda() {
       try {
         const res = await fetch(`${API}/trieda`);
@@ -2738,7 +2627,9 @@
         setStatus(false);
       }
     }
+
     function renderTrieda(d) {
+      // Ambient
       const ambGrid = document.getElementById("grid-ambient");
       ambGrid.innerHTML = "";
       Object.entries(d.ambient).forEach(([k, item]) => {
@@ -2753,19 +2644,28 @@
           item.key,
         );
       });
+
+      // Power
       const pwrGrid = document.getElementById("grid-power");
       pwrGrid.innerHTML = "";
       Object.entries(d.power).forEach(([k, item]) => {
-        if (k === "socket_status") {
+        const isSocket = k === "socket_status";
+        const extraClass = "it-card";
+        if (isSocket) {
           const isOn = item.value === "Zapnutá";
           const isOff = item.value === "Vypnutá";
           const valClass = isOn ? "val-on" : isOff ? "val-off" : "";
           const icon = isOn ? "plug-zap" : "plug";
           pwrGrid.innerHTML += `
-            <div class="glass-card it-card" onclick="openModal('socket_status','Stav zásuvky – história','src2','',2)" data-title="stav zásuvky">
-              <div class="card-top"><span class="card-label">${item.title}</span><div class="card-icon-wrap"><i data-lucide="${icon}"></i></div></div>
-              <div class="card-value-row"><span class="card-value ${valClass}">${item.value !== "--" ? item.value : "--"}</span></div>
-            </div>`;
+              <div class="glass-card it-card" onclick="openModal('socket_status','Stav zásuvky – história','src2','',2)" data-title="stav zásuvky" title="Kliknite pre históriu">
+                <div class="card-top">
+                  <span class="card-label">${item.title}</span>
+                  <div class="card-icon-wrap"><i data-lucide="${icon}"></i></div>
+                </div>
+                <div class="card-value-row">
+                  <span class="card-value ${valClass}">${item.value !== "--" ? item.value : "--"}</span>
+                </div>
+              </div>`;
         } else {
           pwrGrid.innerHTML += sensorCardHTML(
             k,
@@ -2773,12 +2673,14 @@
             item.value,
             item.unit,
             item.icon,
-            "it-card",
+            extraClass,
             item.source,
             item.key,
           );
         }
       });
+
+      // Lux
       const luxGrid = document.getElementById("grid-lux");
       luxGrid.innerHTML = "";
       Object.entries(d.lux).forEach(([k, item]) => {
@@ -2793,6 +2695,8 @@
           item.key,
         );
       });
+
+      // Door
       const doorGrid = document.getElementById("grid-door");
       const doorItem = d.door.state;
       const dv = doorItem.value;
@@ -2800,16 +2704,22 @@
         dv === "Otvorené" ? "val-open" : dv === "Zatvorené" ? "val-closed" : "";
       const dvIcon = dv === "Otvorené" ? "door-open" : "door-closed";
       doorGrid.innerHTML = `
-        <div class="glass-card it-card" onclick="openModal('Exti_status','Dverový senzor 05 – história','dvere','',8)" data-title="dvere it učebňa">
-          <div class="card-top"><span class="card-label">${doorItem.title}</span><div class="card-icon-wrap"><i data-lucide="${dvIcon}"></i></div></div>
-          <div class="card-value-row"><span class="card-value ${dvClass}">${dv !== "--" ? dv : "--"}</span></div>
-          <div class="th-time" style="margin-top:8px;">${d.door.timestamp !== "--" ? d.door.timestamp.slice(11, 16) : ""}</div>
-        </div>`;
+          <div class="glass-card it-card" onclick="openModal('Exti_status','Dverový senzor 05 – história','dvere','',8)" data-title="dvere it učebňa">
+            <div class="card-top">
+              <span class="card-label">${doorItem.title}</span>
+              <div class="card-icon-wrap"><i data-lucide="${dvIcon}"></i></div>
+            </div>
+            <div class="card-value-row">
+              <span class="card-value ${dvClass}">${dv !== "--" ? dv : "--"}</span>
+            </div>
+            <div class="th-time" style="margin-top:8px;">${d.door.timestamp !== "--" ? d.door.timestamp.slice(11, 16) : ""}</div>
+          </div>`;
+
       lucide.createIcons();
       applySearch();
     }
 
-    // ── SENSOR CARD HTML ──────────────────────────────────────────────────
+    // ── SENSOR CARD HTML ──────────────────────────────────────────────────────
     function sensorCardHTML(
       key,
       title,
@@ -2832,36 +2742,38 @@
       const isWindDir = key === "wind_direction";
       const windExtra =
         isWindDir && cardinal
-          ? `
-        <div class="wind-dir-row">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;">
-            <circle cx="12" cy="12" r="10" stroke="rgba(96,165,250,0.3)" stroke-width="1.5"/>
-            <text x="12" y="5.5" text-anchor="middle" fill="#60a5fa" font-size="3.5" font-weight="bold">S</text>
-            <text x="12" y="20.5" text-anchor="middle" fill="rgba(148,163,184,0.7)" font-size="3.5">J</text>
-            <text x="20.5" y="12.8" text-anchor="middle" fill="rgba(148,163,184,0.7)" font-size="3.5">V</text>
-            <text x="3.5" y="12.8" text-anchor="middle" fill="rgba(148,163,184,0.7)" font-size="3.5">Z</text>
-            <line x1="12" y1="12" x2="${12 + 6 * Math.sin(((parseFloat(value) || 0) * Math.PI) / 180)}" y2="${12 - 6 * Math.cos(((parseFloat(value) || 0) * Math.PI) / 180)}" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"/>
-            <circle cx="12" cy="12" r="1.5" fill="#60a5fa"/>
-          </svg>
-          <span class="wind-dir-label">${cardinal}</span>
-        </div>`
+          ? `<div class="wind-dir-row">
+               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;">
+                 <circle cx="12" cy="12" r="10" stroke="rgba(96,165,250,0.3)" stroke-width="1.5"/>
+                 <text x="12" y="5.5" text-anchor="middle" fill="#60a5fa" font-size="3.5" font-weight="bold">S</text>
+                 <text x="12" y="20.5" text-anchor="middle" fill="rgba(148,163,184,0.7)" font-size="3.5">J</text>
+                 <text x="20.5" y="12.8" text-anchor="middle" fill="rgba(148,163,184,0.7)" font-size="3.5">V</text>
+                 <text x="3.5" y="12.8" text-anchor="middle" fill="rgba(148,163,184,0.7)" font-size="3.5">Z</text>
+                 <line x1="12" y1="12" x2="${12 + 6 * Math.sin(((parseFloat(value) || 0) * Math.PI) / 180)}" y2="${12 - 6 * Math.cos(((parseFloat(value) || 0) * Math.PI) / 180)}"
+                       stroke="#f87171" stroke-width="1.5" stroke-linecap="round"/>
+                 <circle cx="12" cy="12" r="1.5" fill="#60a5fa"/>
+               </svg>
+               <span class="wind-dir-label">${cardinal}</span>
+             </div>`
           : "";
       return `
-        <div class="${baseClass}" ${onclick ? `onclick="${onclick}"` : ""}
-             data-title="${(title || "").toLowerCase()}" title="Kliknite pre históriu">
-          <div class="card-top">
-            <span class="card-label">${title}</span>
-            <div class="card-icon-wrap"><i data-lucide="${icon || "activity"}"></i></div>
-          </div>
-          <div class="card-value-row">
-            <span class="card-value">${value !== null && value !== undefined ? value : "--"}</span>
-            <span class="card-unit">${unit}</span>
-          </div>
-          ${windExtra}
-        </div>`;
+          <div class="${baseClass}"
+               ${onclick ? `onclick="${onclick}"` : ""}
+               data-title="${(title || "").toLowerCase()}"
+               title="Kliknite pre históriu">
+            <div class="card-top">
+              <span class="card-label">${title}</span>
+              <div class="card-icon-wrap"><i data-lucide="${icon || "activity"}"></i></div>
+            </div>
+            <div class="card-value-row">
+              <span class="card-value">${value !== null && value !== undefined ? value : "--"}</span>
+              <span class="card-unit">${unit}</span>
+            </div>
+            ${windExtra}
+          </div>`;
     }
 
-    // ── VYHĽADÁVANIE ──────────────────────────────────────────────────────
+    // ── VYHĽADÁVANIE ─────────────────────────────────────────────────────────
     function setupSearch() {
       document
         .getElementById("searchInput")
@@ -2874,7 +2786,7 @@
       });
     }
 
-    // ── MODAL & GRAFY ─────────────────────────────────────────────────────
+    // ── MODAL & GRAFY ─────────────────────────────────────────────────────────
     let _currentUnit = "";
 
     async function openModal(key, title, group, unit, source) {
@@ -2891,8 +2803,6 @@
       loader.innerHTML = '<i data-lucide="loader-2"></i>';
       lucide.createIcons();
       modal.classList.add("open");
-      // Scrollneme modal na vrch
-      modal.scrollTop = 0;
       if (chartInstance) {
         chartInstance.destroy();
         chartInstance = null;
@@ -2905,6 +2815,7 @@
       const isWindDir = key === "wind_direction";
       const isDoor = key === "Exti_status" || key === "state";
       const isSocket = key === "socket_status";
+
       const isTempKey =
         key === "temperature" ||
         key === "TempC_SHT" ||
@@ -2916,6 +2827,7 @@
         const res = await fetch(`${API}/history/${source}?limit=500`);
         const data = await res.json();
         const rows = data.rows || [];
+
         const labels = rows.map((r, i) => {
           const dt = new Date(r.timestamp);
           const hhmm = `${String(dt.getHours()).padStart(2, "0")}:${String(dt.getMinutes()).padStart(2, "0")}`;
@@ -2925,12 +2837,19 @@
             return `${dt.getDate()}.${dt.getMonth() + 1}. ${hhmm}`;
           return hhmm;
         });
+
         const dataset = rows.map((r) => (r[key] !== undefined ? r[key] : null));
         const isPct = isPercentKey(key, unit);
-        if (isDoor || isSocket) drawToggleList(rows, key, isDoor);
-        else if (isWindDir) drawWindCompass(rows, labels);
-        else if (isPct) drawPieChart(dataset, labels, title, unit);
-        else drawChart(labels, dataset, title, unit, "line", isTempKey);
+
+        if (isDoor || isSocket) {
+          drawToggleList(rows, key, isDoor);
+        } else if (isWindDir) {
+          drawWindCompass(rows, labels);
+        } else if (isPct) {
+          drawPieChart(dataset, labels, title, unit);
+        } else {
+          drawChart(labels, dataset, title, unit, "line", isTempKey);
+        }
       } catch {
         loader.innerHTML =
           '<span style="color:#F87171;">Historické dáta nie sú dostupné.</span>';
@@ -2952,12 +2871,14 @@
       _pieIdx = 0;
     }
 
+    // ── DOOR / SOCKET – zoznam udalostí ──────────────────────────────────────
     function drawToggleList(rows, key, isDoor) {
       document.getElementById("chart-loader").style.display = "none";
       const container = document.getElementById("chart-container");
       container.classList.remove("hidden");
       document.getElementById("modal-subtitle").textContent =
         "Posledných 20 zmien stavu";
+
       let prev = null;
       const events = [];
       rows.forEach((r) => {
@@ -2968,45 +2889,50 @@
         }
       });
       const recent = events.slice(-20).reverse();
+
       if (!recent.length) {
         container.innerHTML = `<p style="color:var(--text-muted);text-align:center;padding:32px;">Žiadne záznamy.</p>`;
         return;
       }
+
       container.innerHTML = `<div style="display:flex;flex-direction:column;gap:8px;">
-        ${recent
-          .map((ev) => {
-            let isActive, label, color, icon;
-            if (isDoor) {
-              isActive = ev.state === "True";
-              label = isActive ? "Otvorené" : "Zatvorené";
-              color = isActive ? "#f87171" : "#34d399";
-              icon = isActive ? "door-open" : "door-closed";
-            } else {
-              isActive =
-                String(ev.state).toLowerCase() === "true" || ev.state === 1;
-              label = isActive ? "Zapnutá" : "Vypnutá";
-              color = isActive ? "#34d399" : "#f87171";
-              icon = isActive ? "plug-zap" : "plug";
-            }
-            const ts = ev.timestamp || "";
-            return `<div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 16px;">
-            <i data-lucide="${icon}" style="width:18px;height:18px;color:${color};flex-shrink:0;"></i>
-            <span style="font-size:0.92rem;font-weight:600;color:${color};flex:1;">${label}</span>
-            <span style="font-size:0.78rem;color:var(--text-muted);">${ts.slice(0, 10)}</span>
-            <span style="font-size:0.88rem;font-weight:500;color:var(--text-secondary);min-width:38px;text-align:right;">${ts.slice(11, 16)}</span>
-          </div>`;
-          })
-          .join("")}
-      </div>`;
+          ${recent
+            .map((ev) => {
+              let isActive, label, color, icon;
+              if (isDoor) {
+                isActive = ev.state === "True";
+                label = isActive ? "Otvorené" : "Zatvorené";
+                color = isActive ? "#f87171" : "#34d399";
+                icon = isActive ? "door-open" : "door-closed";
+              } else {
+                isActive =
+                  String(ev.state).toLowerCase() === "true" || ev.state === 1;
+                label = isActive ? "Zapnutá" : "Vypnutá";
+                color = isActive ? "#34d399" : "#f87171";
+                icon = isActive ? "plug-zap" : "plug";
+              }
+              const ts = ev.timestamp || "";
+              return `
+              <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:11px 16px;">
+                <i data-lucide="${icon}" style="width:18px;height:18px;color:${color};flex-shrink:0;"></i>
+                <span style="font-size:0.92rem;font-weight:600;color:${color};flex:1;">${label}</span>
+                <span style="font-size:0.78rem;color:var(--text-muted);">${ts.slice(0, 10)}</span>
+                <span style="font-size:0.88rem;font-weight:500;color:var(--text-secondary);min-width:38px;text-align:right;">${ts.slice(11, 16)}</span>
+              </div>`;
+            })
+            .join("")}
+        </div>`;
       lucide.createIcons();
     }
 
+    // ── KOMPAS – smer vetra ───────────────────────────────────────────────────
     function drawWindCompass(rows, labels) {
       document.getElementById("chart-loader").style.display = "none";
       const container = document.getElementById("chart-container");
       container.classList.remove("hidden");
       document.getElementById("modal-subtitle").textContent =
         "Smer vetra – história a aktuálny smer";
+
       const validRows = rows.filter(
         (r) => r.wind_direction !== undefined && r.wind_direction !== null,
       );
@@ -3014,66 +2940,72 @@
         ? parseFloat(validRows[validRows.length - 1].wind_direction)
         : 0;
       const cardinal = degToCardinal(latest);
+
       const histDeg = validRows.map((r) => parseFloat(r.wind_direction));
-      const histLabels = validRows.map((r) => labels[rows.indexOf(r)] || "");
+      const histLabels = validRows.map((r, i) => labels[rows.indexOf(r)] || "");
+
       container.innerHTML = `
-        <div class="compass-modal-wrap">
-          <div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap;justify-content:center;">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
-              <div class="compass-svg-wrap">
-                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="compass-bg">
-                  <circle cx="100" cy="100" r="95" fill="rgba(8,15,30,0.6)" stroke="rgba(96,165,250,0.3)" stroke-width="1.5"/>
-                  ${Array.from({ length: 12 }, (_, i) => {
-                    const a = (i * 30 * Math.PI) / 180,
-                      r1 = 75,
-                      r2 = 90;
-                    return `<line x1="${100 + r1 * Math.sin(a)}" y1="${100 - r1 * Math.cos(a)}" x2="${100 + r2 * Math.sin(a)}" y2="${100 - r2 * Math.cos(a)}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>`;
-                  }).join("")}
-                  <text x="100" y="18" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="700" font-family="DM Sans,sans-serif">S</text>
-                  <text x="100" y="190" text-anchor="middle" fill="rgba(148,163,184,0.8)" font-size="12" font-family="DM Sans,sans-serif">J</text>
-                  <text x="186" y="105" text-anchor="middle" fill="rgba(148,163,184,0.8)" font-size="12" font-family="DM Sans,sans-serif">V</text>
-                  <text x="14" y="105" text-anchor="middle" fill="rgba(148,163,184,0.8)" font-size="12" font-family="DM Sans,sans-serif">Z</text>
-                  <text x="155" y="50" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">SV</text>
-                  <text x="155" y="160" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">JV</text>
-                  <text x="45" y="160" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">JZ</text>
-                  <text x="45" y="50" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">SZ</text>
-                  <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-                  <circle cx="100" cy="100" r="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
-                  <g transform="rotate(${latest}, 100, 100)">
-                    <polygon points="100,30 96,100 100,110 104,100" fill="#f87171" opacity="0.9"/>
-                    <polygon points="100,170 96,100 100,110 104,100" fill="rgba(255,255,255,0.3)" opacity="0.7"/>
-                  </g>
-                  <circle cx="100" cy="100" r="6" fill="#60a5fa"/>
-                </svg>
+          <div class="compass-modal-wrap">
+            <div style="display:flex;align-items:center;gap:32px;flex-wrap:wrap;justify-content:center;">
+              <!-- Kompas -->
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px;">
+                <div class="compass-svg-wrap">
+                  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" class="compass-bg">
+                    <circle cx="100" cy="100" r="95" fill="rgba(8,15,30,0.6)" stroke="rgba(96,165,250,0.3)" stroke-width="1.5"/>
+                    ${Array.from({ length: 12 }, (_, i) => {
+                      const a = (i * 30 * Math.PI) / 180;
+                      const r1 = 75,
+                        r2 = 90;
+                      return `<line x1="${100 + r1 * Math.sin(a)}" y1="${100 - r1 * Math.cos(a)}" x2="${100 + r2 * Math.sin(a)}" y2="${100 - r2 * Math.cos(a)}" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>`;
+                    }).join("")}
+                    <text x="100" y="18" text-anchor="middle" fill="#60a5fa" font-size="14" font-weight="700" font-family="DM Sans,sans-serif">S</text>
+                    <text x="100" y="190" text-anchor="middle" fill="rgba(148,163,184,0.8)" font-size="12" font-family="DM Sans,sans-serif">J</text>
+                    <text x="186" y="105" text-anchor="middle" fill="rgba(148,163,184,0.8)" font-size="12" font-family="DM Sans,sans-serif">V</text>
+                    <text x="14" y="105" text-anchor="middle" fill="rgba(148,163,184,0.8)" font-size="12" font-family="DM Sans,sans-serif">Z</text>
+                    <text x="155" y="50" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">SV</text>
+                    <text x="155" y="160" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">JV</text>
+                    <text x="45" y="160" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">JZ</text>
+                    <text x="45" y="50" text-anchor="middle" fill="rgba(148,163,184,0.5)" font-size="9" font-family="DM Sans,sans-serif">SZ</text>
+                    <circle cx="100" cy="100" r="60" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+                    <circle cx="100" cy="100" r="30" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+                    <g transform="rotate(${latest}, 100, 100)">
+                      <polygon points="100,30 96,100 100,110 104,100" fill="#f87171" opacity="0.9"/>
+                      <polygon points="100,170 96,100 100,110 104,100" fill="rgba(255,255,255,0.3)" opacity="0.7"/>
+                    </g>
+                    <circle cx="100" cy="100" r="6" fill="#60a5fa"/>
+                  </svg>
+                </div>
+                <div style="text-align:center;">
+                  <div style="font-size:2rem;font-weight:700;color:var(--text-primary);">${latest}°</div>
+                  <div style="font-size:1.1rem;font-weight:700;color:var(--accent);">${cardinal}</div>
+                </div>
               </div>
-              <div style="text-align:center;">
-                <div style="font-size:2rem;font-weight:700;color:var(--text-primary);">${latest}°</div>
-                <div style="font-size:1.1rem;font-weight:700;color:var(--accent);">${cardinal}</div>
+              <!-- Legenda svetových strán -->
+              <div style="display:flex;flex-direction:column;gap:8px;min-width:120px;">
+                ${[
+                  ["S", "Sever", "0°"],
+                  ["V", "Východ", "90°"],
+                  ["J", "Juh", "180°"],
+                  ["Z", "Západ", "270°"],
+                ]
+                  .map(
+                    ([abbr, full, deg]) => `
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:1rem;font-weight:700;color:var(--accent);width:20px;">${abbr}</span>
+                    <span style="font-size:0.82rem;color:var(--text-secondary);">${full}</span>
+                    <span style="font-size:0.78rem;color:var(--text-muted);margin-left:auto;">${deg}</span>
+                  </div>`,
+                  )
+                  .join("")}
               </div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:8px;min-width:120px;">
-              ${[
-                ["S", "Sever", "0°"],
-                ["V", "Východ", "90°"],
-                ["J", "Juh", "180°"],
-                ["Z", "Západ", "270°"],
-              ]
-                .map(
-                  ([a, f, d]) => `
-                <div style="display:flex;align-items:center;gap:10px;">
-                  <span style="font-size:1rem;font-weight:700;color:var(--accent);width:20px;">${a}</span>
-                  <span style="font-size:0.82rem;color:var(--text-secondary);">${f}</span>
-                  <span style="font-size:0.78rem;color:var(--text-muted);margin-left:auto;">${d}</span>
-                </div>`,
-                )
-                .join("")}
+            <!-- Graf histórie smeru vetra -->
+            <div style="width:100%;margin-top:20px;">
+              <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em;">História smeru (°)</div>
+              <div class="line-chart-wrap"><canvas id="historyChart"></canvas></div>
             </div>
-          </div>
-          <div style="width:100%;margin-top:20px;">
-            <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em;">História smeru (°)</div>
-            <div class="line-chart-wrap"><canvas id="historyChart"></canvas></div>
-          </div>
-        </div>`;
+          </div>`;
+
       const ctx = document.getElementById("historyChart").getContext("2d");
       const isDark = !document.body.classList.contains("light");
       const gridC = isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.09)";
@@ -3081,6 +3013,7 @@
       const grad = ctx.createLinearGradient(0, 0, 0, 280);
       grad.addColorStop(0, "rgba(96,165,250,0.35)");
       grad.addColorStop(1, "rgba(96,165,250,0.00)");
+
       chartInstance = new Chart(ctx, {
         type: "line",
         data: {
@@ -3144,10 +3077,12 @@
       });
     }
 
+    // ── PIE CHART (%) ─────────────────────────────────────────────────────────
     function drawPieChart(rawData, rawLabels, labelName, unit) {
       document.getElementById("chart-loader").style.display = "none";
       const container = document.getElementById("chart-container");
       container.classList.remove("hidden");
+
       const valid = [],
         validLabels = [];
       rawData.forEach((v, i) => {
@@ -3160,6 +3095,7 @@
         container.innerHTML = `<p style="color:var(--text-muted);text-align:center;padding:40px;">Žiadne platné dáta.</p>`;
         return;
       }
+
       _pieData = valid;
       _pieLabels = validLabels;
       _pieIdx = valid.length - 1;
@@ -3167,44 +3103,58 @@
       const min = Math.round(Math.min(...valid));
       const max = Math.round(Math.max(...valid));
       const v0 = Math.round(valid[valid.length - 1]);
+
       container.innerHTML = `
-        <div class="pie-layout">
-          <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
-            <div class="pie-canvas-wrap">
-              <canvas id="historyChart"></canvas>
-              <div class="pie-center-label">
-                <span class="pie-center-value" id="pie-val-display">${v0}</span>
-                <span class="pie-center-unit">${unit}</span>
+          <div class="pie-layout">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:14px;">
+              <div class="pie-canvas-wrap">
+                <canvas id="historyChart"></canvas>
+                <div class="pie-center-label">
+                  <span class="pie-center-value" id="pie-val-display">${v0}</span>
+                  <span class="pie-center-unit">${unit}</span>
+                </div>
+              </div>
+              <div style="width:240px;position:relative;height:52px;"><canvas id="sparkChart"></canvas></div>
+              <div style="width:240px;display:flex;flex-direction:column;gap:8px;">
+                <input type="range" id="pie-slider" min="0" max="${valid.length - 1}" value="${valid.length - 1}" step="1"
+                  style="width:100%;accent-color:#60a5fa;" oninput="updatePieIndex(parseInt(this.value))"/>
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                  <button onclick="updatePieIndex(_pieIdx-1)" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:4px 12px;color:var(--text-primary);cursor:pointer;font-size:0.78rem;">‹ Staršia</button>
+                  <span id="pie-time-label" style="font-size:0.72rem;color:var(--text-muted);">${validLabels[valid.length - 1] || "--"}</span>
+                  <button onclick="updatePieIndex(_pieIdx+1)" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:4px 12px;color:var(--text-primary);cursor:pointer;font-size:0.78rem;">Novšia ›</button>
+                </div>
               </div>
             </div>
-            <div style="width:240px;position:relative;height:52px;"><canvas id="sparkChart"></canvas></div>
-            <div style="width:240px;display:flex;flex-direction:column;gap:8px;">
-              <input type="range" id="pie-slider" min="0" max="${valid.length - 1}" value="${valid.length - 1}" step="1" style="width:100%;accent-color:#60a5fa;" oninput="updatePieIndex(parseInt(this.value))"/>
-              <div style="display:flex;align-items:center;justify-content:space-between;">
-                <button onclick="updatePieIndex(_pieIdx-1)" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:4px 12px;color:var(--text-primary);cursor:pointer;font-size:0.78rem;">‹ Staršia</button>
-                <span id="pie-time-label" style="font-size:0.72rem;color:var(--text-muted);">${validLabels[valid.length - 1] || "--"}</span>
-                <button onclick="updatePieIndex(_pieIdx+1)" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:4px 12px;color:var(--text-primary);cursor:pointer;font-size:0.78rem;">Novšia ›</button>
+            <div class="pie-legend">
+              <div class="pie-legend-item">
+                <div class="pie-legend-dot" style="background:#60a5fa;"></div>
+                <span class="pie-legend-label">${labelName}</span>
+                <span class="pie-legend-val" id="pie-leg-val">${v0}%</span>
+              </div>
+              <div class="pie-legend-item">
+                <div class="pie-legend-dot" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);"></div>
+                <span class="pie-legend-label">Zostatok</span>
+                <span class="pie-legend-val" id="pie-leg-rem">${Math.max(0, 100 - v0)}%</span>
+              </div>
+              <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;margin-top:4px;display:flex;flex-direction:column;gap:7px;">
+                ${[
+                  ["Minimum", min + "%"],
+                  ["Priemer", avg + "%"],
+                  ["Maximum", max + "%"],
+                ]
+                  .map(
+                    ([l, v]) => `
+                  <div style="display:flex;justify-content:space-between;gap:20px;font-size:0.8rem;">
+                    <span style="color:var(--text-muted);">${l}</span>
+                    <span style="color:var(--text-primary);font-weight:600;">${v}</span>
+                  </div>`,
+                  )
+                  .join("")}
+                <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">${valid.length} meraní</div>
               </div>
             </div>
-          </div>
-          <div class="pie-legend">
-            <div class="pie-legend-item"><div class="pie-legend-dot" style="background:#60a5fa;"></div><span class="pie-legend-label">${labelName}</span><span class="pie-legend-val" id="pie-leg-val">${v0}%</span></div>
-            <div class="pie-legend-item"><div class="pie-legend-dot" style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);"></div><span class="pie-legend-label">Zostatok</span><span class="pie-legend-val" id="pie-leg-rem">${Math.max(0, 100 - v0)}%</span></div>
-            <div style="border-top:1px solid rgba(255,255,255,0.1);padding-top:12px;margin-top:4px;display:flex;flex-direction:column;gap:7px;">
-              ${[
-                ["Minimum", min + "%"],
-                ["Priemer", avg + "%"],
-                ["Maximum", max + "%"],
-              ]
-                .map(
-                  ([l, v]) =>
-                    `<div style="display:flex;justify-content:space-between;gap:20px;font-size:0.8rem;"><span style="color:var(--text-muted);">${l}</span><span style="color:var(--text-primary);font-weight:600;">${v}</span></div>`,
-                )
-                .join("")}
-              <div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px;">${valid.length} meraní</div>
-            </div>
-          </div>
-        </div>`;
+          </div>`;
+
       const ctx = document.getElementById("historyChart").getContext("2d");
       chartInstance = new Chart(ctx, {
         type: "doughnut",
@@ -3240,6 +3190,7 @@
           },
         },
       });
+
       const sctx = document.getElementById("sparkChart").getContext("2d");
       const sg = sctx.createLinearGradient(0, 0, 0, 52);
       sg.addColorStop(0, "rgba(96,165,250,0.35)");
@@ -3289,6 +3240,7 @@
       document.getElementById("pie-slider").value = idx;
       _renderSparkMarker(idx);
     }
+
     function _renderSparkMarker(idx) {
       if (!_sparkInstance) return;
       const n = _pieData.length;
@@ -3301,6 +3253,7 @@
       _sparkInstance.update("none");
     }
 
+    // ── LINE CHART (s vylepšenou osou Y pre teploty) ──────────────────────────
     function drawChart(
       labels,
       data,
@@ -3313,6 +3266,7 @@
       const container = document.getElementById("chart-container");
       container.classList.remove("hidden");
       container.innerHTML = `<div class="line-chart-wrap"><canvas id="historyChart"></canvas></div>`;
+
       const ctx = document.getElementById("historyChart").getContext("2d");
       const isDark = !document.body.classList.contains("light");
       const gridC = isDark ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.09)";
@@ -3321,6 +3275,7 @@
       const grad = ctx.createLinearGradient(0, 0, 0, 280);
       grad.addColorStop(0, "rgba(96,165,250,0.45)");
       grad.addColorStop(1, "rgba(96,165,250,0.00)");
+
       function tempTickColor(val) {
         if (val < 0) return "#93c5fd";
         if (val < 10) return "#67e8f9";
@@ -3328,12 +3283,16 @@
         if (val < 25) return "#fbbf24";
         return "#f87171";
       }
+
       const yTickCallback = isTempKey ? (val) => `🌡 ${val} °C` : undefined;
+
       let pointColors = undefined;
-      if (isTempKey && data.length)
+      if (isTempKey && data.length) {
         pointColors = data.map((v) =>
           v !== null ? tempTickColor(parseFloat(v)) : "transparent",
         );
+      }
+
       chartInstance = new Chart(ctx, {
         type,
         data: {
@@ -3406,29 +3365,35 @@
           },
         },
       });
+
       if (isTempKey) {
         const legend = document.createElement("div");
         legend.style.cssText =
           "display:flex;justify-content:center;gap:14px;margin-top:14px;flex-wrap:wrap;";
-        legend.innerHTML = [
-          ["#93c5fd", "Mráz (< 0 °C)"],
-          ["#67e8f9", "Chladno (< 10 °C)"],
-          ["#34d399", "Príjemné (< 18 °C)"],
-          ["#fbbf24", "Teplo (< 25 °C)"],
-          ["#f87171", "Horúco (≥ 25 °C)"],
-        ]
+        const tempLevels = [
+          { color: "#93c5fd", label: "Mráz (< 0 °C)" },
+          { color: "#67e8f9", label: "Chladno (< 10 °C)" },
+          { color: "#34d399", label: "Príjemné (< 18 °C)" },
+          { color: "#fbbf24", label: "Teplo (< 25 °C)" },
+          { color: "#f87171", label: "Horúco (≥ 25 °C)" },
+        ];
+        legend.innerHTML = tempLevels
           .map(
-            ([c, l]) =>
-              `<div style="display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--text-secondary);"><span style="width:10px;height:10px;border-radius:50%;background:${c};display:inline-block;flex-shrink:0;"></span>${l}</div>`,
+            (l) =>
+              `<div style="display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--text-secondary);">
+               <span style="width:10px;height:10px;border-radius:50%;background:${l.color};display:inline-block;flex-shrink:0;"></span>
+               ${l.label}
+             </div>`,
           )
           .join("");
         container.appendChild(legend);
       }
     }
 
-    // ── CAMERA LIGHTBOX ───────────────────────────────────────────────────
+    // ── CAMERA LIGHTBOX ───────────────────────────────────────────────────────
     let _camIndex = 0,
       _camRefreshInterval = null;
+
     window.openCam = function (idx) {
       _camIndex = idx;
       clearInterval(_camRefreshInterval);
@@ -3444,6 +3409,7 @@
       _camIndex = idx;
       _updateCamModal();
     };
+
     function _updateCamModal() {
       const img = document.getElementById("cam-modal-img");
       const title = document.getElementById("cam-modal-title");
@@ -3461,7 +3427,7 @@
         `${CAM_BASE}/${_camIndex}?t=${Date.now()}`;
     }
 
-    // ── TÉMA ─────────────────────────────────────────────────────────────
+    // ── TÉMA ─────────────────────────────────────────────────────────────────
     function setupThemeToggle() {
       document.getElementById("theme-toggle").addEventListener("click", () => {
         const body = document.getElementById("body-layout");
