@@ -97,7 +97,6 @@
       color: var(--text-primary);
       min-height: 100vh;
       overflow-x: hidden;
-      /* FIX: prevent white bar on mobile */
       background: #050a16;
     }
     #app-shell {
@@ -229,7 +228,7 @@
     .screen { display: none; }
     .screen.active { display: block; }
 
-    /* ── PREDPOVEĎ POČASIA CARD (nahrádza stav oblohy v header area) ── */
+    /* ── PREDPOVEĎ POČASIA CARD ── */
     .forecast-card {
       padding: 14px 18px;
       display: flex;
@@ -237,6 +236,9 @@
       gap: 14px;
       animation: card-in 0.4s ease both;
       flex-wrap: wrap;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
     }
     .forecast-now {
       display: flex;
@@ -262,6 +264,7 @@
       gap: 10px;
       overflow-x: auto;
       flex: 1;
+      min-width: 0;
       padding-bottom: 2px;
       scrollbar-width: none;
     }
@@ -287,6 +290,9 @@
       gap: 18px;
       animation: card-in 0.4s ease both;
       flex-wrap: wrap;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
     }
     .forecast-card-large .forecast-now-icon { font-size: 2.8rem; }
     .forecast-card-large .forecast-now-value { font-size: 1.4rem; }
@@ -350,13 +356,14 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      min-width: 0; /* FIX: zabráni pretekaniu obsahu von z gridu */
     }
     .uvod-right-col {
       display: flex;
       flex-direction: column;
       gap: 16px;
+      min-width: 0; /* FIX: zabráni pretekaniu obsahu von z gridu */
     }
-    /* Kamery + radar v pravom stĺpci – poradie: kamera1, radar, kamera2 */
     .uvod-cameras-stack {
       display: flex;
       flex-direction: column;
@@ -371,7 +378,11 @@
     }
 
     /* ── TEMP ROW ── */
-    .uvod-temp-row { display: flex; gap: 16px; }
+    .uvod-temp-row {
+      display: flex;
+      gap: 16px;
+      min-width: 0; /* FIX: zabráni pretekaniu */
+    }
     @media (max-width: 600px) {
       .uvod-temp-row { flex-direction: column; }
       .sensor-card-large .card-value { font-size: 2.6rem; }
@@ -389,6 +400,7 @@
       overflow: hidden;
       animation: card-in 0.4s ease both;
       flex: 1;
+      min-width: 0; /* FIX: zabráni pretekaniu */
     }
     .sensor-card-large::before {
       content: "";
@@ -532,7 +544,7 @@
     .it-card { padding: 13px; cursor: pointer; position: relative; overflow: hidden; animation: card-in 0.4s ease both; }
     .it-card .card-value { font-size: 1.45rem; }
 
-    /* ── MODAL – OPRAVENÉ PRE MOBILE ── */
+    /* ── MODAL ── */
     #chart-modal {
       position: fixed;
       inset: 0;
@@ -580,7 +592,6 @@
       display: flex; align-items: center; justify-content: center;
       cursor: pointer; color: var(--text-secondary);
       transition: background var(--transition-fast), color var(--transition-fast);
-      /* Väčší tap target na mobile */
       min-width: 44px; min-height: 44px;
     }
     .modal-close:hover { background: rgba(255,255,255,0.14); color: var(--text-primary); }
@@ -697,10 +708,8 @@
       </header>
 
       <main>
-        <!-- ÚVOD – nový layout: vľavo text+predpoveď, vpravo kamera1+radar+kamera2 -->
         <div id="screen-uvod" class="screen active">
           <div class="uvod-new-grid">
-            <!-- ĽAVÝ STĹPEC: predpoveď + teploty -->
             <div class="uvod-left-col">
               <div class="block-header">
                 <div class="block-title">
@@ -709,21 +718,16 @@
                 </div>
                 <p class="block-desc">Predpoveď · teplota · aktualizácia každých 30 s</p>
               </div>
-              <!-- Predpoveď počasia (nahrádza stav oblohy) -->
               <div id="forecast-wrap-uvod"></div>
-              <!-- Teplota + pocitová teplota -->
               <div class="uvod-temp-row" id="uvod-temp-row"></div>
             </div>
-            <!-- PRAVÝ STĹPEC: kamera 1, radar, kamera 2 -->
             <div class="uvod-right-col">
               <div class="section-label"><i data-lucide="camera"></i> Školské kamery & radar</div>
               <div class="uvod-cameras-stack">
-                <!-- Kamera 1 -->
                 <div class="glass-card camera-card" onclick="window.openCam(0)">
                   <div class="cam-badge" style="pointer-events:none;"><span class="rec-dot"></span> REC 01</div>
                   <img id="cam0" src="" alt="Kamera 1" style="pointer-events:none;">
                 </div>
-                <!-- RADAR -->
                 <div class="glass-card radar-card">
                   <div class="radar-badge"><span class="radar-dot"></span> RADAR</div>
                   <div class="radar-card-inner">
@@ -735,7 +739,6 @@
                     ></iframe>
                   </div>
                 </div>
-                <!-- Kamera 2 -->
                 <div class="glass-card camera-card" onclick="window.openCam(1)">
                   <div class="cam-badge" style="pointer-events:none;"><span class="rec-dot"></span> REC 02</div>
                   <img id="cam1" src="" alt="Kamera 2" style="pointer-events:none;">
@@ -745,7 +748,6 @@
           </div>
         </div>
 
-        <!-- DETAILY -->
         <div id="screen-detaily" class="screen">
           <div class="uvod-grid">
             <div class="cameras-col">
@@ -758,7 +760,6 @@
                 <div class="cam-badge" style="pointer-events:none;"><span class="rec-dot"></span> REC 02</div>
                 <img id="cam1-detaily" src="" alt="Kamera 2" style="pointer-events:none;">
               </div>
-              <!-- RADAR v detailoch, pod kamerami -->
               <div class="glass-card radar-card" style="margin-top:2px;">
                 <div class="radar-badge"><span class="radar-dot"></span> RADAR</div>
                 <div class="radar-card-inner">
@@ -778,7 +779,6 @@
                 </div>
                 <p class="block-desc">Vonkajšie klimatické podmienky · aktualizácia každých 30 s</p>
               </div>
-              <!-- Predpoveď namiesto stavu oblohy -->
               <div id="forecast-wrap-detaily"></div>
               <div class="sensor-grid" id="grid-uvod-meteo"></div>
               <div id="shmu-wrap"></div>
@@ -786,7 +786,6 @@
           </div>
         </div>
 
-        <!-- ŠKOLA -->
         <div id="screen-skola" class="screen">
           <div class="skola-header">
             <div class="block-title" style="font-family:var(--font-display);font-size:1.25rem;">
@@ -807,7 +806,6 @@
           <div class="th-grid" id="grid-th"></div>
         </div>
 
-        <!-- TRIEDA IT -->
         <div id="screen-trieda" class="screen">
           <div class="block-header" style="margin-bottom:20px;">
             <div class="block-title"><i data-lucide="monitor"></i> IT učebňa – monitorovanie prostredia</div>
@@ -883,7 +881,6 @@
     const PERCENT_KEYS = new Set(["humidity","Humidity","RH","rh","cloudiness","Cloudiness","Hum_SHT","hum_sht"]);
     function isPercentKey(key, unit) { return unit === "%" || PERCENT_KEYS.has(key); }
 
-    // ── SVETOVÉ STRANY ────────────────────────────────────────────────────
     function degToCardinal(deg) {
       if (deg === "--" || deg === null || deg === undefined) return "";
       const d = parseFloat(deg);
@@ -892,7 +889,6 @@
       return dirs[Math.round(d / 22.5) % 16];
     }
 
-    // ── PREDPOVEĎ POČASIA Z OPEN-METEO (pre SHMÚ oblasť Nitra) ──────────
     const NITRA_LAT = 48.32;
     const NITRA_LON = 18.09;
 
@@ -956,9 +952,7 @@
       const nowWmo = getWmo(nowCode);
       const nowTemp = cw ? Math.round(cw.temperature) : "--";
 
-      // Nasledujúce hodiny (6 položiek)
       const now = new Date();
-      const nowHour = now.getHours();
       const times = data.hourly?.time || [];
       const temps = data.hourly?.temperature_2m || [];
       const precip = data.hourly?.precipitation_probability || [];
@@ -1002,7 +996,6 @@
         </div>`;
     }
 
-    // ── SHMÚ VÝSTRAHY ─────────────────────────────────────────────────────
     const SHMU_KEYWORD_MAP = [
       { re: /dažď|zrážky|prší|zrážkov/i, label: "Zrážky", emoji: "🌧️" },
       { re: /sneži|sneh|snežen/i, label: "Sneženie", emoji: "❄️" },
@@ -1075,8 +1068,6 @@
       } catch(_) { if (wrap) wrap.innerHTML = ""; }
     }
 
-    // ── SLOVENSKÝ KALENDÁR ────────────────────────────────────────────────
-    // Meniny sú indexované ako "MM-DD"
     const SK_CALENDAR = {
       "01-01":"Nový rok","01-06":"Traja králi","01-08":"Severín","01-12":"Ernest","01-13":"Rastislav",
       "01-17":"Nataša","01-18":"Bohdana","01-19":"Drahomíra","01-20":"Dalibor","01-21":"Vincent",
@@ -1155,7 +1146,6 @@
     const SK_MONTHS = ["januára","februára","marca","apríla","mája","júna","júla","augusta","septembra","októbra","novembra","decembra"];
 
     function renderDateBar() {
-      // Použijeme skutočný aktuálny dátum z prehliadača
       const now = new Date();
       const dd = String(now.getDate()).padStart(2,'0');
       const mm = String(now.getMonth() + 1).padStart(2,'0');
@@ -1183,7 +1173,6 @@
       if (html) lucide.createIcons();
     }
 
-    // ── SLIDESHOW ─────────────────────────────────────────────────────────
     (function() {
       const layers = document.querySelectorAll(".bg-layer");
       let cur = 0;
@@ -1194,7 +1183,6 @@
       }, 7000);
     })();
 
-    // ── INIT ──────────────────────────────────────────────────────────────
     document.addEventListener("DOMContentLoaded", () => {
       lucide.createIcons();
       setupThemeToggle();
@@ -1207,7 +1195,6 @@
       document.getElementById("cam0-detaily").src = `${CAM_BASE}/0?t=${t}`;
       document.getElementById("cam1-detaily").src = `${CAM_BASE}/1?t=${t}`;
 
-      // Predpoveď – načítaj raz a pak každých 15 min
       fetchForecast().then(data => {
         renderForecastCard(data, "forecast-wrap-uvod", true);
         renderForecastCard(data, "forecast-wrap-detaily", false);
@@ -1226,11 +1213,6 @@
 
       setInterval(() => {
         const ts = Date.now();
-        ["cam0","cam1","cam0-detaily","cam1-detaily"].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.src = `${CAM_BASE}/${id.includes('1') && !id.includes('0') ? 1 : id.includes('1') ? 1 : 0}?t=${ts}`;
-        });
-        // Presnejší refresh
         const c0 = document.getElementById("cam0");
         const c1 = document.getElementById("cam1");
         const c0d = document.getElementById("cam0-detaily");
@@ -1246,7 +1228,6 @@
       });
     });
 
-    // ── NAVIGÁCIA ─────────────────────────────────────────────────────────
     function switchScreen(name) {
       currentScreen = name;
       document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
@@ -1265,7 +1246,6 @@
       el.innerHTML = ok ? '<span class="status-live">●</span> Živé dáta' : '<span class="status-error">●</span> Offline / Záloha';
     }
 
-    // ── ÚVOD ──────────────────────────────────────────────────────────────
     async function fetchUvod() {
       try {
         const res = await fetch(`${API}/uvod`);
@@ -1313,7 +1293,6 @@
       applySearch();
     }
 
-    // ── DETAILY ───────────────────────────────────────────────────────────
     async function fetchDetaily() {
       try {
         const res = await fetch(`${API}/uvod`);
@@ -1345,7 +1324,6 @@
       applySearch();
     }
 
-    // ── ŠKOLA ─────────────────────────────────────────────────────────────
     async function fetchSkola() {
       try {
         const res = await fetch(`${API}/skola`);
@@ -1383,7 +1361,6 @@
       return "temp-hot";
     }
 
-    // ── TRIEDA ────────────────────────────────────────────────────────────
     async function fetchTrieda() {
       try {
         const res = await fetch(`${API}/trieda`);
@@ -1437,7 +1414,6 @@
       applySearch();
     }
 
-    // ── SENSOR CARD HTML ──────────────────────────────────────────────────
     function sensorCardHTML(key, title, value, unit, icon, extraClass, source, dataKey, cardinal) {
       const isIt = extraClass === "it-card";
       const baseClass = isIt ? "glass-card it-card" : `glass-card sensor-card ${extraClass}`;
@@ -1472,7 +1448,6 @@
         </div>`;
     }
 
-    // ── VYHĽADÁVANIE ──────────────────────────────────────────────────────
     function setupSearch() {
       document.getElementById("searchInput").addEventListener("input", applySearch);
     }
@@ -1483,7 +1458,6 @@
       });
     }
 
-    // ── MODAL & GRAFY ─────────────────────────────────────────────────────
     let _currentUnit = "";
 
     async function openModal(key, title, group, unit, source) {
@@ -1499,7 +1473,6 @@
       loader.innerHTML = '<i data-lucide="loader-2"></i>';
       lucide.createIcons();
       modal.classList.add("open");
-      // Scrollneme modal na vrch
       modal.scrollTop = 0;
       if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
       if (_sparkInstance) { _sparkInstance.destroy(); _sparkInstance = null; }
@@ -1770,7 +1743,6 @@
       }
     }
 
-    // ── CAMERA LIGHTBOX ───────────────────────────────────────────────────
     let _camIndex = 0, _camRefreshInterval = null;
     window.openCam = function(idx) {
       _camIndex = idx;
@@ -1798,7 +1770,6 @@
       document.getElementById("cam-modal-img").src = `${CAM_BASE}/${_camIndex}?t=${Date.now()}`;
     }
 
-    // ── TÉMA ─────────────────────────────────────────────────────────────
     function setupThemeToggle() {
       document.getElementById("theme-toggle").addEventListener("click", () => {
         const body = document.getElementById("body-layout");
