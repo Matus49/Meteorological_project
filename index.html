@@ -346,10 +346,89 @@
     }
     @keyframes blink { 50% { opacity: 0; } }
 
-    /* ── UVOD – nový layout ── */
+    /* ── RADAR EXPAND BUTTON ── */
+    .radar-expand-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(96,165,250,0.4);
+      border-radius: 8px;
+      padding: 5px 11px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #60a5fa;
+      cursor: pointer;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.15s, border-color 0.15s;
+      font-family: var(--font-body);
+    }
+    .radar-expand-btn:hover { background: rgba(96,165,250,0.2); border-color: #60a5fa; }
+    .radar-expand-btn svg { width: 12px; height: 12px; }
+
+    /* ── RADAR MODAL ── */
+    #radar-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    #radar-modal.open { opacity: 1; pointer-events: all; }
+    #radar-modal-inner {
+      position: relative;
+      width: 100%;
+      max-width: 1100px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      overflow: hidden;
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+    #radar-modal.open #radar-modal-inner { transform: scale(1); }
+    #radar-modal-inner iframe {
+      width: 100%;
+      height: 70vh;
+      border: none;
+      display: block;
+    }
+    .radar-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--glass-border);
+    }
+    .radar-modal-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* ── UVOD – nový layout: stĺpec (hodnoty hore, kamery dole) ── */
     .uvod-new-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 20px;
     }
     .uvod-left-col {
@@ -377,14 +456,6 @@
       .uvod-cameras-row {
         grid-template-columns: 1fr;
       }
-    }
-
-    @media (max-width: 900px) {
-      .uvod-new-grid {
-        grid-template-columns: 1fr;
-      }
-      .uvod-left-col { order: 1; }
-      .uvod-right-col { order: 2; }
     }
 
     /* ── TEMP ROW ── */
@@ -674,7 +745,6 @@
       #chart-modal-content { padding: 20px 14px; }
       .pie-layout { flex-direction: column; }
       .pie-canvas-wrap { width: 190px; height: 190px; }
-      .uvod-new-grid { grid-template-columns: 1fr; }
     }
     </style>
   </head>
@@ -736,6 +806,7 @@
         <!-- ÚVOD -->
         <div id="screen-uvod" class="screen active">
           <div class="uvod-new-grid">
+            <!-- Počasie + namerané hodnoty (hore) -->
             <div class="uvod-left-col">
               <div class="block-header">
                 <div class="block-title">
@@ -747,16 +818,19 @@
               <div id="forecast-wrap-uvod"></div>
               <div class="uvod-temp-row" id="uvod-temp-row"></div>
             </div>
+            <!-- Kamery + radar (dole, pod nameranými hodnotami) -->
             <div class="uvod-right-col">
-              <div class="section-label"><i data-lucide="camera"></i> Školské kamery & radar</div>
-              <!-- Kamery + radar vodorovne na PC, zvislo na mobile -->
+              <div class="section-label"><i data-lucide="camera"></i> Školské kamery &amp; radar</div>
               <div class="uvod-cameras-row">
                 <div class="glass-card camera-card" onclick="window.openCam(0)">
                   <div class="cam-badge" style="pointer-events:none;"><span class="rec-dot"></span> REC 01</div>
                   <img id="cam0" src="" alt="Kamera 1" style="pointer-events:none;">
                 </div>
-                <div class="glass-card radar-card">
+                <div class="glass-card radar-card" style="position:relative;">
                   <div class="radar-badge"><span class="radar-dot"></span> RADAR</div>
+                  <button class="radar-expand-btn" onclick="openRadarModal()" title="Zväčšiť radar">
+                    <i data-lucide="maximize-2"></i> Zväčšiť
+                  </button>
                   <div class="radar-card-inner">
                     <iframe
                       src="https://embed.windy.com/embed2.html?lat=48.32&lon=18.09&detailLat=48.32&detailLon=18.09&width=650&height=450&zoom=8&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1"
@@ -861,6 +935,28 @@
           </div>
         </div>
       </main>
+    </div>
+
+    <!-- RADAR MODAL -->
+    <div id="radar-modal" onclick="if(event.target===this)closeRadarModal()">
+      <div id="radar-modal-inner">
+        <div class="radar-modal-header">
+          <div class="radar-modal-title">
+            <span class="radar-dot"></span>
+            <i data-lucide="map" style="width:16px;height:16px;color:#60a5fa;"></i>
+            Radar zrážok – Nitra
+          </div>
+          <button onclick="closeRadarModal()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#94a3b8;flex-shrink:0;">
+            <i data-lucide="x" style="width:17px;height:17px;"></i>
+          </button>
+        </div>
+        <iframe
+          src="https://embed.windy.com/embed2.html?lat=48.32&lon=18.09&detailLat=48.32&detailLon=18.09&width=1100&height=700&zoom=8&level=surface&overlay=rain&product=ecmwf&menu=true&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=m%2Fs&metricTemp=%C2%B0C&radarRange=-1"
+          allowfullscreen
+          loading="lazy"
+          title="Radar zrážok – Nitra (rozšírený)"
+        ></iframe>
+      </div>
     </div>
 
     <!-- CHART MODAL -->
@@ -1298,7 +1394,7 @@
       }, 5000);
 
       document.addEventListener("keydown", e => {
-        if (e.key === "Escape") { closeModal(); closeCam(); }
+        if (e.key === "Escape") { closeModal(); closeCam(); closeRadarModal(); }
       });
     });
 
@@ -1842,6 +1938,14 @@
     }
     function _refreshCamModal() {
       document.getElementById("cam-modal-img").src = `${CAM_BASE}/${_camIndex}?t=${Date.now()}`;
+    }
+
+    function openRadarModal() {
+      document.getElementById("radar-modal").classList.add("open");
+      lucide.createIcons();
+    }
+    function closeRadarModal() {
+      document.getElementById("radar-modal").classList.remove("open");
     }
 
     function setupThemeToggle() {
